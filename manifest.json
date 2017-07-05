@@ -1,0 +1,31 @@
+{
+  "manifest_version": 2,
+
+  "name": "FollowHunter - Instagram",
+  "short_name": "FollowHunter",
+  "description": "Automatize repetitive actions for gaining followers on Instagram",
+  "version": "0.1",
+  "minimum_chrome_version": "34",
+
+  "permissions":["*://*.instagram.com/*", "storage", "notifications"],
+  "background": {
+    "scripts": [ 
+      "/dist/service.js"
+    ],
+    "persistent": false
+  },
+  /*"content_scripts":[
+     {
+      "matches": ["*://*.instagram.com/*"],
+      "js": ["/dist/content.js"],
+      "all_frames": false
+    }
+  ],*/
+  "icons": {
+      "128": "/assets/img/web_player_remote_logo.png"
+  },
+  "browser_action": {
+    "default_popup": "/pages/popup.html",
+    "default_title": "Watching"
+  }
+}
