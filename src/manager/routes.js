@@ -1,5 +1,8 @@
 import Settings from "./Settings.vue";
 
 export default [
-	{ path: '/settings', component: Settings }
+	{ 
+		path: '/settings', 
+		component: Settings 
+	}
 ]

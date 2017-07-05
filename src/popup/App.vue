@@ -1,7 +1,6 @@
 <template>
   <div id = "app">
-    <Headbar :user="userinfo"/>
-    <router-view />
+    <a :href="links.settings" target="_blank">Settings</a>
   </div>
 </template>
 
@@ -16,13 +15,13 @@
 </style>
 
 <script>
-  import Headbar from "components/Headbar.vue";
+  import Head from "components/Head.vue";
 
   export default {
     data () {
       return {
-        userinfo: {
-          image: "http://nope"
+        links: {
+          settings: chrome.extension.getURL('/pages/manager.html#/settings/')
         }
       }
     },
@@ -36,7 +35,7 @@
 
     },
     components: {
-      Headbar
+      Head
     }
   }
 </script>
