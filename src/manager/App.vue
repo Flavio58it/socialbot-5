@@ -1,17 +1,24 @@
 <template>
   <div id = "app">
     <Headbar :user="userinfo"/>
-    <router-view />
+    <div class="mainContent">
+      <router-view />
+    </div>
   </div>
 </template>
 
 <style lang="scss">
+  body {
+    background-color: $background-color;
+  }
   #app {
     font-family: 'Avenir', Helvetica, Arial, FontAwesome, sans-serif!important;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     color: $font_color;
-    background-color: $background-color;
+  }
+  .mainContent {
+    padding: 15px;
   }
 </style>
 

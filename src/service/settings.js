@@ -17,7 +17,7 @@ export default function (sub) {
 		var obj = {};
 		obj[sub] = obj[sub] || {}
 		obj[sub][name] = val;
-		storage.set(obj);
+		return storage.set(obj);
 	}
 
 	t.get = (name) => {
@@ -25,6 +25,12 @@ export default function (sub) {
 		obj[sub] = obj[sub] || {}
 		obj[sub][name] = settings[name] || false;
 		return storage.get(obj);
+	}
+
+	t.setAll = (obj) => {
+		var obj = {};
+		obj[sub] = obj;
+		return storage.set(obj);
 	}
 
 	t.getAll = () => {

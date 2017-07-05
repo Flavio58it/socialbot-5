@@ -1,28 +1,33 @@
 <template>
-	<div class="row">
-		<div class="col-2 userImage">
-			<img :src="user.image" :alt="user.username"></img>
+	<div>
+		<div class="container">
+			<div class="row">
+				<div class="col-2 userImage text-left">
+					<i class="fa fa-user-circle-o"></i> <!-- When no account is connected this is showed! -->
+					<!--<a href="www.instagram.com" target="_blank"><img :src="user.image" :alt="user.username"></img></a>-->
+				</div>
+				<div class="col-8 title text-center">
+					<router-link to="/"><b>FollowHunter</b> control panel</router-link>
+				</div>
+				<div class="col-2 text-right">
+					<i class="fa fa-bell"></i> <!-- Notification system (unified) -->
+				</div>
+			</div>
 		</div>
-		<div class="col-8 title">
-			Instagram
-		</div>
-		<div class="col-2">
-			Ntf
-		</div>
+		<hr/>
 	</div>
 </template>
 
 <style scoped lang="scss">
+	.container {
+		margin-top: $spacer;
+	}
 	.userImage {
-		text-align: center;
 
 		img {
 			max-width: 95px;
 			max-height: 95px;
 		}
-	}
-	.title {
-		text-align: center;
 	}
 </style>
 

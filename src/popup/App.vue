@@ -15,7 +15,6 @@
 </style>
 
 <script>
-  import Head from "components/Head.vue";
 
   export default {
     data () {
@@ -35,7 +34,7 @@
 
     },
     components: {
-      Head
+      
     }
   }
 </script>

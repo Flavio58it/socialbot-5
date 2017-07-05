@@ -6,7 +6,7 @@ body {
 
 .btn {border-radius: 0px !important;} /* Remove ugly button radius of bootstrap framework */
 
-/* Really basic grid system */
+/* Really basic grid system 
 .col-1 {width: 8.33%;}
 .col-2 {width: 16.66%;}
 .col-3 {width: 25%;}
@@ -28,7 +28,7 @@ body {
     clear: both;
     display: table;
 }
-
+*/
 @keyframes flickerAnimation {
   0%   { opacity:1; }
   50%  { opacity:.2; }
