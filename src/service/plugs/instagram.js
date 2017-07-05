@@ -1,4 +1,3 @@
-
 import format from "string-template";
 
 const urls = {

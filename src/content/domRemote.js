@@ -15,22 +15,6 @@ function createScript(fun) {
 
 export default function() {
 	createScript(function(window, document){
-		var domHooks = false;
-
-		window.addEventListener("message", function(event) {
-			if (event.source != window || !event.data || !event.data.action)
-    			return;
-
-    		var action = event.data.action, data = event.data.type
-    		if (action == "_domRemoteButtonAction_" && domHooks) {
-    			var button = document.querySelector(domHooks[data]);
-    			if (button)
-    				button.click(); 			
-    		}
-    		else if (action == "_domRemoteHooks_") {
-    			domHooks = data
-    		}
-
-		}, "*");
+		
 	});
 }

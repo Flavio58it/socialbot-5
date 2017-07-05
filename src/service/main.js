@@ -5,7 +5,7 @@ import robot from "./robot";
 
 import instagram from "./plugs/instagram";
 
-var settings = {
+var sets = {
 	instagram: new settings("instagram")
 }
 
@@ -15,10 +15,9 @@ Comm.listen("popup", function(action, data) {
 			getAllInitInfo();
 		break;
 		case "getSettings":
-			settings[data.type].getAll().then((data) => {
+			sets[data.type].getAll().then((data) => {
 				Comm.send("settings", data);
 			});
-		});
 		break;
 	}
 })

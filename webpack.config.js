@@ -8,6 +8,7 @@ var shortcuts = [
 
 module.exports = [
     page_mode('./src/popup/main.js', 'popup.js'),
+    page_mode('./src/manager/main.js', 'manager.js'),
     {
       entry: "./src/service/main.js",
       output: {
@@ -92,6 +93,13 @@ function page_mode(input, output){
               loader: 'babel-loader',
               exclude: /node_modules/
             },
+            {
+              test: /\.css$/,
+              use: [
+                { loader: "style-loader" },
+                { loader: "css-loader" }
+              ]
+            }
             // File loader is not needed as the chrome extension does not have cache.
             /*{
               test: /\.(png|jpg|gif|svg)$/,

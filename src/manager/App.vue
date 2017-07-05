@@ -18,13 +18,13 @@
   import Head from "components/Head.vue";
 
   export default {
-    data: function(){
+    data () {
       return {
 
       }
     },
     mounted () {
-      
+      this.$send("init");
     },
     message (action, data){
 
