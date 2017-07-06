@@ -2,8 +2,15 @@ import storage from "storage";
 
 const settings = {
 	instagram: {
-		enabled: true,
-		followTags: false
+		enabled: true, // Robot enabled
+		paused: false, // Pause the execution until the reboot
+		likeDash: true, // Like the images from your dashboard
+		followBack: true, // Follow back when a user starts following you
+		unFollowBack: true, // Unfollow the people that unfollows you (managed by whitelist)
+		likeBack: true, // Like back images when a user is liking yours
+		followTags: [], // Follow and like images in these tags
+		whiteList: [], // Whitelist of actions (unfollows etc.)
+		blackList: [], // Blacklist of actions (likeback, followback etc.)
 	},
 	fpx: {
 		enabled: false
@@ -28,9 +35,9 @@ export default function (sub) {
 	}
 
 	t.setAll = (obj) => {
-		var obj = {};
-		obj[sub] = obj;
-		return storage.set(obj);
+		var nobj = {};
+		nobj[sub] = obj;
+		return storage.set(nobj);
 	}
 
 	t.getAll = () => {

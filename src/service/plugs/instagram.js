@@ -17,15 +17,26 @@ function getUrl(url){
 	return (!/^https?:/.test(url))?urls.home:"" + url;
 }
 
-function decodeObject (page) {
-	// parse page html and then return the object of the page
-	return {}
+function decodeObject (url) {
+	// parse page html and return the object of the page
+	var el = document.createElement("html");
+
+	return fetch(getUrl(urls.get.notifications)).then((data) => {
+		el.innerHTML = data;
+		return el;
+	}).then((el) => {
+		el.querySelector("script:contains('window._sharedData')");
+		var data = el.innerHTML;
+		return data.replace(/^.+=\s\{(.+$)/, "{$1");
+	})
 }
 
 export default function () {
 	var id = "insta", 
 		feedStatusIds = {
-			home: false,
+			homeFeed: false,
+			myFeed: false,
+			userFeed:{} // Used for all other users
 		}
 
 	return {
@@ -34,9 +45,7 @@ export default function () {
 		},
 		actions: {
 			getNotifications () {
-				fetch(getUrl(urls.get.notifications)).then((data) => {
-					
-				})
+				
 			},
 			getFeed () {
 

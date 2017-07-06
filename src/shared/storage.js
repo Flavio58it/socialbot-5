@@ -21,5 +21,12 @@ export default {
 				chrome.storage.local.get(name, s);
 			} catch (e) {f(e)}
 		})
+	},
+	clear: function(){
+		return _p(function(s, f){
+			try {
+				chrome.storage.local.clear(s);
+			} catch (e) {f(e)}
+		})
 	}
 }

@@ -4,7 +4,7 @@ body {
 	padding: 1px;
 }
 
-.btn {border-radius: 0px !important;} /* Remove ugly button radius of bootstrap framework */
+.btn {border-radius: 2px !important;} /* Remove ugly button radius of bootstrap framework */
 
 /* Really basic grid system 
 .col-1 {width: 8.33%;}

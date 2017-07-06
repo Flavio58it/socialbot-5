@@ -2,6 +2,7 @@
 	<div id="navigator">
 		<h3>Settings</h3>
 		<hr/>
+		<button class="btn-link" @click="$send('reset')">Reset storage</button>
 		<div class="container">
 			<div class="row text-center">
 				<div class="col cat" @click="navigate('instagram')">
