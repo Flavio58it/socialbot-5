@@ -10,6 +10,12 @@
 						</b-form-checkbox>
 					</div>
 					<div>
+						<b-form-checkbox v-model="settings.notifications">
+							Notifications
+							<div class="description">Show notifications on desktop</div>
+						</b-form-checkbox>
+					</div>
+					<div>
 						<b-form-checkbox v-model="settings.likeDash">
 							Like dashboard
 							<div class="description">Like the images from your dashboard</div>
@@ -18,25 +24,25 @@
 					<div>
 						<b-form-checkbox v-model="settings.followBack">
 							Followback
-							<div class="description">Follow back the people who follows you</div>
+							<div class="description">Follow back the people who follows you (Blacklist applied)</div>
 						</b-form-checkbox>
 					</div>
 					<div>
 						<b-form-checkbox v-model="settings.unFollowBack">
-							UnFollowBack
-							<div class="description">When a user unfollows you will be unfollowed back. (Whitelist applied)</div>
+							UnFollowback
+							<div class="description">When a user unfollows you, will be unfollowed back. (Whitelist applied)</div>
 						</b-form-checkbox>
 					</div>
 					<div>
 						<b-form-checkbox v-model="settings.likeBack">
 							LikeBack
-							<div class="description">When a user likes a photo of yours, The bot will like a couple of theirs. (Blacklist applied)</div>
+							<div class="description">When a user likes a photo of yours the bot will like a couple of theirs. (Blacklist applied)</div>
 						</b-form-checkbox>
 					</div>
 				</div>
 				<div class="col">
 					<b>Tags follower</b>
-					<div class="description">These tags will be periodically checked and the new images will be liked</div>
+					<div class="description">These tags will be periodically checked and the new posts will be liked</div>
 					<hr/>
 					<Tags v-model="settings.followTags"/>
 				</div>

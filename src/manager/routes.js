@@ -15,7 +15,7 @@ export default [
 			},
 			{
 				path: "*",
-				component: NotFound
+				redirect: "instagram" 
 			}
 		]
 	},

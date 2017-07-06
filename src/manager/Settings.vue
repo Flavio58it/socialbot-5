@@ -1,8 +1,22 @@
 <template>
 	<div id="navigator">
-		<h3>Settings</h3>
+		<div class="row">
+			<div class="col">
+				<h3>Settings</h3>
+			</div>
+			<div class="col text-right">
+				<a class="font-small" href="#" @click.prevent="showAdvanced = !showAdvanced">Advanced</a>
+			</div>
+		</div>
 		<hr/>
-		<button class="btn-link" @click="$send('reset')">Reset storage</button>
+		<div v-if="showAdvanced" class="container advanced">
+			<div class="row">
+				<div>
+					<a class="btn-link" href="#" @click.prevent="$send('reset')">Reset storage</a>
+				</div>
+			</div>
+		</div>
+		<hr v-if="showAdvanced"/>
 		<div class="container">
 			<div class="row text-center">
 				<div class="col cat" @click="navigate('instagram')">
@@ -33,10 +47,18 @@
 	#content {
 		padding-top: $spacer;
 	}
+	.advanced a {
+		color:red;
+	}
 </style>
 
 <script>
 	export default {
+		data () {
+			return {
+				showAdvanced: false
+			}
+		},
 		methods: {
 			navigate (section) {
 				this.$router.push("/settings/" + section)

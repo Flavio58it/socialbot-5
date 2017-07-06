@@ -1,16 +1,19 @@
 import storage from "storage";
 
 const settings = {
+	generic:  {
+		influencerTreshold: 15000 // Number of followers
+	},
 	instagram: {
 		enabled: true, // Robot enabled
 		paused: false, // Pause the execution until the reboot
+		notifications: false, // Show notification when is present
 		likeDash: true, // Like the images from your dashboard
 		followBack: true, // Follow back when a user starts following you
 		unFollowBack: true, // Unfollow the people that unfollows you (managed by whitelist)
 		likeBack: true, // Like back images when a user is liking yours
+		noFollowIfInfluencer: false, //If the user is a influencer do not follow it (as it will not follow back)
 		followTags: [], // Follow and like images in these tags
-		whiteList: [], // Whitelist of actions (unfollows etc.)
-		blackList: [], // Blacklist of actions (likeback, followback etc.)
 	},
 	fpx: {
 		enabled: false
