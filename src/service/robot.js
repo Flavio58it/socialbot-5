@@ -1,20 +1,27 @@
-import Random from "random-js";
-
-const _p = (cbk) => new Promise(cbk);
-
-// Wait a random amount of time to simulate user interaction
-function wait (from, to) {
-	var rand = Random.integer(from || 3000, to || 30000)
-	return _p((s, f) => {
-		setTimeout(s, rand);
-	})
-}
+import requests from "./requests";
 
 export default function (settings, plug, plugName) {
-	var t = this, flow = Promise.resolve();
+	var t = this;
 
-	plug.init().then(settings.get("followTags")).then((data) => {
-		console.log("We are good here", data);
+	requests.listen();
+
+	plug.init().then(() => settings.get("followTags")).then((data) => {
+		var flow = Promise.resolve()
+		data.forEach((tagName) => {
+			flow = flow.then(() => {
+				return Promise.all([
+					settings.get("waitActionLower"), 
+					settings.get("waitActionHigher")
+				]).then((minmax) => 
+					plug.actions.likeTagImages(
+						tagName, 
+						minmax
+					)
+				)
+			})
+		})
+	}).then (() => {
+		requests.unlisten();
 	})
 
 }
