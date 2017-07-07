@@ -25,13 +25,13 @@ function getUrl(url, overrideJson){
 	return ((!/^https?:/.test(url))?urls.home:"") + url + ((useJsonEncoding && !overrideJson)?urls.json:"");
 }
 
-function decodeObject (url) {
-	// parse page html and return the object of the page
-	if (!useJsonEncoding) {
+function decodeObject (url, overrideDecoder) {
+	if (!useJsonEncoding || overrideDecoder === true) {
 		// This is emergency fallback if the json method will not work anymore. Is dirty but is working.
+		// parse page html and return the object of the page
 		var el = document.createElement("html");
 
-		return fetch(getUrl(url), fetchConfig)
+		return fetch(getUrl(url, true), fetchConfig)
 		.then((response) => {
 			return response.text();
 		})
@@ -49,26 +49,34 @@ function decodeObject (url) {
 	}
 }
 
-function likePost (postId) {
+function likePost (postId, csrf) {
 	return fetch(getUrl(format(urls.post.like, postId), true), {
 		credentials: "include",
 		method: "POST",
 		headers: {
 			"content-type":"application/x-www-form-urlencoded",
-			"x-requested-with": "XMLHttpRequest"
+			"x-requested-with": "XMLHttpRequest",
+			"x-instagram-ajax":"1",
+			"x-csrftoken": csrf
 		}
 	});
 }
 
 export default function () {
-	var id = "insta";
+	var csrf = false;
 
 	return {
-		// Check if user is logged in and get the token
 		init () {
-			return Promise.resolve({
-					// TODO: Check login status
-					logged: true
+			// Check if user is logged in and get the token
+			return decodeObject(urls.home, true).then((data) => {
+				// Getting data from homepage, using the fallback method. The original json is much lighter and misses basic info as csrf_token.
+				console.log("Init info: ", data)
+				csrf = data.config.csrf_token;
+				return {
+						// TODO: Check login status
+						logged: true,
+						domain: urls.home
+				}
 			})
 		},
 		actions: {
@@ -76,11 +84,14 @@ export default function () {
 				
 			},
 			likeTagImages (tagName, wait, limit) {
+				if (!csrf)
+					return Promise.reject({error: "Init failed"});
 				return decodeObject(format(urls.get.tag, tagName))
 				.then((data) => {
 					var ops = Promise.resolve();
 					data.tag.media.nodes.forEach((d) => {
-						ops = ops.then(() => likePost(d.id)).then(() => waiter(wait[0] * 1000, wait[1] * 1000));
+						// TODO: Check if the post is already liked
+						ops = ops.then(() => likePost(d.id, csrf)).then(() => waiter(wait[0] * 1000, wait[1] * 1000));
 					})
 					return ops;
 				});

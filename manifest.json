@@ -10,6 +10,7 @@
   "permissions":[
     "*://*.instagram.com/*", 
     "webRequest",
+    "webRequestBlocking",
     "storage", 
     "notifications"
   ],

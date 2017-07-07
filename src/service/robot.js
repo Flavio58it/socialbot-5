@@ -1,12 +1,13 @@
 import requests from "./requests";
 
 export default function (settings, plug, plugName) {
-	var t = this;
+	var t = this, request = false;
 
-	requests.listen();
-
-	plug.init().then(() => settings.get("followTags")).then((data) => {
-		var flow = Promise.resolve()
+	return plug.init().then((data) => {
+		request = new requests(data.domain).listen(); // See the requests module for the explanation
+		return settings.get("followTags")
+	}).then((data) => {
+		var flow = Promise.resolve();
 		data.forEach((tagName) => {
 			flow = flow.then(() => {
 				return Promise.all([
@@ -20,8 +21,13 @@ export default function (settings, plug, plugName) {
 				)
 			})
 		})
+		return flow;
 	}).then (() => {
-		requests.unlisten();
+		if (request)
+			request.unlisten();
+		return {
+			completed: true
+		}
 	})
 
 }
