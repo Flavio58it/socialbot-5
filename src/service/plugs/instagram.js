@@ -21,6 +21,8 @@ fetchConfig = {
 	mode: "cors"
 };
 
+// ------------------
+// Generic functions -----------------
 function getUrl(url, overrideJson){
 	return ((!/^https?:/.test(url))?urls.home:"") + url + ((useJsonEncoding && !overrideJson)?urls.json:"");
 }
@@ -49,8 +51,8 @@ function decodeObject (url, overrideDecoder) {
 	}
 }
 
-function likePost (postId, csrf) {
-	return fetch(getUrl(format(urls.post.like, postId), true), {
+function _postData (csrf) {
+	return {
 		credentials: "include",
 		method: "POST",
 		headers: {
@@ -59,7 +61,13 @@ function likePost (postId, csrf) {
 			"x-instagram-ajax":"1",
 			"x-csrftoken": csrf
 		}
-	});
+	}
+}
+
+// -----------------
+// Action functions ----------------
+function likePost (postId, csrf) {
+	return fetch(getUrl(format(urls.post.like, postId), true), _postData(csrf));
 }
 
 export default function () {
@@ -91,7 +99,9 @@ export default function () {
 					var ops = Promise.resolve();
 					data.tag.media.nodes.forEach((d) => {
 						// TODO: Check if the post is already liked
-						ops = ops.then(() => likePost(d.id, csrf)).then(() => waiter(wait[0] * 1000, wait[1] * 1000));
+						console.log("Post data: ", d);
+						ops = ops.then(() => likePost(d.id, csrf)).then(() => waiter(wait.actionLower * 1000, wait.actionUpper
+						 * 1000));
 					})
 					return ops;
 				});

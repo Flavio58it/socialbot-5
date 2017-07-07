@@ -41,7 +41,7 @@ Comm.listen("manager", function(action, data) {
 for (var i in plugs) {
 	var plugContainer = plugs[i];
 	if (!plugContainer.bot)
-		plugContainer.bot = new robot(plugContainer.settings, plugContainer.plug, i);
+		plugContainer.bot = new robot(plugContainer.settings, plugContainer.plug, i).start();
 }
 
 function getAllInitInfo() {

@@ -8,7 +8,7 @@ function randomizer (from, to) {
 }
 
 export default function (from, to) {
-	var rand = randomizer(from, to);
+	var rand = to?randomizer(from, to):from;
 	return _p((s, f) => {
 		setTimeout(s, rand);
 	})
