@@ -5,7 +5,7 @@ const bot = function(settings, plug, plugName) {
 	var request = false;
 	return plug.init().then((data) => {
 		request = new requests(data.domain).listen(); // See the requests module for the explanation
-		return settings.get("followTags")
+		return settings.get("follow").then((follow) => follow.tags)
 	}).then((data) => {
 		// LIke all the tag images
 		var flow = Promise.resolve();
@@ -14,7 +14,7 @@ const bot = function(settings, plug, plugName) {
 				return settings.get("waiter").then((minmax) => {
 					return plug.actions.likeTagImages(
 						tagName, 
-						minmax
+						minmax	
 					)
 				})
 			})
@@ -22,7 +22,7 @@ const bot = function(settings, plug, plugName) {
 		return flow;
 	})
 	// Like your flow images
-
+	
 
 
 

@@ -25,10 +25,13 @@ fetchConfig = {
 // ------------------
 // Generic functions -----------------
 function getUrl(url, overrideJson){
+	if (/^chrome-extension:/.test(url))
+		url = url.replace(/^.+\/\/.[^\/]+(.+)/, "$1");
 	return ((!/^https?:/.test(url))?urls.home:"") + url + ((useJsonEncoding && !overrideJson)?urls.json:"");
 }
 
-function decodeObject (url, overrideDecoder) {
+function decodeObject (url, overrideDecoder, settings) {
+	var settings = settings || {cbk:{}};
 	if (!useJsonEncoding || overrideDecoder === true) {
 		// This is emergency fallback if the json method will not work anymore. Is dirty but is working.
 		// parse page html and return the object of the page
@@ -41,7 +44,14 @@ function decodeObject (url, overrideDecoder) {
 		.then((data) => {
 			el.innerHTML = data;
 			return el;
-		}).then((el) => {
+		})
+		.then((el) => {
+			if (settings.cbk.onData)
+				return Promise.resolve(settings.cbk.onData(el)).then(() => el);
+			else
+				return Promise.resolve(el);
+		})
+		.then((el) => {
 			var data = document.evaluate("//script[contains(., 'window._sharedData')]", el).iterateNext().innerHTML;
 			return JSON.parse(data.replace(/^.+=\s\{(.+$)/, "{$1").replace(/\};$/, "}"));
 		})
@@ -72,12 +82,27 @@ function likePost (postId, csrf) {
 }
 
 export default function () {
-	var csrf = false;
+	var csrf = false, query_id = false;
 
 	return {
 		init () {
-			// Check if user is logged in and get the token
-			return decodeObject(urls.home, true).then((data) => {
+			// Check if user is logged in and get the tokens
+			return decodeObject(urls.home, true, {
+				cbk: {
+					onData (data) {
+						// Getting the query id token from the only found position. Yes, is a script (puke)
+						var data = getUrl(data.querySelector("script[src*='Commons.js']").src, true);
+						return fetch(data).then((script) => script.text()).then((script) => {
+							var regex = /\:.{1,3}(\d{17}).{1,3}\,/;
+							if (regex.test(script)){
+								query_id = script.match(regex)[1];
+							}
+						}).catch(() => {
+							console.error("Query id fetcher failed. Cannot look for new pages")
+						})
+					}
+				}
+			}).then((data) => {
 				// Getting data from homepage, using the fallback method. The original json is much lighter and misses basic info as csrf_token.
 				console.log("Init info: ", data)
 				csrf = data.config.csrf_token;
@@ -90,31 +115,50 @@ export default function () {
 			})
 		},
 		actions: {
-			getNotifications () {
-				
-			},
 			likeTagImages (tagName, wait, limit) {
 				if (!csrf)
 					return Promise.reject({error: "Init failed"});
-				var continueLikes = 
-				return decodeObject(format(urls.get.tag, tagName))
-				.then((data) => {
-					var ops = Promise.resolve();
-					data.tag.media.nodes.forEach((d) => {
-						// TODO: Check if the post is already liked
-						console.log("Post data: ", d);
 
-						ops = ops.then(() => {
-							return decodeObject(format(urls.get.post, d.id)).then(() => {
-								
-							});
+				var numberLiked = 0;
+
+				function like (pointer) {
+					return decodeObject(format((urls.get.tag), tagName))
+					.then((data) => {
+						var ops = Promise.resolve();
+
+						data.tag.media.nodes.forEach((d) => {
+							    //console.log("Post data: ", d);
+								ops = ops.then(() => {
+									// If the user or the bot has already liked the post the like process is aborted, as the previous posts has already been viewed.
+									if (numberLiked > limit)
+										return Promise.reject({likedLimitReached: true});
+									return decodeObject(format(urls.get.post, d.code)).then((data) => {
+										if (data.graphql.shortcode_media.viewer_has_liked) {
+											return Promise.reject({alreadyLiked: true})
+										}
+										return waiter(1000, 5000).then(() => data);
+									});
+								})
+								.then(() => likePost(d.id, csrf))
+								.then(() => waiter(wait.actionLower * 1000, wait.actionUpper * 1000))
 						})
-						.then(() => likePost(d.id, csrf))
-						.then(() => waiter(wait.actionLower * 1000, wait.actionUpper
-						 * 1000));
-					})
-					return ops;
-				});
+						return ops.then((data) => {
+							//Here should recall like function with pointer
+							return Promise.resolve(data);
+						}).catch((e) => {
+							if (e.alreadyLiked) {
+								console.warn("Already liked. Aborting...");
+								return Promise.resolve({
+									data,
+									liked: numberLiked
+								});
+							}
+							return Promise.reject(e);
+						});
+					});
+				}
+
+				return like();
 			}
 		}
 	}

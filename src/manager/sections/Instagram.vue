@@ -89,13 +89,44 @@
 								</div>
 							</div>
 						</b-tab>
+						<b-tab title="Likes">
+							<div>
+								<label>
+									<b>Like condition</b>
+									<div class="description">Use pipes "|" to separate words and hashtags</div>
+									<br/>
+									<div class="description">Like an image if: (leave empty if unused)</div>
+								</label>
+							</div>
+							<div class="row">
+								<div class="col-12">
+									<b-form-input
+										:textarea="true"
+										v-model="settings.filters.likes.description_yes"
+									/>
+								</div>
+							</div>
+							<div>
+								<label>
+									<div class="description">Don't like an image if: (leave empty if unused)</div>
+								</label>
+							</div>
+							<div class="row">
+								<div class="col-12">
+									<b-form-input
+										:textarea="true"
+										v-model="settings.filters.likes.description_no"
+									/>
+								</div>
+							</div>
+						</b-tab>
 					</b-tabs>
 				</div>
 				<div class="col">
 					<b>Tags follower</b>
 					<div class="description">These tags will be periodically checked and the new posts will be liked</div>
 					<hr/>
-					<Tags v-model="settings.followTags"/>
+					<Tags v-model="settings.follow.tags"/>
 				</div>
 			</div>
 			<hr/>

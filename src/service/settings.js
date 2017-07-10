@@ -14,11 +14,19 @@ const settings = {
 		likeBack: true, // Like back images when a user is liking yours
 		noFollowIfInfluencer: false, //If the user is a influencer do not follow it (as it will not follow back)
 		waiter: {
-			actionLower: 10, // Wait between one action and another (min)
+			actionLower: 10, // Wait between one action and another (min) (seconds)
 			actionUpper: 30, //(max)
 			roundPause: 5 // Time between one round and another. In minutes
 		},
-		followTags: [], // Follow and like images in these tags
+		filters: { // Various filters for liking/following
+			likes: { // When like a pose
+				description_yes: "",
+				description_no: ""
+			}
+		},
+		follow: {
+			tags: []
+		}, // Follow and like images in these tags
 	},
 	fpx: {
 		enabled: false
