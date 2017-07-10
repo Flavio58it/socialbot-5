@@ -11,6 +11,7 @@ const urls = {
 	get: {
 		tag: "/explore/tags/{0}/", // TagName
 		feed: "/{0}/", // username
+		post: "/p/{0}/", // Get the post data
 		notifications: "/account/activity/"
 	}
 }, 
@@ -82,6 +83,7 @@ export default function () {
 				csrf = data.config.csrf_token;
 				return {
 						// TODO: Check login status
+						connectionOk: true,
 						logged: true,
 						domain: urls.home
 				}
@@ -94,13 +96,21 @@ export default function () {
 			likeTagImages (tagName, wait, limit) {
 				if (!csrf)
 					return Promise.reject({error: "Init failed"});
+				var continueLikes = 
 				return decodeObject(format(urls.get.tag, tagName))
 				.then((data) => {
 					var ops = Promise.resolve();
 					data.tag.media.nodes.forEach((d) => {
 						// TODO: Check if the post is already liked
 						console.log("Post data: ", d);
-						ops = ops.then(() => likePost(d.id, csrf)).then(() => waiter(wait.actionLower * 1000, wait.actionUpper
+
+						ops = ops.then(() => {
+							return decodeObject(format(urls.get.post, d.id)).then(() => {
+								
+							});
+						})
+						.then(() => likePost(d.id, csrf))
+						.then(() => waiter(wait.actionLower * 1000, wait.actionUpper
 						 * 1000));
 					})
 					return ops;
