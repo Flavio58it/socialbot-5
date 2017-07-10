@@ -11,10 +11,14 @@ const bot = function(settings, plug, plugName) {
 		var flow = Promise.resolve();
 		data.forEach((tagName) => {
 			flow = flow.then(() => {
-				return settings.get("waiter").then((minmax) => {
+				return Promise.all([
+					settings.get("waiter"),
+					settings.get("limits")
+				]).then((data) => {
 					return plug.actions.likeTagImages(
 						tagName, 
-						minmax	
+						data[0],
+						data[1].like
 					)
 				})
 			})

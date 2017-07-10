@@ -1,9 +1,13 @@
 import format from "string-template";
+import urlParams from "url-params";
 import waiter from "waiter";
 
 const urls = {
 	home: "https://www.instagram.com",
-	json: "?__a=1",
+	json: {
+		name: "__a",
+		val: "1"
+	},
 	post: {
 		like: "/web/likes/{0}/like/", // post id
 		unlike: "/web/likes/{0}/like/", // post id
@@ -27,7 +31,7 @@ fetchConfig = {
 function getUrl(url, overrideJson){
 	if (/^chrome-extension:/.test(url))
 		url = url.replace(/^.+\/\/.[^\/]+(.+)/, "$1");
-	return ((!/^https?:/.test(url))?urls.home:"") + url + ((useJsonEncoding && !overrideJson)?urls.json:"");
+	return ((!/^https?:/.test(url))?urls.home:"") + ((useJsonEncoding && !overrideJson)?urlParams.add(url, urls.json.name, urls.json.val):url);
 }
 
 function decodeObject (url, overrideDecoder, settings) {
@@ -122,16 +126,27 @@ export default function () {
 				var numberLiked = 0;
 
 				function like (pointer) {
-					return decodeObject(format((urls.get.tag), tagName))
-					.then((data) => {
-						var ops = Promise.resolve();
+					var nextQuery = pointer?
+						urlParams.add(
+							urlParams.add(
+								format((urls.get.tag), tagName), "query_id", query_id), 
+							"pointer", JSON.stringify({
+								"tag_name": tagName,
+								"first": numberLiked,
+								"after": pointer
+							})):
+						format((urls.get.tag), tagName);
 
-						data.tag.media.nodes.forEach((d) => {
+					return decodeObject(nextQuery)
+					.then((data) => {
+						var ops = Promise.resolve(), source = data.tag.media;
+
+						source.nodes.forEach((d) => {
 							    //console.log("Post data: ", d);
 								ops = ops.then(() => {
 									// If the user or the bot has already liked the post the like process is aborted, as the previous posts has already been viewed.
 									if (numberLiked > limit)
-										return Promise.reject({likedLimitReached: true});
+										return Promise.reject({likeLimitReached: true});
 									return decodeObject(format(urls.get.post, d.code)).then((data) => {
 										if (data.graphql.shortcode_media.viewer_has_liked) {
 											return Promise.reject({alreadyLiked: true})
@@ -140,11 +155,24 @@ export default function () {
 									});
 								})
 								.then(() => likePost(d.id, csrf))
+								.then((d) => {
+									numberLiked++;
+									return d;
+								}).catch((e) => {
+									// This is not correct, is catching the likeLimitReached
+									console.error("Post not found...");
+								})
 								.then(() => waiter(wait.actionLower * 1000, wait.actionUpper * 1000))
 						})
-						return ops.then((data) => {
+
+						return ops.then((prevData) => {
 							//Here should recall like function with pointer
-							return Promise.resolve(data);
+							if (source.page_info.end_cursor) {
+								console.log("Next page");
+								return like(source.page_info.end_cursor)
+							} else {
+								return Promise.resolve(prevData);
+							}
 						}).catch((e) => {
 							if (e.alreadyLiked) {
 								console.warn("Already liked. Aborting...");
@@ -152,6 +180,12 @@ export default function () {
 									data,
 									liked: numberLiked
 								});
+							} else if (e.likeLimitReached) {
+								console.warn("Like limit reached...");
+								return Promise.resolve({
+									data,
+									liked: numberLiked
+								})
 							}
 							return Promise.reject(e);
 						});

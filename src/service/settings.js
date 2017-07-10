@@ -24,6 +24,9 @@ const settings = {
 				description_no: ""
 			}
 		},
+		limits: {
+			like: 20
+		},
 		follow: {
 			tags: []
 		}, // Follow and like images in these tags

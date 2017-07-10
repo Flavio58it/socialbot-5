@@ -119,6 +119,20 @@
 									/>
 								</div>
 							</div>
+							<div>
+								<label>
+									<b>Like limit</b>
+									<div class="description">Like limit for tags / dashboard / recommended</div>
+								</label>
+							</div>
+							<div class="row">
+								<div class="col-4">
+									<b-form-input
+										type="number"
+										v-model="settings.limits.like"
+									/>
+								</div>
+							</div>
 						</b-tab>
 					</b-tabs>
 				</div>
@@ -176,6 +190,7 @@
 			checkUpperLimitValid (val) {
 				if (val < this.settings.waiter.actionLower + 10)
 					return this.settings.waiter.actionLower + 10;
+				return val;
 			},
 			checkLowerLimitValid (val) {
 				return (val < 10)?10:val;
