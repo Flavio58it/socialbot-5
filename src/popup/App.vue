@@ -1,10 +1,13 @@
 <template>
-  <div id = "app">
-    <a :href="links.settings" target="_blank">Settings</a>
+  <div id = "app" style="width: 480px;">
+    <Headbar :showSettings="true" :showAccounts="true"/>
   </div>
 </template>
 
 <style lang="scss">
+   body {
+    background-color: $background-color;
+  }
   #app {
     font-family: 'Avenir', Helvetica, Arial, FontAwesome, sans-serif!important;
     -webkit-font-smoothing: antialiased;
@@ -15,13 +18,12 @@
 </style>
 
 <script>
+  import Headbar from "components/Headbar.vue";
 
   export default {
     data () {
       return {
-        links: {
-          settings: chrome.extension.getURL('/pages/manager.html#/settings/')
-        }
+
       }
     },
     mounted () {
@@ -34,7 +36,7 @@
 
     },
     components: {
-      
+        Headbar
     }
   }
 </script>

@@ -208,7 +208,7 @@ export default function () {
 			},
 			likeDashboard (wait, limit) {
 				var numberLiked = 0;
-				// TODO: Here should simulate activity of some type
+				// TODO: Here should simulate activity of some type (or not?)
 				return decodeObject(urls.home).then((data) => {
 					//console.log("DashboardLike: ", data);
 					var source = data.graphql.user.edge_web_feed_timeline, flow = Promise.resolve();
@@ -232,6 +232,7 @@ export default function () {
 					})
 
 					return flow.then((d) => {
+						//TODO: New page support here
 						return d;
 					}).catch((e) => {
 						if (e.alreadyLiked) {
@@ -250,6 +251,9 @@ export default function () {
 						return Promise.reject(e);
 					})
 				})
+			},
+			likeExplore () {
+
 			}
 		}
 	}
