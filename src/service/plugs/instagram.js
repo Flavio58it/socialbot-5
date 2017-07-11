@@ -25,6 +25,9 @@ fetchConfig = {
 	credentials: "include",
 	mode: "cors"
 };
+var cache = {
+	query_id: false
+};
 
 // ------------------
 // Generic functions -----------------
@@ -95,11 +98,19 @@ export default function () {
 				cbk: {
 					onData (data) {
 						// Getting the query id token from the only found position. Yes, is a script (puke)
-						var data = getUrl(data.querySelector("script[src*='Commons.js']").src, true);
+						var src = data.querySelector("script[src*='Commons.js']").src, data = getUrl(src, true); // TODO: Implement script cache if the name remains the same.
+						if (cache.query_id && cache.query_id.src == src && cache.query_id.id) {
+							query_id = cache.query_id.id
+							return Promise.resolve();
+						}
 						return fetch(data).then((script) => script.text()).then((script) => {
 							var regex = /\:.{1,3}(\d{17}).{1,3}\,/;
 							if (regex.test(script)){
 								query_id = script.match(regex)[1];
+								cache.query_id = {
+									src: src,
+									id: query_id
+								}
 							}
 						}).catch(() => {
 							console.error("Query id fetcher failed. Cannot look for new pages")
@@ -145,7 +156,7 @@ export default function () {
 							    //console.log("Post data: ", d);
 								ops = ops.then(() => {
 									// If the user or the bot has already liked the post the like process is aborted, as the previous posts has already been viewed.
-									if (numberLiked > limit)
+									if (numberLiked >= limit)
 										return Promise.reject({likeLimitReached: true});
 									return decodeObject(format(urls.get.post, d.code)).then((data) => {
 										if (data.graphql.shortcode_media.viewer_has_liked) {
@@ -159,7 +170,8 @@ export default function () {
 									numberLiked++;
 									return d;
 								}).catch((e) => {
-									// This is not correct, is catching the likeLimitReached
+									if (e.likeLimitReached) // Passing the likeLimit as is not an error to manage here.
+										return Promise.reject(e);
 									console.error("Post not found...");
 								})
 								.then(() => waiter(wait.actionLower * 1000, wait.actionUpper * 1000))
@@ -193,6 +205,51 @@ export default function () {
 				}
 
 				return like();
+			},
+			likeDashboard (wait, limit) {
+				var numberLiked = 0;
+				// TODO: Here should simulate activity of some type
+				return decodeObject(urls.home).then((data) => {
+					//console.log("DashboardLike: ", data);
+					var source = data.graphql.user.edge_web_feed_timeline, flow = Promise.resolve();
+					source.edges.forEach((post) => {
+						post = post.node;
+						flow = flow.then(() => {
+							if (numberLiked >= limit)
+								return Promise.reject({likeLimitReached: true});
+							if (post.viewer_has_liked){
+								return Promise.reject({alreadyLiked: true})
+							}
+							return likePost(post.id, csrf).then((d) => {
+								numberLiked++;
+								return d;
+							}).catch((e) => {
+								numberLiked++;
+								return Promise.reject(e);
+							})
+							.then(() => waiter(wait.actionLower * 1000, wait.actionUpper * 1000));
+						})
+					})
+
+					return flow.then((d) => {
+						return d;
+					}).catch((e) => {
+						if (e.alreadyLiked) {
+							console.warn("Already liked. Aborting...");
+							return Promise.resolve({
+								data,
+								liked: numberLiked
+							});
+						} else if (e.likeLimitReached) {
+							console.warn("Like limit reached...");
+							return Promise.resolve({
+								data,
+								liked: numberLiked
+							})
+						}
+						return Promise.reject(e);
+					})
+				})
 			}
 		}
 	}

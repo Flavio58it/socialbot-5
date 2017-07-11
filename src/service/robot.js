@@ -26,6 +26,17 @@ const bot = function(settings, plug, plugName) {
 		return flow;
 	})
 	// Like your flow images
+	.then(() => {
+		return settings.get("likeDash").then((shouldLike) => {
+			if (shouldLike)
+				return Promise.all([
+					settings.get("waiter"),
+					settings.get("limits")
+				]).then ((data) => plug.actions.likeDashboard(data[0], data[1].like));
+			else
+				return Promise.resolve();
+		})
+	})
 	
 
 
