@@ -1,6 +1,6 @@
 <template>
   <div id = "app">
-    <Headbar :user="userinfo"/>
+    <Headbar/>
     <div class="mainContent">
       <router-view />
     </div>
@@ -28,9 +28,7 @@
   export default {
     data () {
       return {
-        userinfo: {
-          image: "http://nope"
-        }
+        
       }
     },
     mounted () {

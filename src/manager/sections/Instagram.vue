@@ -44,10 +44,8 @@
 						</b-tab>
 						<b-tab title="Timings">
 							<div>
-								<label>
-									<b>Like timer</b>
-									<div class="description">The upper and lower limit for the like timer</div>
-								</label>
+								<b>Like timer</b>
+								<div class="description">The upper and lower limit for the like timer</div>
 							</div>
 							<div class="row">
 								<div class="col-4">
@@ -74,10 +72,8 @@
 							</div>
 							<hr/>
 							<div>
-								<label>
-									<b>Pause timer</b>
-									<div class="description">The time between one round and another</div>
-								</label>
+								<b>Pause timer</b>
+								<div class="description">The time between one round and another</div>
 							</div>
 							<div class="row">
 								<div class="col-6">
@@ -91,12 +87,21 @@
 						</b-tab>
 						<b-tab title="Likes">
 							<div>
-								<label>
-									<b>Like condition</b>
-									<div class="description">Use pipes "|" to separate words and hashtags</div>
-									<br/>
-									<div class="description">Like an image if: (leave empty if unused)</div>
-								</label>
+								<b>
+									Like condition 
+									<helper title="Like condition">
+										<div>
+											<p>This condition allows to select precisely what type of photos the bot will like.</p>
+											<p>Examples: food|vegan|#veggie|#red|blue</p>
+											<p>Here can be used hashtags and normal text. The pipe "|" char separates the text. Is sufficient that one of this words/sentences are present to trigger the like/unlike functionality.</p>
+											<p>This will apply for like/don't like fields.
+											If you have previously liked a post it will not be unliked.</p>
+										</div>
+									</helper>
+								</b>
+								<div class="description">Use pipes "|" to separate words and hashtags</div>
+								<br/>
+								<div class="description">Like an image if: (leave empty if unused)</div>
 							</div>
 							<div class="row">
 								<div class="col-12">
@@ -107,9 +112,7 @@
 								</div>
 							</div>
 							<div>
-								<label>
-									<div class="description">Don't like an image if: (leave empty if unused)</div>
-								</label>
+								<div class="description">Don't like an image if: (leave empty if unused)</div>
 							</div>
 							<div class="row">
 								<div class="col-12">
@@ -120,10 +123,8 @@
 								</div>
 							</div>
 							<div>
-								<label>
-									<b>Like limit</b>
-									<div class="description">Like limit for tags / dashboard / recommended</div>
-								</label>
+								<b>Like limit</b>
+								<div class="description">Like limit for tags / dashboard / recommended</div>
 							</div>
 							<div class="row">
 								<div class="col-4">
@@ -169,6 +170,7 @@
 
 <script>
 	import Tags from "../Tags.vue";
+	import Helper from "components/Helper.vue";
 
 	export default {
 		data () {
@@ -203,7 +205,8 @@
 			}
 		},
 		components: {
-			Tags
+			Tags,
+			Helper
 		}
 	}
 </script>

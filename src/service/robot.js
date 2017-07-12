@@ -43,6 +43,7 @@ const bot = function(settings, plug, plugName) {
 
 	// When all is finished ---
 	.then (() => {
+		console.info("Round finished");
 		if (request)
 			request.unlisten();
 	})
