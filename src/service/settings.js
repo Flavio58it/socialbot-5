@@ -19,13 +19,17 @@ const settings = {
 			roundPause: 5 // Time between one round and another. In minutes
 		},
 		filters: { // Various filters for liking/following
-			likes: { // When like a pose
-				description_yes: "",
-				description_no: ""
+			likes: { // When like a post
+				isInclusive: false,
+				text: ""
 			}
 		},
 		limits: {
-			like: 20
+			likes: {
+				tag: 20,
+				dash: 20,
+				explorer: 20
+			}
 		},
 		follow: {
 			tags: []

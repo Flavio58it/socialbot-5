@@ -91,46 +91,57 @@
 									Like condition 
 									<helper title="Like condition">
 										<div>
-											<p>This condition allows to select precisely what type of photos the bot will like.</p>
+											<p>This condition allows to select precisely what type of photos the bot will like based on image description.</p>
 											<p>Examples: food|vegan|#veggie|#red|blue</p>
 											<p>Here can be used hashtags and normal text. The pipe "|" char separates the text. Is sufficient that one of this words/sentences are present to trigger the like/unlike functionality.</p>
-											<p>This will apply for like/don't like fields.
-											If you have previously liked a post it will not be unliked.</p>
+											<p>If you have previously liked a post it will not be unliked.</p>
 										</div>
 									</helper>
 								</b>
-								<div class="description">Use pipes "|" to separate words and hashtags</div>
-								<br/>
-								<div class="description">Like an image if: (leave empty if unused)</div>
+								<div class="description">Use pipes "|" to separate words or hashtags</div>
 							</div>
 							<div class="row">
-								<div class="col-12">
-									<b-form-input
-										:textarea="true"
-										v-model="settings.filters.likes.description_yes"
-									/>
+
+								<div class="col-6">
+									 <b-form-select 
+									 	v-model="settings.filters.likes.isInclusive" 
+									 	:options="[
+									 		{text: 'Include if', value: 'true'},
+									 		{text: 'Exclude if', value: 'false'}
+									 	]" 
+									 	class="mb-3"/>
 								</div>
-							</div>
-							<div>
-								<div class="description">Don't like an image if: (leave empty if unused)</div>
-							</div>
-							<div class="row">
-								<div class="col-12">
+								<div class="col-6">
 									<b-form-input
 										:textarea="true"
-										v-model="settings.filters.likes.description_no"
+										v-model="settings.filters.likes.text"
 									/>
 								</div>
 							</div>
 							<div>
 								<b>Like limit</b>
-								<div class="description">Like limit for tags / dashboard / recommended</div>
+								<div class="description">Like limits per round of the bot</div>
 							</div>
 							<div class="row">
 								<div class="col-4">
+									Hashtag follower
 									<b-form-input
 										type="number"
-										v-model="settings.limits.like"
+										v-model="settings.limits.likes.tag"
+									/>
+								</div>
+								<div class="col-4">
+									Dashboard
+									<b-form-input
+										type="number"
+										v-model="settings.limits.likes.dash"
+									/>
+								</div>
+								<div class="col-4">
+									Explore
+									<b-form-input
+										type="number"
+										v-model="settings.limits.likes.explorer"
 									/>
 								</div>
 							</div>

@@ -18,7 +18,7 @@ const bot = function(settings, plug, plugName) {
 					return plug.actions.likeTagImages(
 						tagName, 
 						data[0],
-						data[1].like
+						data[1].likes.tag
 					)
 				})
 			})
