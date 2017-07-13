@@ -3,7 +3,7 @@ import waiter from "waiter";
 
 const bot = function(settings, plug, plugName) {
 	var request = false;
-	return plug.init().then((data) => {
+	return plug.init(settings).then((data) => {
 		request = new requests(data.domain).listen(); // See the requests module for the explanation
 		return settings.get("follow").then((follow) => follow.tags)
 	}).then((data) => {
@@ -37,13 +37,15 @@ const bot = function(settings, plug, plugName) {
 				return Promise.resolve();
 		})
 	})
-	
-
 
 
 	// When all is finished ---
 	.then (() => {
 		console.info("Round finished");
+		if (request)
+			request.unlisten();
+	}).catch((e) => {
+		console.error("Round error", e);
 		if (request)
 			request.unlisten();
 	})
@@ -68,6 +70,10 @@ export default function (settings, plug, plugName) {
 			}
 			return Promise.reject(e);
 		});
+	}
+
+	t.isRunning = () => {
+		return running;
 	}
 
 

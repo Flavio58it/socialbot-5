@@ -1,6 +1,7 @@
 import format from "string-template";
 import urlParams from "url-params";
 import waiter from "waiter";
+import axios from "axios";
 
 const urls = {
 	home: "https://www.instagram.com",
@@ -16,15 +17,13 @@ const urls = {
 		tag: "/explore/tags/{0}/", // TagName
 		feed: "/{0}/", // username
 		post: "/p/{0}/", // Get the post data
-		notifications: "/account/activity/"
+		notifications: "/account/activity/",
+		query: "/graphql/query/?query_id={0}"
 	}
 }, 
 // Used in encodeObject. Go to the function and watch the comments.
-useJsonEncoding = true,
-fetchConfig = {
-	credentials: "include",
-	mode: "cors"
-};
+useJsonEncoding = true;
+
 var cache = {
 	query_id: false
 };
@@ -44,9 +43,9 @@ function decodeObject (url, overrideDecoder, settings) {
 		// parse page html and return the object of the page
 		var el = document.createElement("html");
 
-		return fetch(getUrl(url, true), fetchConfig)
+		return axios(getUrl(url, true))
 		.then((response) => {
-			return response.text();
+			return response.data;
 		})
 		.then((data) => {
 			el.innerHTML = data;
@@ -59,19 +58,18 @@ function decodeObject (url, overrideDecoder, settings) {
 				return Promise.resolve(el);
 		})
 		.then((el) => {
-			var data = document.evaluate("//script[contains(., 'window._sharedData')]", el).iterateNext().innerHTML;
+			var data = document.evaluate("//script[contains(., 'window._sharedData')]", el).iterateNext().innerHTML;	
 			return JSON.parse(data.replace(/^.+=\s\{(.+$)/, "{$1").replace(/\};$/, "}"));
 		})
 	} else {
-		return fetch(getUrl(url), fetchConfig).then((data) => {
-			return data.json();
+		return axios(getUrl(url)).then((data) => {
+			return data.data;
 		})
 	}
 }
 
 function _postData (csrf) {
 	return {
-		credentials: "include",
 		method: "POST",
 		headers: {
 			"content-type":"application/x-www-form-urlencoded",
@@ -85,11 +83,11 @@ function _postData (csrf) {
 // -----------------
 // Action functions ----------------
 function likePost (postId, csrf) {
-	return fetch(getUrl(format(urls.post.like, postId), true), _postData(csrf));
+	return axios(getUrl(format(urls.post.like, postId), true), _postData(csrf));
 }
 
-export default function () {
-	var csrf = false, query_id = false;
+export default function (settings) {
+	var csrf = false, query_id = false, user = false;
 
 	return {
 		init () {
@@ -98,12 +96,12 @@ export default function () {
 				cbk: {
 					onData (data) {
 						// Getting the query id token from the only found position. Yes, is a script (puke)
-						var src = data.querySelector("script[src*='Commons.js']").src, data = getUrl(src, true); // TODO: Implement script cache if the name remains the same.
+						var src = data.querySelector("script[src*='Commons.js']").src, thenSrc = getUrl(src, true); // TODO: Implement script cache if the name remains the same.
 						if (cache.query_id && cache.query_id.src == src && cache.query_id.id) {
 							query_id = cache.query_id.id
 							return Promise.resolve();
 						}
-						return fetch(data).then((script) => script.text()).then((script) => {
+						return axios(thenSrc).then((script) => script.data).then((script) => {
 							var regex = /\:.{1,3}(\d{17}).{1,3}\,/;
 							if (regex.test(script)){
 								query_id = script.match(regex)[1];
@@ -121,6 +119,7 @@ export default function () {
 				// Getting data from homepage, using the fallback method. The original json is much lighter and misses basic info as csrf_token.
 				console.log("Init info: ", data)
 				csrf = data.config.csrf_token;
+				user = data.config.viewer;
 				return {
 						// TODO: Check login status
 						connectionOk: true,
@@ -130,6 +129,10 @@ export default function () {
 			})
 		},
 		actions: {
+			/**
+			* ----- Like the images by tag
+			*
+			**/
 			likeTagImages (tagName, wait, limit) {
 				if (!csrf)
 					return Promise.reject({error: "Init failed"});
@@ -172,7 +175,11 @@ export default function () {
 								}).catch((e) => {
 									if (e.likeLimitReached) // Passing the likeLimit as is not an error to manage here.
 										return Promise.reject(e);
-									console.error("Post not found...");
+									if (e.response && e.response.status == 404) {
+										console.error("Post not found...");
+										return Promise.resolve();
+									}
+									return Promise.reject({error: "Connection error"});
 								})
 								.then(() => waiter(wait.actionLower * 1000, wait.actionUpper * 1000))
 						})
@@ -206,6 +213,11 @@ export default function () {
 
 				return like();
 			},
+			/**
+			* ----- Like the dashboard posts
+			*
+			**/
+
 			likeDashboard (wait, limit) {
 				var numberLiked = 0;
 				// TODO: Here should simulate activity of some type (or not?)
@@ -252,8 +264,31 @@ export default function () {
 					})
 				})
 			},
+			/**
+			* ----- Like the explore (magnifying glass) posts
+			*
+			**/
 			likeExplore () {
 
+			},
+
+			/**
+			* --- Get the user list and check if is following you. Optionally unfollow or followBack
+			* the params are followBack and unFollowback features
+			**/
+			followManager (removeThemIfUnfollowed, addThemIfFollowing) {
+				console.log("Getting followers of ", user);
+
+				function getMe (howMuch) {
+					return decodeObject(urlParams(format(users.get.query, query_id)), "variables", JSON.stringify({
+						"id": user.id,
+						"first": howMuch // Get only the first user and then ask the complete list.
+					}))
+				}
+
+				return getMe(1).then((data) => {
+					return getMe(data.data.user.edge_followed_by.count)
+				})
 			}
 		}
 	}

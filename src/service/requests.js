@@ -7,7 +7,7 @@ function _updater(details) {
   var enableFix = false;
   for (var i = 0; i < details.requestHeaders.length; ++i) {
     if (details.requestHeaders[i].name === 'Origin') {
-      if (details.requestHeaders[i].value == "null") {
+      if (details.requestHeaders[i].value.indexOf("chrome-extension") >= -1) {
         enableFix = true;
         details.requestHeaders.splice(i, 1);
       }
