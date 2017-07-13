@@ -14,11 +14,11 @@ const bot = function(settings, plug, plugName) {
 				return Promise.all([
 					settings.get("waiter"),
 					settings.get("limits")
-				]).then((data) => {
+				]).then((settings) => {
 					return plug.actions.likeTagImages(
 						tagName, 
-						data[0],
-						data[1].likes.tag
+						settings[0],
+						settings[1].likes.tag
 					)
 				})
 			})
@@ -32,9 +32,16 @@ const bot = function(settings, plug, plugName) {
 				return Promise.all([
 					settings.get("waiter"),
 					settings.get("limits")
-				]).then ((data) => plug.actions.likeDashboard(data[0], data[1].like));
+				]).then ((settings) => plug.actions.likeDashboard(settings[0], settings[1].like));
 			else
 				return Promise.resolve();
+		})
+	}).then(() => {
+		return Promise.all([
+			settings.get("followBack"),
+			settings.get("unFollowBack")
+		]).then((settings) => {
+			return plug.actions.followManager(settings[0], settings[1])
 		})
 	})
 

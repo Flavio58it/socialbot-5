@@ -280,14 +280,14 @@ export default function (settings) {
 				console.log("Getting followers of ", user);
 
 				function getMe (howMuch) {
-					return decodeObject(urlParams(format(users.get.query, query_id)), "variables", JSON.stringify({
+					return decodeObject(urlParams.add(format(urls.get.query, query_id), "variables", JSON.stringify({
 						"id": user.id,
 						"first": howMuch // Get only the first user and then ask the complete list.
-					}))
+					})), true)
 				}
 
 				return getMe(1).then((data) => {
-					return getMe(data.data.user.edge_followed_by.count)
+					return getMe(data.data.user.edge_followed_by.count);
 				})
 			}
 		}
