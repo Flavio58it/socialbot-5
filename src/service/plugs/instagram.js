@@ -291,15 +291,35 @@ export default function (settings) {
 			followManager (removeThemIfUnfollowed, addThemIfFollowing) {
 				console.log("Getting followers of ", user);
 
-				function getMe (howMuch) {
-					return decodeObject(urlParams.add(format(urls.get.query, query_id.followers), "variables", JSON.stringify({
+				function getUsersBatch (list, pointer) {
+					if (!list)
+						var list = [];
+					var data = {
 						"id": user.id,
-						"first": howMuch // Get only the first user and then ask the complete list.
-					})), false, {overrideJson: true})
+						"first": 100
+					};
+					if (pointer)
+						data.after = pointer;
+					return decodeObject(urlParams.add(format(urls.get.query, query_id.followers), "variables", JSON.stringify(data)), false, {overrideJson: true})
+						.then(data => data.data)
+						.then((data) => {
+							list.push(...data.user.edge_followed_by.edges);
+							if (data.user.edge_followed_by.page_info.has_next_page && data.user.edge_followed_by.page_info.end_cursor)
+								return getUsersBatch(list, data.user.edge_followed_by.page_info.end_cursor);
+							return list;
+						})
 				}
 
-				return getMe(1).then((data) => {
-					return getMe(data.data.user.edge_followed_by.count);
+
+				return getUsersBatch().then((list) => {
+					console.log(list);
+					/*var op = [];
+					list.forEach((t) => {
+						op.push(Promise.resolve(t).then((data) => {
+							return axios()
+						}))
+					})*/
+					return list
 				})
 			}
 		}
