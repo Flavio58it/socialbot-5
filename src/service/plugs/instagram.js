@@ -62,7 +62,7 @@ function decodeObject (url, overrideDecoder, settings) {
 			return JSON.parse(data.replace(/^.+=\s\{(.+$)/, "{$1").replace(/\};$/, "}"));
 		})
 	} else {
-		return axios(getUrl(url)).then((data) => {
+		return axios(getUrl(url, settings.overrideJson)).then((data) => {
 			return data.data;
 		})
 	}
@@ -102,16 +102,27 @@ export default function (settings) {
 							return Promise.resolve();
 						}
 						return axios(thenSrc).then((script) => script.data).then((script) => {
-							var regex = /\:.{1,3}(\d{17}).{1,3}\,/;
-							if (regex.test(script)){
-								query_id = script.match(regex)[1];
+							var regex = {
+								like: /\=.{1,4}(\d{17}).[^;]+SUL_REQUESTED/,
+								followers: /\=.{1,4}(\d{17}).[^;]+FOLLOW_LIST_REQUEST_UPDATED/
+							}
+							for (var y in regex) {
+								if (regex[y].test(script)){
+									query_id = query_id?query_id:{};
+									query_id[y] = script.match(regex[y])[1]
+								}
+							}
+							if (query_id){
 								cache.query_id = {
 									src: src,
 									id: query_id
 								}
+							} else {
+								cache.query_id = false;
+								return Promise.reject({error: "query_id picker fail"})
 							}
-						}).catch(() => {
-							console.error("Query id fetcher failed. Cannot look for new pages")
+						}).catch((e) => {
+							console.error("Query id fetcher failed. Some operations will not work. ", e)
 						})
 					}
 				}
@@ -143,7 +154,7 @@ export default function (settings) {
 					var nextQuery = pointer?
 						urlParams.add(
 							urlParams.add(
-								format((urls.get.tag), tagName), "query_id", query_id), 
+								format((urls.get.tag), tagName), "query_id", query_id.like), 
 							"pointer", JSON.stringify({
 								"tag_name": tagName,
 								"first": numberLiked,
@@ -173,13 +184,14 @@ export default function (settings) {
 									numberLiked++;
 									return d;
 								}).catch((e) => {
-									if (e.likeLimitReached) // Passing the likeLimit as is not an error to manage here.
+									if (e.likeLimitReached || e.alreadyLiked){ // Passing the likeLimit as is not an error to manage here.
 										return Promise.reject(e);
+									}
 									if (e.response && e.response.status == 404) {
 										console.error("Post not found...");
 										return Promise.resolve();
 									}
-									return Promise.reject({error: "Connection error"});
+									return Promise.reject({error: "Connection error", details: e});
 								})
 								.then(() => waiter(wait.actionLower * 1000, wait.actionUpper * 1000))
 						})
@@ -280,10 +292,10 @@ export default function (settings) {
 				console.log("Getting followers of ", user);
 
 				function getMe (howMuch) {
-					return decodeObject(urlParams.add(format(urls.get.query, query_id), "variables", JSON.stringify({
+					return decodeObject(urlParams.add(format(urls.get.query, query_id.followers), "variables", JSON.stringify({
 						"id": user.id,
 						"first": howMuch // Get only the first user and then ask the complete list.
-					})), true)
+					})), false, {overrideJson: true})
 				}
 
 				return getMe(1).then((data) => {
