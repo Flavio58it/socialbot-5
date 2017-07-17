@@ -32,7 +32,7 @@
 							<div>
 								<b-form-checkbox v-model="settings.unFollowBack">
 									UnFollowback
-									<div class="description">When a user unfollows you, will be unfollowed back. (Whitelist applied)</div>
+									<div class="description">When a user unfollows you will be unfollowed back. (Whitelist applied)</div>
 								</b-form-checkbox>
 							</div>
 							<div>
@@ -156,6 +156,10 @@
 				</div>
 			</div>
 			<hr/>
+				<b>Followers manager</b>
+				<div class="description">Here you can manage the your followers. </div>
+				<FollowManager :users="[]"/>
+			<hr/>
 			<div>
 				<button @click="save" class="btn btn-primary btn-lg float-right save">Save</button>
 			</div>
@@ -182,6 +186,7 @@
 <script>
 	import Tags from "../Tags.vue";
 	import Helper from "components/Helper.vue";
+	import FollowManager from "../FollowManager.vue";
 
 	export default {
 		data () {
@@ -217,7 +222,8 @@
 		},
 		components: {
 			Tags,
-			Helper
+			Helper,
+			FollowManager
 		}
 	}
 </script>

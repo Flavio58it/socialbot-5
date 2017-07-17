@@ -86,6 +86,26 @@ function likePost (postId, csrf) {
 	return axios(getUrl(format(urls.post.like, postId), true), _postData(csrf));
 }
 
+function getUsersBatch (query, userid, list, pointer) {
+	if (!list)
+		var list = [];
+	var data = {
+		"id": userid,
+		"first": 100
+	};
+	if (pointer)
+		data.after = pointer;
+	return decodeObject(urlParams.add(format(urls.get.query, query), "variables", JSON.stringify(data)), false, {overrideJson: true})
+		.then(data => data.data.user)
+		.then((data) => {
+			var fdata = data.edge_followed_by?data.edge_followed_by:data.edge_follow;
+			list.push(...fdata.edges);
+			if (fdata.page_info.has_next_page && fdata.page_info.end_cursor)
+				return getUsersBatch(query, userid, list, fdata.page_info.end_cursor);
+			return list;
+		})
+}
+
 export default function (settings) {
 	var csrf = false, query_id = false, user = false;
 
@@ -96,7 +116,7 @@ export default function (settings) {
 				cbk: {
 					onData (data) {
 						// Getting the query id token from the only found position. Yes, is a script (puke)
-						var src = data.querySelector("script[src*='Commons.js']").src, thenSrc = getUrl(src, true); // TODO: Implement script cache if the name remains the same.
+						var src = data.querySelector("script[src*='Commons.js']").src, thenSrc = getUrl(src, true);
 						if (cache.query_id && cache.query_id.src == src && cache.query_id.id) {
 							query_id = cache.query_id.id
 							return Promise.resolve();
@@ -104,7 +124,8 @@ export default function (settings) {
 						return axios(thenSrc).then((script) => script.data).then((script) => {
 							var regex = {
 								like: /\=.{1,4}(\d{17}).[^;]+SUL_REQUESTED/,
-								followers: /\=.{1,4}(\d{17}).[^;]+FOLLOW_LIST_REQUEST_UPDATED/
+								followers: /\=.{1,4}(\d{17}).[^;]+FOLLOW_LIST_REQUEST_UPDATED/,
+								following: /\=.{1,4}(\d{17}).[^;\d{17}]+FOLLOW_LIST_REQUEST_UPDATED/
 							}
 							for (var y in regex) {
 								if (regex[y].test(script)){
@@ -288,38 +309,16 @@ export default function (settings) {
 			* --- Get the user list and check if is following you. Optionally unfollow or followBack
 			* the params are followBack and unFollowback features
 			**/
-			followManager (removeThemIfUnfollowed, addThemIfFollowing) {
+			followManager (removeThemIfUnfollowed, addThemIfFollowing) { // If both are false then the only the list is returned.
 				console.log("Getting followers of ", user);
 
-				function getUsersBatch (list, pointer) {
-					if (!list)
-						var list = [];
-					var data = {
-						"id": user.id,
-						"first": 100
-					};
-					if (pointer)
-						data.after = pointer;
-					return decodeObject(urlParams.add(format(urls.get.query, query_id.followers), "variables", JSON.stringify(data)), false, {overrideJson: true})
-						.then(data => data.data)
-						.then((data) => {
-							list.push(...data.user.edge_followed_by.edges);
-							if (data.user.edge_followed_by.page_info.has_next_page && data.user.edge_followed_by.page_info.end_cursor)
-								return getUsersBatch(list, data.user.edge_followed_by.page_info.end_cursor);
-							return list;
-						})
-				}
+				return Promise.all([
+					getUsersBatch(query_id.followers, user.id),
+					getUsersBatch(query_id.following, user.id)
+				]).then((res) => { // Here we have the followers and the following. Let's differentiate!
+					console.log(res);
 
-
-				return getUsersBatch().then((list) => {
-					console.log(list);
-					/*var op = [];
-					list.forEach((t) => {
-						op.push(Promise.resolve(t).then((data) => {
-							return axios()
-						}))
-					})*/
-					return list
+					
 				})
 			}
 		}
