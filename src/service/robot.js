@@ -90,10 +90,7 @@ export default function (settings, plug, plugName) {
 		if (runningOnce)
 			return Promise.resolve(plug);
 		return plug.init().then((data) => {
-			return {
-				plug,
-				status: data
-			}
+			return plug;
 		})
 	}
 

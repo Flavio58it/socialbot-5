@@ -322,7 +322,9 @@ export default function (settings) {
 					res[0].forEach((t) => {
 						users.push({
 							id: t.node.id,
+							profile_url: getUrl(format(urls.get.feed, t.node.username), true),
 							username: t.node.username,
+							fullname: t.node.full_name,
 							img: t.node.profile_pic_url,
 							status: "follower",
 							follows_me: true
@@ -338,7 +340,9 @@ export default function (settings) {
 						}
 						users.push({
 							id: t.node.id,
+							profile_url: getUrl(format(urls.get.feed, t.node.username), true),
 							username: t.node.username,
+							fullname: t.node.full_name,
 							img: t.node.profile_pic_url,
 							status: "following",
 							follows_me: false
