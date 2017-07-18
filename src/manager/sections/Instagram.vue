@@ -158,7 +158,7 @@
 			<hr/>
 				<b>Followers manager</b>
 				<div class="description">Here you can manage the your followers. </div>
-				<FollowManager :users="[]"/>
+				<FollowManager :type="type"/>
 			<hr/>
 			<div>
 				<button @click="save" class="btn btn-primary btn-lg float-right save">Save</button>

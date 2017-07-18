@@ -34,14 +34,24 @@ Comm.listen("manager", function(action, data) {
 		case "saveSettings":
 			plugs[data.type].settings.setAll(data.settings);
 		break;
+
+		case "getUsers": 
+			plugs[data.type].bot.getPlug().then((plug) => {
+				return plug.actions.followManager();
+			}).then((users) => {
+				Comm.sendMessage("usersData", {list: users, type: data.type});
+			})
+		break;
 	}
 })
 
 // Start the bot when the browser is started!
 for (var i in plugs) {
 	var plugContainer = plugs[i];
-	if (!plugContainer.bot)
-		plugContainer.bot = new robot(plugContainer.settings, plugContainer.plug, i).start();
+	if (!plugContainer.bot) {
+		plugContainer.bot = new robot(plugContainer.settings, plugContainer.plug, i);
+		plugContainer.bot.start();
+	}
 }
 
 function getAllInitInfo() {

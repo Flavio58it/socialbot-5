@@ -316,9 +316,40 @@ export default function (settings) {
 					getUsersBatch(query_id.followers, user.id),
 					getUsersBatch(query_id.following, user.id)
 				]).then((res) => { // Here we have the followers and the following. Let's differentiate!
-					console.log(res);
+					var users = [], indexer = [];
+					console.log("All users", res);
 
-					
+					res[0].forEach((t) => {
+						users.push({
+							id: t.node.id,
+							username: t.node.username,
+							img: t.node.profile_pic_url,
+							status: "follower",
+							follows_me: true
+						});
+						indexer.push(t.node.id);
+					});
+
+					res[1].forEach((t) => {
+						var index = indexer.indexOf(t.node.id);
+						if (index > -1) {// Check if the user has been aleeady picked
+							users[index].status = "followback";
+							return;
+						}
+						users.push({
+							id: t.node.id,
+							username: t.node.username,
+							img: t.node.profile_pic_url,
+							status: "following",
+							follows_me: false
+						});
+					});
+
+					// Here you should cycle on users and removeThemIfUnfollowed or addThemIfFollowing + database management
+
+					console.log("Result: ", users);
+
+					return users;
 				})
 			}
 		}

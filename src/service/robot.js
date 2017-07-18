@@ -52,17 +52,18 @@ const bot = function(settings, plug, plugName) {
 		if (request)
 			request.unlisten();
 	}).catch((e) => {
-		console.error("Round error", e);
+		//console.error("Round error", e);
 		if (request)
 			request.unlisten();
+		return Promise.reject(e);
 	})
 }
 
 export default function (settings, plug, plugName) {
-	var t = this, running = false;
+	var t = this, running = false, runningOnce = false;
 
 	t.start = () => {
-		running = true;
+		running = runningOnce = true;
 		return settings.get("enabled").then((enabled) => {
 			if (!enabled)
 				return Promise.reject({stopped: true});
@@ -70,17 +71,30 @@ export default function (settings, plug, plugName) {
 			running = false;
 			triggerTimer();
 		}).catch ((e) => {
-			running = false;
+			running = runningOnce = false;
 			if (e.stopped) {
 				console.warn("Bot stopped");
 				return;
+			} else {
+				console.error("Bot error", e);
 			}
-			return Promise.reject(e);
+			//return Promise.reject(e);
 		});
 	}
 
 	t.isRunning = () => {
 		return running;
+	}
+
+	t.getPlug = () => {
+		if (runningOnce)
+			return Promise.resolve(plug);
+		return plug.init().then((data) => {
+			return {
+				plug,
+				status: data
+			}
+		})
 	}
 
 
