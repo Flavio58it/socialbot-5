@@ -10,14 +10,14 @@ export default function (settings) {
 		/**
 		* Logs various type of data to the log db table. The various functions will be compatible with the templates used in FE
 		**/
-		logUserInteraction (type, userData, details) { // Types: LIKE, FOLLOWBACK, UNFOLLOW, NEW, COMMENT
+		userInteraction (type, userData, details) { // Types: LIKE, FOLLOWBACK, UNFOLLOW, NEW, COMMENT
 			return db.logs.add({
 				plug: settings.type,
 				action: "USER_" + type.toUpperCase(),
 				details: {
-					img: userData.img,
-					userId: userData.id,
-					userName: userData.userName,
+					img: userData.display_src,
+					userId: userData.owner.id || false,
+					userName: userData.userName || false,
 					comment: details.comment || undefined
 				},
 				time: new Date().getTime()

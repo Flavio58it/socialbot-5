@@ -203,11 +203,11 @@ export default function (settings) {
 									});
 								})
 								.then(() => likePost(d.id, csrf))
-								//.then((d) => {logger.logUserInteraction("LIKE", d);return d;})
-								.then((d) => {
+								.then((data) => {log.userInteraction("LIKE", d);return data;})
+								.then((data) => {
 									console.log("HEY: ", d);
 									numberLiked++;
-									return d;
+									return data;
 								}).catch((e) => {
 									if (e.likeLimitReached || e.alreadyLiked){ // Passing the likeLimit as is not an error to manage here.
 										return Promise.reject(e);
