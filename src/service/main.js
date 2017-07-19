@@ -2,6 +2,7 @@ import Comm from "./comm";
 import settings from "./settings";
 
 import storage from "storage";
+import db from "./db/db";
 
 import robot from "./robot";
 
@@ -20,8 +21,11 @@ Comm.listen("manager", function(action, data) {
 		case "init":
 			getAllInitInfo();
 		break;
-		case "reset":
+		case "resetStorage":
 			storage.clear();
+		break;
+		case "resetDB":
+			db.delete();
 		break;
 		case "getSettings":
 			plugs[data.type].settings.getAll().then((settings) => {

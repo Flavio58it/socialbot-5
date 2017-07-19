@@ -2,6 +2,7 @@ import format from "string-template";
 import urlParams from "url-params";
 import waiter from "waiter";
 import axios from "axios";
+import logger from "../db/logger";
 
 const urls = {
 	home: "https://www.instagram.com",
@@ -107,7 +108,8 @@ function getUsersBatch (query, userid, list, pointer) {
 }
 
 export default function (settings) {
-	var csrf = false, query_id = false, user = false;
+	var csrf = false, query_id = false, user = false,
+		log = new logger({type: "instagram"});
 
 	return {
 		init () {
@@ -201,7 +203,9 @@ export default function (settings) {
 									});
 								})
 								.then(() => likePost(d.id, csrf))
+								//.then((d) => {logger.logUserInteraction("LIKE", d);return d;})
 								.then((d) => {
+									console.log("HEY: ", d);
 									numberLiked++;
 									return d;
 								}).catch((e) => {
@@ -334,7 +338,7 @@ export default function (settings) {
 
 					res[1].forEach((t) => {
 						var index = indexer.indexOf(t.node.id);
-						if (index > -1) {// Check if the user has been aleeady picked
+						if (index > -1) { // Check if the user has been aleeady picked
 							users[index].status = "followback";
 							return;
 						}
@@ -348,10 +352,13 @@ export default function (settings) {
 							follows_me: false
 						});
 					});
-
-					// Here you should cycle on users and removeThemIfUnfollowed or addThemIfFollowing + database management
+				
 
 					console.log("Result: ", users);
+
+					return users;
+				}).then((users) => {
+					// Here you should cycle on users and removeThemIfUnfollowed or addThemIfFollowing + database management
 
 					return users;
 				})

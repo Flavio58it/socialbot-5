@@ -12,7 +12,8 @@
 		<div v-if="showAdvanced" class="container advanced">
 			<div class="row">
 				<div>
-					<a class="btn-link" href="#" @click.prevent="$send('reset')">Reset storage</a>
+					<a class="btn-link" href="#" @click.prevent="$send('resetStorage')">Reset storage</a>
+					<a class="btn-link" href="#" @click.prevent="$send('resetDB')">  Reset database</a>
 				</div>
 			</div>
 		</div>

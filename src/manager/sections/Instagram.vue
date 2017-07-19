@@ -88,7 +88,10 @@
 						<b-tab title="Likes">
 							<div>
 								<b>
-									Like condition 
+									Like conditions
+								</b>
+								<div class="description">
+									Use pipes "|" to separate words or hashtags  
 									<helper title="Like condition">
 										<div>
 											<p>This condition allows to select precisely what type of photos the bot will like based on image description.</p>
@@ -97,11 +100,27 @@
 											<p>If you have previously liked a post it will not be unliked.</p>
 										</div>
 									</helper>
-								</b>
-								<div class="description">Use pipes "|" to separate words or hashtags</div>
+								</div>
 							</div>
 							<div class="row">
-
+								<div class="col-6">
+									 <b-form-select 
+									 	v-model="settings.filters.likes.isInclusive" 
+									 	:options="[
+									 		{text: 'Include if', value: 'true'},
+									 		{text: 'Exclude if', value: 'false'}
+									 	]" 
+									 	class="mb-3"/>
+								</div>
+								<div class="col-6">
+									<b-form-input
+										:textarea="true"
+										v-model="settings.filters.likes.text"
+									/>
+								</div>
+							</div>
+							<div class="description">Like by the number of likes condition</div>
+							<div class="row">
 								<div class="col-6">
 									 <b-form-select 
 									 	v-model="settings.filters.likes.isInclusive" 
@@ -164,9 +183,7 @@
 				<button @click="save" class="btn btn-primary btn-lg float-right save">Save</button>
 			</div>
 		</div>
-		<div v-else>
-			Loading...
-		</div>
+		<Loading v-else/>
 	</div>
 </template>
 
@@ -184,6 +201,7 @@
 </style>
 
 <script>
+	import Loading from "components/Loading.vue";
 	import Tags from "../Tags.vue";
 	import Helper from "components/Helper.vue";
 	import FollowManager from "../FollowManager.vue";
@@ -221,6 +239,7 @@
 			}
 		},
 		components: {
+			Loading,
 			Tags,
 			Helper,
 			FollowManager
