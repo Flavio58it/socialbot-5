@@ -11,6 +11,7 @@ export default function (settings) {
 		* Logs various type of data to the log db table. The various functions will be compatible with the templates used in FE
 		**/
 		userInteraction (type, userData, details) { // Types: LIKE, FOLLOWBACK, UNFOLLOW, NEW, COMMENT
+			var details = details || {};
 			return db.logs.add({
 				plug: settings.type,
 				action: "USER_" + type.toUpperCase(),
@@ -22,6 +23,6 @@ export default function (settings) {
 				},
 				time: new Date().getTime()
 			})
-		}
+		},
 	}
 }

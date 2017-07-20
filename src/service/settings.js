@@ -28,7 +28,8 @@ const settings = {
 			likes: {
 				tag: 20,
 				dash: 20,
-				explorer: 20
+				explorer: 20,
+				user: 5
 			}
 		},
 		follow: {

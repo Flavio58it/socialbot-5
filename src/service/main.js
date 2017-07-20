@@ -3,6 +3,7 @@ import settings from "./settings";
 
 import storage from "storage";
 import db from "./db/db";
+import logger from "./db/logger.js";
 
 import robot from "./robot";
 
@@ -45,6 +46,16 @@ Comm.listen("manager", function(action, data) {
 			}).then((users) => {
 				Comm.sendMessage("usersData", {list: users, type: data.type});
 			})
+		break;
+		case "getLogs": 
+			var prom = db.logs;
+			if (data.filter != "all")
+				prom = prom.where("plug").equals(data.filter)
+			if (data.limit)
+				prom = prom.limit(data.limit)
+			prom.toArray().then((data) => {
+				Comm.sendMessage("logs", {list: data, forWhich: data.forWhich});
+			});
 		break;
 	}
 })

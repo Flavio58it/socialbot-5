@@ -3,6 +3,7 @@ import Settings from "./Settings.vue";
 import NotFound from "components/NotFound.vue";
 
 import Instagram from "./sections/Instagram.vue";
+import Home from "./Home.vue";
 
 export default [
 	{ 
@@ -18,6 +19,10 @@ export default [
 				redirect: "instagram" 
 			}
 		]
+	},
+	{
+		path: "/",
+		component: Home
 	},
 
 	// Page not found fallback

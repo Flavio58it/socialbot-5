@@ -1,6 +1,9 @@
 <template>
   <div id = "app" style="width: 480px;">
-    <Headbar :showSettings="true" :showAccounts="true"/>
+    <Headbar :showSettings="true" :showAccounts="true" :borderless="true"/>
+    <div class="container">
+      <log-scraper loggerid = "popup"/>
+    </div>
   </div>
 </template>
 
@@ -19,6 +22,7 @@
 
 <script>
   import Headbar from "components/Headbar.vue";
+  import LogScraper from "components/LogScraper.vue";
 
   export default {
     data () {
@@ -36,7 +40,8 @@
 
     },
     components: {
-        Headbar
+        Headbar,
+        LogScraper
     }
   }
 </script>

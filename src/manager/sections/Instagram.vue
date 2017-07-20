@@ -174,14 +174,14 @@
 					<Tags v-model="settings.follow.tags"/>
 				</div>
 			</div>
-			<hr/>
-				<b>Followers manager</b>
-				<div class="description">Here you can manage the your followers. </div>
-				<FollowManager :type="type"/>
-			<hr/>
 			<div>
 				<button @click="save" class="btn btn-primary btn-lg float-right save">Save</button>
 			</div>
+			<div  class="clearfix"/>
+			<hr/>
+			<b>Followers manager</b>
+			<div class="description">Here you can manage the your followers. </div>
+			<FollowManager :type="type"/>
 		</div>
 		<Loading v-else/>
 	</div>
