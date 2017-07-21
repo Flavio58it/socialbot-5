@@ -13,6 +13,8 @@ const urls = {
 	post: {
 		like: "/web/likes/{0}/like/", // post id
 		unlike: "/web/likes/{0}/like/", // post id
+		follow: "/web/friendships/{0}/follow/",
+		unfollow: "/web/friendships/{0}/unfollow/"
 	},
 	get: {
 		tag: "/explore/tags/{0}/", // TagName
@@ -205,7 +207,6 @@ export default function (settings) {
 								.then(() => likePost(d.id, csrf))
 								.then((data) => {log.userInteraction("LIKE", d);return data;})
 								.then((data) => {
-									console.log("HEY: ", d);
 									numberLiked++;
 									return data;
 								}).catch((e) => {
@@ -269,7 +270,9 @@ export default function (settings) {
 							if (post.viewer_has_liked){
 								return Promise.reject({alreadyLiked: true})
 							}
-							return likePost(post.id, csrf).then((d) => {
+							return likePost(post.id, csrf)
+							.then((d) => {log.userInteraction("LIKE", data);return d;})
+							.then((d) => {
 								numberLiked++;
 								return d;
 							}).catch((e) => {
@@ -359,8 +362,11 @@ export default function (settings) {
 					return users;
 				}).then((users) => {
 					// Here you should cycle on users and removeThemIfUnfollowed or addThemIfFollowing + database management
-
-					return users;
+					var isFirstTime = false;
+					return db.users.toArray().then((arr) => {
+						if (arr.length == 0)
+							isFirstTime = true;
+					}).then(() => users);
 				})
 			}
 		}

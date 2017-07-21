@@ -12,12 +12,13 @@ export default function (settings) {
 		**/
 		userInteraction (type, userData, details) { // Types: LIKE, FOLLOWBACK, UNFOLLOW, NEW, COMMENT
 			var details = details || {};
+			console.log("Logging userData: ", userData);
 			return db.logs.add({
 				plug: settings.type,
 				action: "USER_" + type.toUpperCase(),
 				details: {
 					img: userData.display_src,
-					userId: userData.owner.id || false,
+					userId: (userData.owner?userData.owner.id:false) || false,
 					userName: userData.userName || false,
 					comment: details.comment || undefined
 				},

@@ -19,7 +19,8 @@
 				</div>
 			</div>
 		</div>
-		<hr/>
+		<hr v-if="separator"/>
+		<div v-else class="separator"/>
 	</div>
 </template>
 
@@ -34,11 +35,20 @@
 			max-height: 95px;
 		}
 	}
+	.separator {
+		margin-top: 15px;
+	}
 </style>
 
 <script>
 	export default {
-		props: ["showSettings", "showUsers"],
+		props: {
+			showSettings:{},
+			showUsers: {},
+			separator: {
+				default: true
+			}
+		},
 		data () {
 			return {
 		        links: {

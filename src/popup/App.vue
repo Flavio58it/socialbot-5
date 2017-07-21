@@ -1,6 +1,6 @@
 <template>
   <div id = "app" style="width: 480px;">
-    <Headbar :showSettings="true" :showAccounts="true" :borderless="true"/>
+    <Headbar :showSettings="true" :showAccounts="true" :separator="false"/>
     <div class="container">
       <log-scraper loggerid = "popup"/>
     </div>

@@ -53,6 +53,7 @@ Comm.listen("manager", function(action, data) {
 				prom = prom.where("plug").equals(data.filter)
 			if (data.limit)
 				prom = prom.limit(data.limit)
+				prom = prom.reverse();
 			prom.toArray().then((data) => {
 				Comm.sendMessage("logs", {list: data, forWhich: data.forWhich});
 			});

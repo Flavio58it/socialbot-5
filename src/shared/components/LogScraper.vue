@@ -6,15 +6,24 @@
 			</div>
 			<Filters v-model="filter"class="col text-right"/>
 		</div>
-		<div id="logs">
-			<div v-for="log in list" class="row logItem">
-				<div v-if="log.details.img" class="col-3 mainimg">
-					<img :src="log.details.img"/>
-				</div>
-				<div class="col-9 description">
-					<b>Liked</b> image
-					<hr/>
-					<b-button variant="danger" size="sm">Unlike it</b-button>
+		<div id="logs" class="row">
+			<div v-for="(log, i) in list" :class="[(i==0)?'col-12':'col-6', 'logItem']">
+				<div class="row">
+					<div v-if="log.details.img" class="col-5 mainimg">
+						<img :src="log.details.img"/>
+					</div>
+					<div class="col-7 description">
+						<div class="row">
+							<span><b>Liked</b> image</span>
+						</div>
+						<div class="row date">
+							{{log.time|fromNow}}
+						</div>
+						<hr/>
+						<div class="row pull-left actions">
+							<b-button variant="danger" size="sm">Unlike it</b-button>
+						</div>
+					</div>
 				</div>
 			</div>
 			<Loading v-if="!list"/>
@@ -38,13 +47,23 @@
 
 	#logs {
 		.logItem {
-			padding: 10px;
+			padding: $spacer-small $spacer;
 		}
 
 		.mainimg img{
 			width: 100%;
-			min-height: 90px;
+			min-height: 80px;
 		}
+
+		.date {
+			font-size: $font-small;
+		}
+	}
+
+	hr {
+		margin-top:5px;
+		margin-bottom: 7px;
+		padding:0;
 	}
 </style>
 
@@ -55,6 +74,8 @@
 	import Filters from "./Filters.vue";
 
 	var timer = false;
+
+	moment.locale("en");
 	export default {
 		props: ["loggerid"],
 		data () {
@@ -71,6 +92,11 @@
 		message (action, data) {
 			if (action == "logs" && data.forWhich == this.loggerID) {
 				this.list = data.list;
+			}
+		},
+		filters: {
+			fromNow (date) {
+				return moment(date).fromNow();
 			}
 		},
 		watch: {
