@@ -4,6 +4,7 @@ import waiter from "waiter";
 const bot = function(settings, plug, plugName) {
 	var request = false;
 	return plug.init(settings).then((data) => {
+		console.info("Logged in: ", data.logged);
 		request = new requests(data.domain).listen(); // See the requests module for the explanation
 		return settings.get("follow").then((follow) => follow.tags)
 	}).then((data) => {

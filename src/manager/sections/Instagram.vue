@@ -224,12 +224,12 @@
 		},
 		methods: {
 			checkUpperLimitValid (val) {
-				if (val < this.settings.waiter.actionLower + 10)
-					return this.settings.waiter.actionLower + 10;
+				if (val <= parseInt(this.settings.waiter.actionLower) + 10)
+					return parseInt(this.settings.waiter.actionLower) + 10;
 				return val;
 			},
 			checkLowerLimitValid (val) {
-				return (val < 10)?10:val;
+				return (val < 3)?3:val;
 			},
 			save () {
 				this.$send("saveSettings", {

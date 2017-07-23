@@ -3,6 +3,7 @@ import urlParams from "url-params";
 import waiter from "waiter";
 import axios from "axios";
 import logger from "../db/logger";
+import db from "../db/db";
 
 const urls = {
 	home: "https://www.instagram.com",
@@ -159,7 +160,7 @@ export default function (settings) {
 				return {
 						// TODO: Check login status
 						connectionOk: true,
-						logged: true,
+						logged: (data && !data.entry_data.LandingPage),
 						domain: urls.home
 				}
 			})
@@ -205,7 +206,7 @@ export default function (settings) {
 									});
 								})
 								.then(() => likePost(d.id, csrf))
-								.then((data) => {log.userInteraction("LIKE", d);return data;})
+								.then((data) => {log.userInteraction("LIKE", d, {tag: tagName});return data;})
 								.then((data) => {
 									numberLiked++;
 									return data;
@@ -271,7 +272,7 @@ export default function (settings) {
 								return Promise.reject({alreadyLiked: true})
 							}
 							return likePost(post.id, csrf)
-							.then((d) => {log.userInteraction("LIKE", data);return d;})
+							.then((d) => {log.userInteraction("LIKE", post);return d;})
 							.then((d) => {
 								numberLiked++;
 								return d;
@@ -318,6 +319,9 @@ export default function (settings) {
 			**/
 			followManager (removeThemIfUnfollowed, addThemIfFollowing) { // If both are false then the only the list is returned.
 				console.log("Getting followers of ", user);
+
+				if (!user)
+					return Promise.reject({error: "User error"})
 
 				return Promise.all([
 					getUsersBatch(query_id.followers, user.id),

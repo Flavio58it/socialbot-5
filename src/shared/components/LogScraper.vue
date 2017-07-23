@@ -13,9 +13,10 @@
 						<img :src="log.details.img"/>
 					</div>
 					<div class="col-7 description">
-						<div class="row">
-							<span><b>Liked</b> image</span>
-						</div>
+						<b-tooltip :show="log.details.tag?undefined:false" :debounce="3000" :content="log.details.tag" class="row">
+							<span><b>Liked</b> image <span v-if="log.details.userName">from <b>{{log.details.userName}}</b></span></span>
+						</b-tooltip>
+						<div v-if="log.details.tag && i==0" class="row tag">#{{log.details.tag}}</div>
 						<div class="row date">
 							{{log.time|fromNow}}
 						</div>
@@ -55,7 +56,7 @@
 			min-height: 80px;
 		}
 
-		.date {
+		.date, .tag {
 			font-size: $font-small;
 		}
 	}

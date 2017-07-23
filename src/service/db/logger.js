@@ -17,10 +17,11 @@ export default function (settings) {
 				plug: settings.type,
 				action: "USER_" + type.toUpperCase(),
 				details: {
-					img: userData.display_src,
+					img: userData.display_src || userData.display_url,
 					userId: (userData.owner?userData.owner.id:false) || false,
-					userName: userData.userName || false,
-					comment: details.comment || undefined
+					userName: (userData.owner&& userData.owner.username)?userData.owner.username:false,
+					comment: details.comment || undefined,
+					tag: details.tag || undefined
 				},
 				time: new Date().getTime()
 			})
