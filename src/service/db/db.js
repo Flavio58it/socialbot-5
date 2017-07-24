@@ -4,7 +4,7 @@ var db = new Dexie("followhunter");
 
 db.version(1).stores({
 	logs: "++id, plug, action, details, time", // Details should have imgSrc, username, userid etc.
-	users: "++id, plug, userid, username, blacklisted, whitelisted, details, lastInteraction, lastUpdate" // Cache of account followers
+	users: "++id, plug, userid, username, whitelisted, followbacked, details, lastInteraction"
 });
 
 export default db;

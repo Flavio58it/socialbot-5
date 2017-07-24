@@ -2,6 +2,7 @@
   <div id = "app" style="width: 480px;">
     <Headbar :showSettings="true" :showAccounts="true" :separator="false"/>
     <div class="container">
+      <div class="status"></div>
       <log-scraper loggerid = "popup"/>
     </div>
   </div>

@@ -26,7 +26,7 @@
 							<div>
 								<b-form-checkbox v-model="settings.followBack">
 									Followback
-									<div class="description">Follow back the people who follows you (Blacklist applied)</div>
+									<div class="description">Follow back the people who follows you</div>
 								</b-form-checkbox>
 							</div>
 							<div>
@@ -37,8 +37,11 @@
 							</div>
 							<div>
 								<b-form-checkbox v-model="settings.likeBack">
-									LikeBack
-									<div class="description">When a user likes a photo of yours the bot will like a couple of theirs. (Blacklist applied)</div>
+									LikeBack 
+									<helper title="LikeBack">
+										The bot will check if the user has been liked in the last 20 days. If no, it will like a couple photos randomly in the user's dashboard.
+									</helper>
+									<div class="description">When a user likes a photo of yours the bot will like a couple of theirs.</div>
 								</b-form-checkbox>
 							</div>
 						</b-tab>

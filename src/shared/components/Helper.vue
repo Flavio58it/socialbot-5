@@ -1,6 +1,6 @@
 <template>
 	<span>
-		<i @click="showModal" class="fa fa-question-circle"/>
+		<i @click.prevent="showModal" class="fa fa-question-circle"/>
 
 		<b-modal id="modalHelper" ref="modalHelper" :title="title" :ok-only="true">
 			<slot/>

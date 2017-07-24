@@ -78,6 +78,7 @@ export default function (settings, plug, plugName) {
 				return;
 			} else {
 				console.error("Bot error", e);
+				triggerTimer(); // Trying to restart after some time
 			}
 			//return Promise.reject(e);
 		});

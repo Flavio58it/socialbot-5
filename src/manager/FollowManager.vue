@@ -1,19 +1,23 @@
 <template>
 	<div id = "userlist">
-		<div class="head row">
-			<div class="col-4">
+		<div class="head form-inline">
+			<div class="input-group col-4">
 				<b-form-input 
 					v-model="filters.name"
 					placeholder="Name, username"
 					type="text"
 				/>
 			</div>
-			<div class="col-8">
+			<div class="input-group col-7">
 				<b-form-checkbox v-model="filters.state" value="following">Follower</b-form-checkbox>
 				<b-form-checkbox v-model="filters.state" value="followback">Followback</b-form-checkbox>
 				<b-form-checkbox v-model="filters.state" value="nofollowing">Not following</b-form-checkbox>
-				<b-form-checkbox v-model="filters.state" value="blacklisted">Blacklisted</b-form-checkbox>
 				<b-form-checkbox v-model="filters.state" value="whitelisted">Whitelisted</b-form-checkbox>
+			</div>
+			<div class="col-1 text-right">
+				<a v-if="clUsers.elements > 50" href = "#" @click.prevent="expanded = !expanded" title="Toggle expand">
+					<i :class="['fa', expanded?'fa-compress':'fa-expand']"/>
+				</a>
 			</div>
 		</div>
 		<div :class="['row', 'list', expanded?'expanded':'']">
@@ -39,7 +43,7 @@
 							<b-button v-if="user.status=='following' || user.status=='followback'" variant="danger">Unfollow</b-button>
 							<b-button v-else variant="info">Follow</b-button>
 							<b-button variant="">Whitelist</b-button>
-							<b-button variant="warning">Blacklist</b-button>
+							<b-button variant="success" title="Like the photos of the user">Like</b-button>
 						</b-button-group>
 					</div>
 				</div>
@@ -51,7 +55,7 @@
 				Showing 1-{{showAll?clUsers.elements:'50'}} of {{clUsers.elements}}
 			</div>
 			<div v-if="clUsers.elements > 50"  class="controlLinks text-right col">
-				<a href="#" @click.prevent="showAll = !showAll">Show all</a> <a href = "#" @click.prevent="expanded = !expanded">   Expand</a>
+				<a href="#" @click.prevent="showAll = !showAll">Show all</a>
 			</div>
 		</div>
 	</div>
@@ -74,6 +78,7 @@
 
 	.head {
 		padding: 15px;
+		line-height: 20px;
 	}
 
 	.list {

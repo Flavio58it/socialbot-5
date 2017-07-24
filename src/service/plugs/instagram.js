@@ -110,6 +110,14 @@ function getUsersBatch (query, userid, list, pointer) {
 		})
 }
 
+function likeUserPosts() {
+
+}
+
+/**
+* -------------- Exposed functions
+**/
+
 export default function (settings) {
 	var csrf = false, query_id = false, user = false,
 		log = new logger({type: "instagram"});
@@ -259,51 +267,60 @@ export default function (settings) {
 
 			likeDashboard (wait, limit) {
 				var numberLiked = 0;
-				// TODO: Here should simulate activity of some type (or not?)
-				return decodeObject(urls.home).then((data) => {
-					//console.log("DashboardLike: ", data);
-					var source = data.graphql.user.edge_web_feed_timeline, flow = Promise.resolve();
-					source.edges.forEach((post) => {
-						post = post.node;
-						flow = flow.then(() => {
-							if (numberLiked >= limit)
-								return Promise.reject({likeLimitReached: true});
-							if (post.viewer_has_liked){
-								return Promise.reject({alreadyLiked: true})
-							}
-							return likePost(post.id, csrf)
-							.then((d) => {log.userInteraction("LIKE", post);return d;})
-							.then((d) => {
-								numberLiked++;
-								return d;
-							}).catch((e) => {
-								numberLiked++;
-								return Promise.reject(e);
+
+				function like(pointer) {
+					return decodeObject(urls.home).then((data) => {
+						//console.log("DashboardLike: ", data);
+						var source = data.graphql.user.edge_web_feed_timeline, flow = Promise.resolve();
+						source.edges.forEach((post) => {
+							post = post.node;
+							flow = flow.then(() => {
+								if (numberLiked >= limit)
+									return Promise.reject({likeLimitReached: true});
+								if (post.viewer_has_liked){
+									return Promise.reject({alreadyLiked: true})
+								}
+								return likePost(post.id, csrf)
+								.then((d) => {log.userInteraction("LIKE", post);return d;})
+								.then((d) => {
+									numberLiked++;
+									return d;
+								}).catch((e) => {
+									numberLiked++;
+									return Promise.reject(e);
+								})
+								.then(() => waiter(wait.actionLower * 1000, wait.actionUpper * 1000));
 							})
-							.then(() => waiter(wait.actionLower * 1000, wait.actionUpper * 1000));
+						})
+
+						return flow.then((prevData) => {
+							if (source.page_info.end_cursor) {
+								console.log("Next page");
+								return like(source.page_info.end_cursor)
+							} else {
+								return Promise.resolve(prevData);
+							}
+						}).catch((e) => {
+							if (e.alreadyLiked) {
+								console.warn("Already liked. Aborting...");
+								return Promise.resolve({
+									data,
+									liked: numberLiked
+								});
+							} else if (e.likeLimitReached) {
+								console.warn("Like limit reached...");
+								return Promise.resolve({
+									data,
+									liked: numberLiked
+								})
+							}
+							return Promise.reject(e);
 						})
 					})
+				}
 
-					return flow.then((d) => {
-						//TODO: New page support here
-						return d;
-					}).catch((e) => {
-						if (e.alreadyLiked) {
-							console.warn("Already liked. Aborting...");
-							return Promise.resolve({
-								data,
-								liked: numberLiked
-							});
-						} else if (e.likeLimitReached) {
-							console.warn("Like limit reached...");
-							return Promise.resolve({
-								data,
-								liked: numberLiked
-							})
-						}
-						return Promise.reject(e);
-					})
-				})
+
+				return like();
 			},
 			/**
 			* ----- Like the explore (magnifying glass) posts
@@ -370,7 +387,12 @@ export default function (settings) {
 					return db.users.toArray().then((arr) => {
 						if (arr.length == 0)
 							isFirstTime = true;
-					}).then(() => users);
+
+
+					})
+
+
+					.then(() => users);
 				})
 			}
 		}

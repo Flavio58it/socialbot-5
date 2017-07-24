@@ -7,12 +7,14 @@
 			<Filters v-model="filter"class="col text-right"/>
 		</div>
 		<div id="logs" class="row">
-			<div v-for="(log, i) in list" :class="[(i==0)?'col-12':'col-6', 'logItem']">
+			<div v-for="(log, i) in list" :class="['logItem', 'col-12']">
 				<div class="row">
-					<div v-if="log.details.img" class="col-5 mainimg">
-						<img :src="log.details.img"/>
+					<div v-if="log.details.img" :class="[(i==0)?'col-5':'col-3', 'mainimg']">
+						<div :class="[(i==0)?'big':'small', 'imgwrapper']">
+							<img :src="log.details.img"/>
+						</div>
 					</div>
-					<div class="col-7 description">
+					<div :class="[(i==0)?'col-7':'col-9', 'description']">
 						<b-tooltip :show="log.details.tag?undefined:false" :debounce="3000" :content="log.details.tag" class="row">
 							<span><b>Liked</b> image <span v-if="log.details.userName">from <b>{{log.details.userName}}</b></span></span>
 						</b-tooltip>
@@ -49,12 +51,31 @@
 	#logs {
 		.logItem {
 			padding: $spacer-small $spacer;
+			
+			.mainimg {
+				text-align: center;
+				padding: 5px;
+
+				.imgwrapper{
+					overflow: hidden;
+					vertical-align: middle;
+
+					&.small {
+						height: 85px;
+					}
+
+					&.big {
+						height: 150px;
+					}
+				}
+
+				img{
+					width: 100%;
+				}
+			}
 		}
 
-		.mainimg img{
-			width: 100%;
-			min-height: 80px;
-		}
+		
 
 		.date, .tag {
 			font-size: $font-small;
