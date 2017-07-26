@@ -21,8 +21,9 @@ const settings = {
 		filters: { // Various filters for liking/following
 			likes: { // When like a post
 				isInclusive: false,
-				text: ""
-			}
+				text: "",
+				videos: true
+			},
 		},
 		limits: {
 			likes: {

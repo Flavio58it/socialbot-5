@@ -35,7 +35,7 @@ mappers = { // This maps the majority of the objects picked from the instagram A
 		"graphql.user.edge_web_feed_timeline.edges": "posts",
 		"graphql.user.edge_web_feed_timeline.page_info.end_cursor": "nextPage"
 	},
-	postLike: { // Post in a list of posts (edges)
+	postLike: { // Post in a list of posts (edges) - like area
 		"id": "id",
 		"owner.id": "userId",
 		"owner.username": "userName",
@@ -47,7 +47,7 @@ mappers = { // This maps the majority of the objects picked from the instagram A
 		"is_video": "isVideo",
 		"likes.count": "likes"
 	},
-	post: { // Post in a list of posts (edges)
+	post: { // Post in a list of posts (edges) - dashboard area
 		"node.id": "id",
 		"node.owner.id": "userId",
 		"node.owner.username": "userName",
@@ -450,9 +450,11 @@ export default function (settings) {
 							isFirstTime = true;
 
 						users.forEach(function(us) { // Cycle each user. Check if is present in the database. if not present and the db is not empty, the user is a new one.
+							// us = users picked now from server / user = users picked from database
 							var user = cache[us.id];
 							if (user) { // The user is present!
 								user.found = true; // The user has been found so has not unfollowed
+								// Update in real time the details to the db in order to have all info updated somehow
 							} else { // User not found and is present in the users array so is a new follower! (party) (except if isFirstTime)
 								if (!addThemIfFollowing)
 									return;

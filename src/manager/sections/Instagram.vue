@@ -135,7 +135,7 @@
 								</div>
 								<div class="col-6">
 									<b-form-input
-										:textarea="true"
+										type="number"
 										v-model="settings.filters.likes.text"
 									/>
 								</div>
@@ -166,6 +166,15 @@
 										v-model="settings.limits.likes.explorer"
 									/>
 								</div>
+							</div>
+							<div>
+								<b>Other</b>
+							</div>
+							<div class="row">
+								<b-form-checkbox v-model="settings.filters.likes.videos">
+									Like videos
+									<div class="description">Like also if the post is a video</div>
+								</b-form-checkbox>
 							</div>
 						</b-tab>
 					</b-tabs>
