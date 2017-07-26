@@ -4,6 +4,7 @@ import waiter from "waiter";
 import axios from "axios";
 import logger from "../db/logger";
 import db from "../db/db";
+import objectMapper from "object-mapper";
 
 const urls = {
 	home: "https://www.instagram.com",
@@ -25,6 +26,43 @@ const urls = {
 		query: "/graphql/query/?query_id={0}"
 	}
 }, 
+mappers = { // This maps the majority of the objects picked from the instagram APIs
+	media: {
+		"tag.media.nodes": "posts",
+		"tag.media.page_info.end_cursor": "nextPage"
+	},
+	dashboard: {
+		"graphql.user.edge_web_feed_timeline.edges": "posts",
+		"graphql.user.edge_web_feed_timeline.page_info.end_cursor": "nextPage"
+	},
+	postLike: { // Post in a list of posts (edges)
+		"id": "id",
+		"owner.id": "userId",
+		"owner.username": "userName",
+		"caption": "comment",
+		"viewer_has_liked": "liked",
+		"code": "code",
+		"display_src": "img",
+		"display_url": "img",
+		"is_video": "isVideo",
+		"likes.count": "likes"
+	},
+	post: { // Post in a list of posts (edges)
+		"node.id": "id",
+		"node.owner.id": "userId",
+		"node.owner.username": "userName",
+		"node.caption": "comment",
+		"node.viewer_has_liked": "liked",
+		"node.code": "code",
+		"node.display_src": "img",
+		"node.display_url": "img",
+		"node.is_video": "isVideo",
+		"node.likes.count": "likes"
+	},
+	postData: { // Post as a singular post (in an ajax specific for that post)
+		"graphql.shortcode_media.viewer_has_liked": "liked"
+	}
+},
 // Used in encodeObject. Go to the function and watch the comments.
 useJsonEncoding = true;
 
@@ -110,8 +148,18 @@ function getUsersBatch (query, userid, list, pointer) {
 		})
 }
 
-function likeUserPosts() {
+function likeUserPosts(userId) {
 
+}
+
+function followUser (userId) {
+	console.log("FollowUserAction")
+	return Promise.resolve();
+}
+
+function unfollowUser (userId) {
+	console.log("UnfollowUserAction")
+	return Promise.resolve();
 }
 
 /**
@@ -198,16 +246,19 @@ export default function (settings) {
 
 					return decodeObject(nextQuery)
 					.then((data) => {
-						var ops = Promise.resolve(), source = data.tag.media;
+						var ops = Promise.resolve(), source = objectMapper(data, mappers.media);
 
-						source.nodes.forEach((d) => {
+						source.posts.forEach((d) => {
 							    //console.log("Post data: ", d);
+							    d = objectMapper(d, mappers.postLike);
+
 								ops = ops.then(() => {
 									// If the user or the bot has already liked the post the like process is aborted, as the previous posts has already been viewed.
 									if (numberLiked >= limit)
 										return Promise.reject({likeLimitReached: true});
 									return decodeObject(format(urls.get.post, d.code)).then((data) => {
-										if (data.graphql.shortcode_media.viewer_has_liked) {
+										data = objectMapper(data, mappers.postData)
+										if (data.liked) {
 											return Promise.reject({alreadyLiked: true})
 										}
 										return waiter(1000, 5000).then(() => data);
@@ -226,16 +277,16 @@ export default function (settings) {
 										console.error("Post not found...");
 										return Promise.resolve();
 									}
-									return Promise.reject({error: "Connection error", details: e});
+									return Promise.reject({error: "Connection error", details: (e.details || e)});
 								})
 								.then(() => waiter(wait.actionLower * 1000, wait.actionUpper * 1000))
 						})
 
 						return ops.then((prevData) => {
 							//Here should recall like function with pointer
-							if (source.page_info.end_cursor) {
+							if (source.nextPage) {
 								console.log("Next page");
-								return like(source.page_info.end_cursor)
+								return like(source.nextPage)
 							} else {
 								return Promise.resolve(prevData);
 							}
@@ -271,13 +322,13 @@ export default function (settings) {
 				function like(pointer) {
 					return decodeObject(urls.home).then((data) => {
 						//console.log("DashboardLike: ", data);
-						var source = data.graphql.user.edge_web_feed_timeline, flow = Promise.resolve();
-						source.edges.forEach((post) => {
-							post = post.node;
+						var source = objectMapper(data, mappers.dashboard), flow = Promise.resolve();
+						source.posts.forEach((post) => {
+							post = objectMapper(post, mappers.post);
 							flow = flow.then(() => {
 								if (numberLiked >= limit)
 									return Promise.reject({likeLimitReached: true});
-								if (post.viewer_has_liked){
+								if (post.liked){
 									return Promise.reject({alreadyLiked: true})
 								}
 								return likePost(post.id, csrf)
@@ -294,9 +345,9 @@ export default function (settings) {
 						})
 
 						return flow.then((prevData) => {
-							if (source.page_info.end_cursor) {
+							if (source.nextPage) {
 								console.log("Next page");
-								return like(source.page_info.end_cursor)
+								return like(source.nextPage)
 							} else {
 								return Promise.resolve(prevData);
 							}
@@ -376,19 +427,64 @@ export default function (settings) {
 							follows_me: false
 						});
 					});
-				
 
 					console.log("Result: ", users);
 
 					return users;
 				}).then((users) => {
-					// Here you should cycle on users and removeThemIfUnfollowed or addThemIfFollowing + database management
 					var isFirstTime = false;
+
 					return db.users.toArray().then((arr) => {
+						var cache = {}, //Cache users by id
+							now = new Date().getTime(), 
+							flow = [],
+							usersCorrupted = false; 
+						arr.forEach((user) => {
+							if (!user.userid)
+								usersCorrupted = true;
+							cache[user.userid] = user;
+						})
+						if (usersCorrupted) // Missing one or more ids from cache. This is critically wrong. Should wipe all database off when this happens (or recover from username)
+							return Promise.reject({error: "The user database is corrupted.", id: "DB_USER_CORRUPTED"})
 						if (arr.length == 0)
 							isFirstTime = true;
 
+						users.forEach(function(us) { // Cycle each user. Check if is present in the database. if not present and the db is not empty, the user is a new one.
+							var user = cache[us.id];
+							if (user) { // The user is present!
+								user.found = true; // The user has been found so has not unfollowed
+							} else { // User not found and is present in the users array so is a new follower! (party) (except if isFirstTime)
+								if (!addThemIfFollowing)
+									return;
+								flow.push(db.users.add({
+									plug: "instagram",
+									userid: us.id,
+									username: us.username,
+									whitelisted: false,
+									followbacked: false,
+									details: {
+										img: us.img
+									},
+									lastInteraction: now
+								}).then(() => { // Followback!
+									if (isFirstTime) // Not followbacking all the people the first time
+										return Promise.resolve();
+									return followUser(us.id);
+								}))
+							}
+						});
 
+						return Promise.all(flow).then(() => { // Check the cached users and unfollow the ones that are not present and are not whitelisted!
+							if (isFirstTime || !removeThemIfUnfollowed)
+								return Promise.resolve();
+							console.log("Arrived to unfollower");
+
+							for (var u in cache) {
+								var user = cache[u];
+								if (!user.found && !user.whitelisted)
+									unfollowUser(user.id);
+							}
+						}).then(() => arr);
 					})
 
 

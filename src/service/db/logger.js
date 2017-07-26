@@ -17,9 +17,11 @@ export default function (settings) {
 				plug: settings.type,
 				action: "USER_" + type.toUpperCase(),
 				details: {
-					img: userData.display_src || userData.display_url,
-					userId: (userData.owner?userData.owner.id:false) || false,
-					userName: (userData.owner&& userData.owner.username)?userData.owner.username:false,
+					img: userData.img,
+					imgId: userData.id,
+					userId: userData.userId,
+					userName: userData.userName,
+					video: userData.isVideo,
 					comment: details.comment || undefined,
 					tag: details.tag || undefined
 				},

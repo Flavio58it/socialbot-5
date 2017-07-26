@@ -4,7 +4,7 @@
 			<div class="col">
 				<b>Latest activity</b>
 			</div>
-			<Filters v-model="filter"class="col text-right"/>
+			<Filters v-model="filter" class="col text-right"/>
 		</div>
 		<div id="logs" class="row">
 			<div v-for="(log, i) in list" :class="['logItem', 'col-12']">
@@ -15,12 +15,12 @@
 						</div>
 					</div>
 					<div :class="[(i==0)?'col-7':'col-9', 'description']">
-						<b-tooltip :show="log.details.tag?undefined:false" :debounce="3000" :content="log.details.tag" class="row">
-							<span><b>Liked</b> image <span v-if="log.details.userName">from <b>{{log.details.userName}}</b></span></span>
-						</b-tooltip>
-						<div v-if="log.details.tag && i==0" class="row tag">#{{log.details.tag}}</div>
+						<span>
+							<b>Liked</b> image <span v-if="log.details.userName">from <b>{{log.details.userName}}</b></span> 
+							<span v-if="log.details.tag">(#{{log.details.tag}})</span>
+						</span>
 						<div class="row date">
-							{{log.time|fromNow}}
+							<div class="col">{{log.time|fromNow}}</div>
 						</div>
 						<hr/>
 						<div class="row pull-left actions">
@@ -30,8 +30,8 @@
 				</div>
 			</div>
 			<Loading v-if="!list"/>
-			<div v-if="list instanceof Array && !list.length" class="text-center">
-				<div>No logs available</div>
+			<div v-if="list instanceof Array && !list.length" class="col text-center">
+				No logs available
 			</div>
 		</div>
 	</div>

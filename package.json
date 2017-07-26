@@ -23,6 +23,7 @@
     "file-loader": "^0.9.0",
     "moment": "^2.18.1",
     "node-sass": "^4.5.0",
+    "object-mapper": "^3.0.1",
     "random-js": "^1.0.8",
     "sass-loader": "^5.0.1",
     "sass-resources-loader": "^1.2.1",
