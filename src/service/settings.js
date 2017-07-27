@@ -24,6 +24,17 @@ const settings = {
 				text: "",
 				videos: true
 			},
+			follow: {
+				followers: {
+					number: 0,
+					more: false
+				},
+				following: {
+					number: 0,
+					more: false
+				},
+				ratio: 0
+			}
 		},
 		limits: {
 			likes: {

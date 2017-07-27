@@ -154,7 +154,16 @@ function likeUserPosts(userId) {
 
 function followUser (userId) {
 	console.log("FollowUserAction")
-	return Promise.resolve();
+	return db.users.where("[plug+userid]").equals(["instagram", userId]).toArray().then((data) => {
+		if (data[0].toFollow) {
+			console.log("Following authorized")
+			return Promise.resolve({follow: true});
+		}
+	}).then (() => {
+		return db.users.where("[plug+userid]").equals(["instagram", userId]).modify({toFollow: false});
+	})
+	
+
 }
 
 function unfollowUser (userId) {
@@ -454,22 +463,21 @@ export default function (settings) {
 							var user = cache[us.id];
 							if (user) { // The user is present!
 								user.found = true; // The user has been found so has not unfollowed
+								us.whitelisted = user.whitelisted;
 								// Update in real time the details to the db in order to have all info updated somehow
 							} else { // User not found and is present in the users array so is a new follower! (party) (except if isFirstTime)
-								if (!addThemIfFollowing)
-									return;
 								flow.push(db.users.add({
 									plug: "instagram",
 									userid: us.id,
 									username: us.username,
 									whitelisted: false,
-									followbacked: false,
+									toFollow: !(addThemIfFollowing || isFirstTime),
 									details: {
 										img: us.img
 									},
 									lastInteraction: now
 								}).then(() => { // Followback!
-									if (isFirstTime) // Not followbacking all the people the first time
+									if (isFirstTime || addThemIfFollowing) // Not followbacking all the people the first time
 										return Promise.resolve();
 									return followUser(us.id);
 								}))

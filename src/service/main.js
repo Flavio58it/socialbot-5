@@ -58,6 +58,10 @@ Comm.listen("manager", function(action, data) {
 				Comm.sendMessage("logs", {list: data, forWhich: data.forWhich});
 			});
 		break;
+
+		case "whitelistUser": // Whitelist a user
+			db.users.where("[plug+userid]").equals([data.type, data.id]).modify({whitelisted: data.add})
+		break;
 	}
 })
 

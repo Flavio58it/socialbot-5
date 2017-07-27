@@ -6,6 +6,11 @@ body {
 
 .btn {border-radius: 2px !important;} /* Remove ugly button radius of bootstrap framework */
 
+.stop-scrolling {
+  height: 100%;
+  overflow: hidden;
+}
+
 /* Really basic grid system 
 .col-1 {width: 8.33%;}
 .col-2 {width: 16.66%;}

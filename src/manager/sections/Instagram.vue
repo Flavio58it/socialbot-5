@@ -160,7 +160,7 @@
 									/>
 								</div>
 								<div class="col-4">
-									Explore
+									Explore <helper title="Explore">The section listing the people that you don't follow but you may like</helper>
 									<b-form-input
 										type="number"
 										v-model="settings.limits.likes.explorer"
@@ -171,10 +171,87 @@
 								<b>Other</b>
 							</div>
 							<div class="row">
-								<b-form-checkbox v-model="settings.filters.likes.videos">
-									Like videos
-									<div class="description">Like also if the post is a video</div>
-								</b-form-checkbox>
+								<div class="col">
+									<b-form-checkbox v-model="settings.filters.likes.videos">
+										Like videos
+										<div class="description">Like also if the post is a video</div>
+									</b-form-checkbox>
+								</div>
+							</div>
+						</b-tab>
+						<b-tab title="Follow">
+							<div>
+								<b>Follow conditions</b>
+								<div class="description">Leave the filter to 0 to disable it.</div>
+							</div>
+							<div class="row">
+								<div class="description col-12">Filter by user followers number</div>
+								<div class="col-6">
+									<b-form-select 
+									 	v-model="settings.filters.follow.followers.more"
+									 	:options="[
+									 		{text: 'More than', value: 'true'},
+									 		{text: 'Less than', value: 'false'}
+									 	]" 
+									 	:disabled="followConditionsMode == 'ratio'"
+									 	class="mb-3"
+									/>
+								</div>
+								<div class="col-6">
+									<b-form-input
+										type="number"
+										:disabled="followConditionsMode == 'ratio'"
+										@input="followFilterManager('fixed')"
+										:formatter="toDefault"
+										lazy-formatter
+										v-model="settings.filters.follow.followers.number"
+									/>
+								</div>
+							</div>
+							<div class="row">
+								<div class="description col-12">Filter by user following number</div>
+								<div class="col-6">
+									<b-form-select 
+									 	v-model="settings.filters.follow.following.more"
+									 	:options="[
+									 		{text: 'More than', value: 'true'},
+									 		{text: 'Less than', value: 'false'}
+									 	]" 
+									 	:disabled="followConditionsMode == 'ratio'"
+									 	class="mb-3"
+									/>
+								</div>
+								<div class="col-6">
+									<b-form-input
+										type="number"
+										:disabled="followConditionsMode == 'ratio'"
+										@input="followFilterManager('fixed')"
+										:formatter="toDefault"
+										lazy-formatter
+										v-model="settings.filters.follow.following.number"
+									/>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-12">
+									<span class="description">Filter by user following ratio</span>
+									<helper title="Following ratio filter">
+										<p>This filter will allow to follow only the users that have a follower/following situation similar to you.</p>
+										<p>A user can have a score from 1 to 100 (which 100 is the most similar to you when 1 is the most uncompatible)</p>
+										<p>This will ensure that you will follow more probably only the people that are sincerely interested in your contents (at most times)</p>
+										<p>Putting 0 will disable this filter and enable the other ones.</p>
+									</helper>
+								</div>
+								<div class="col-4">
+									<b-form-input
+										type="number"
+										@input="followFilterManager('ratio')"
+										:disabled="followConditionsMode == 'fixed'"
+										:formatter="toDefault"
+										lazy-formatter
+										v-model="settings.filters.follow.ratio"
+									/>
+								</div>
 							</div>
 						</b-tab>
 					</b-tabs>
@@ -222,6 +299,7 @@
 		data () {
 			return {
 				type: "instagram",
+				followConditionsMode: false,
 				settings: false
 			}
 		},
@@ -242,6 +320,18 @@
 			},
 			checkLowerLimitValid (val) {
 				return (val < 3)?3:val;
+			},
+			toDefault (val){
+				if (val == "" || parseInt(val) < 0)
+					return "0";
+				return val;
+			},
+			followFilterManager(cat){
+				if (this.settings.filters.follow.following.number == 0 && this.settings.filters.follow.followers.number == 0 && this.settings.filters.follow.ratio == 0){
+					this.followConditionsMode = false;
+					return;
+				}
+				this.followConditionsMode = cat;
 			},
 			save () {
 				this.$send("saveSettings", {

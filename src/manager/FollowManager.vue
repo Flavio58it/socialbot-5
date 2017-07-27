@@ -20,7 +20,7 @@
 				</a>
 			</div>
 		</div>
-		<div :class="['row', 'list', expanded?'expanded':'']">
+		<div :class="['row', 'list', expanded?'expanded':'']" @mouseenter="stopScroll(true)" @mouseleave="stopScroll(false)">
 			<div v-for="user in clUsers.list" class="user col-6 row">
 				<div class="col-3">
 					<a>
@@ -42,7 +42,8 @@
 						<b-button-group size="sm">
 							<b-button v-if="user.status=='following' || user.status=='followback'" variant="danger">Unfollow</b-button>
 							<b-button v-else variant="info">Follow</b-button>
-							<b-button variant="">Whitelist</b-button>
+							<b-button v-if="!user.whitelisted" @click="whitelist(user, true)">Whitelist</b-button>
+							<b-button v-else @click="whitelist(user, false)">Remove from whitelist</b-button>
 							<b-button variant="success" title="Like the photos of the user">Like</b-button>
 						</b-button-group>
 					</div>
@@ -127,6 +128,19 @@
 			if (action == "usersData" && data.type == this.type)
 				this.users = data.list;
 		},
+		methods: {
+			whitelist (user, mode) {
+				this.$send("whitelistUser", {id: user.id, add: mode, type: this.type});
+				user.whitelisted = mode;
+				this.$forceUpdate();
+			},
+			stopScroll (enabled) {
+				if (enabled)
+					document.body.classList.add("stop-scrolling")
+				else
+					document.body.classList.remove("stop-scrolling")
+			}
+		},
 		computed: {
 			clUsers () {
 				var arr = this.users.slice(0), filters = this.filters;
@@ -135,21 +149,22 @@
 						return t.username.indexOf(filters.name) >= 0;
 					})
 				if (filters.state.length){
-					if (filters.state.indexOf('following') >= 0) {
+					if (filters.state.indexOf('whitelisted') >= 0)
+						arr = arr.filter((t) => {
+							return t.whitelisted;
+						})
+					if (filters.state.indexOf('following') >= 0)
 						arr = arr.filter((t) => {
 							return t.follows_me;
 						})
-					}
-					if (filters.state.indexOf('followback') >= 0) {
+					if (filters.state.indexOf('followback') >= 0)
 						arr = arr.filter((t) => {
 							return t.status == "followback";
 						})
-					}
-					if (filters.state.indexOf('nofollowing') >= 0) {
+					if (filters.state.indexOf('nofollowing') >= 0)
 						arr = arr.filter((t) => {
 							return !t.follows_me;
 						})
-					}
 				}
 
 				return {

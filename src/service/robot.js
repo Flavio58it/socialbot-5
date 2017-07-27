@@ -73,13 +73,11 @@ export default function (settings, plug, plugName) {
 			triggerTimer();
 		}).catch ((e) => {
 			running = runningOnce = false;
-			if (e.stopped) {
+			triggerTimer(); // Restart after some time!
+			if (e.stopped)
 				console.warn("Bot stopped");
-				return;
-			} else {
+			else
 				console.error("Bot error", e);
-				triggerTimer(); // Trying to restart after some time
-			}
 			//return Promise.reject(e);
 		});
 	}
