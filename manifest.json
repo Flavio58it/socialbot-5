@@ -30,6 +30,7 @@
   "icons": {
       "128": "/assets/img/web_player_remote_logo.png"
   },
+  "options_page": "/pages/manager.html#/settings/",
   "browser_action": {
     "default_popup": "/pages/popup.html",
     "default_title": "Watching"

@@ -5,6 +5,7 @@ import axios from "axios";
 import logger from "../db/logger";
 import db from "../db/db";
 import objectMapper from "object-mapper";
+import police from "../police";
 
 const urls = {
 	home: "https://www.instagram.com",
@@ -155,8 +156,12 @@ function likeUserPosts(userId) {
 function followUser (userId) {
 	console.log("FollowUserAction")
 	return db.users.where("[plug+userid]").equals(["instagram", userId]).toArray().then((data) => {
+		if (data.length > 0)
+			return Promise.reject({error: "Users number mismatch", id: "DB_USER_EXCEEDING"});
 		if (data[0].toFollow) {
-			console.log("Following authorized")
+			console.log("Following authorized");
+
+
 			return Promise.resolve({follow: true});
 		}
 	}).then (() => {
@@ -175,12 +180,14 @@ function unfollowUser (userId) {
 * -------------- Exposed functions
 **/
 
-export default function (settings) {
+export default function () {
 	var csrf = false, query_id = false, user = false,
-		log = new logger({type: "instagram"});
+		log = new logger({type: "instagram"}),
+		checker = false;
 
 	return {
-		init () {
+		init (settings) {
+			checker = new police(settings); // Init the main checker.
 			// Check if user is logged in and get the tokens
 			return decodeObject(urls.home, true, {
 				cbk: {
