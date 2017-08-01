@@ -21,7 +21,7 @@ const urls = {
 	},
 	get: {
 		tag: "/explore/tags/{0}/", // TagName
-		feed: "/{0}/", // username
+		user: "/{0}/", // username
 		post: "/p/{0}/", // Get the post data
 		notifications: "/account/activity/",
 		query: "/graphql/query/?query_id={0}"
@@ -149,20 +149,25 @@ function getUsersBatch (query, userid, list, pointer) {
 		})
 }
 
-function likeUserPosts(userId) {
+function getUserData (userName) {
+	return decodeObject(format(urls.get.user))
+}
+
+function likeUserPosts(userName) {
 
 }
 
-function followUser (userId) {
-	console.log("FollowUserAction")
-	return db.users.where("[plug+userid]").equals(["instagram", userId]).toArray().then((data) => {
-		if (data.length > 0)
+function followUser (userId, checker) {
+	if (!checker)
+		return; // Here will directly follow without checks
+	return db.users.where("[plug+userid]").equals(["instagram", userId]).toArray().then((data) => { // Check if the user has to be followed
+		if (data.length > 1)
 			return Promise.reject({error: "Users number mismatch", id: "DB_USER_EXCEEDING"});
 		if (data[0].toFollow) {
 			console.log("Following authorized");
 
 
-			return Promise.resolve({follow: true});
+			return getUserData(data[0].username).then((user) =>  checker.shouldFollow({user, data: data[0]}))
 		}
 	}).then (() => {
 		return db.users.where("[plug+userid]").equals(["instagram", userId]).modify({toFollow: false});
@@ -417,7 +422,7 @@ export default function () {
 					res[0].forEach((t) => {
 						users.push({
 							id: t.node.id,
-							profile_url: getUrl(format(urls.get.feed, t.node.username), true),
+							profile_url: getUrl(format(urls.get.user, t.node.username), true),
 							username: t.node.username,
 							fullname: t.node.full_name,
 							img: t.node.profile_pic_url,
@@ -435,7 +440,7 @@ export default function () {
 						}
 						users.push({
 							id: t.node.id,
-							profile_url: getUrl(format(urls.get.feed, t.node.username), true),
+							profile_url: getUrl(format(urls.get.user, t.node.username), true),
 							username: t.node.username,
 							fullname: t.node.full_name,
 							img: t.node.profile_pic_url,
@@ -486,7 +491,7 @@ export default function () {
 								}).then(() => { // Followback!
 									if (isFirstTime || addThemIfFollowing) // Not followbacking all the people the first time
 										return Promise.resolve();
-									return followUser(us.id);
+									return followUser(us.id, checker);
 								}))
 							}
 						});

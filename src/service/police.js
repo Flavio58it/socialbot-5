@@ -7,7 +7,8 @@ import objectMapper from "object-mapper";
 
 const genericMapper = { // The default mapper for the settings.
 	follow: {
-		"filters.follow.following": "following"
+		"filters.follow.following": "following",
+		"filters.follow.followers": "followers"
 	}
 }, 
 police = (settings) => {
@@ -20,7 +21,7 @@ police = (settings) => {
 	t.shouldFollow = (data) => {
 		var settings = getSetting("follow");
 		return settings.then((settings) => {
-
+			console.log("Settings");
 		});
 	}
 	
