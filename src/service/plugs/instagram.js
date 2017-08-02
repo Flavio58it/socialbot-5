@@ -62,6 +62,21 @@ mappers = { // This maps the majority of the objects picked from the instagram A
 	},
 	postData: { // Post as a singular post (in an ajax specific for that post)
 		"graphql.shortcode_media.viewer_has_liked": "liked"
+	},
+	user: { // User homepage (dashboard + posts)
+		"user.username": "username",
+		"user.full_name": "fullName",
+		"user.id": "id",
+		"user.followed_by.count": "followedBy",
+		"user.follows.count": "follows",
+		"user.biography": "bio",
+		"user.follows_viewer": "followMe",
+		"user.has_blocked_viewer": "blocked",
+		"user.media.page_info.end_cursor": "posts.nextPage",
+		"user.media.nodes[].id": "posts.list[].id",
+		"user.media.nodes[].likes.count": "posts.list[].likes",
+		"user.media.nodes[].thumbnail_src": "posts.list[].src",
+		"user.media.nodes[].is_video": "posts.list[].video"
 	}
 },
 // Used in encodeObject. Go to the function and watch the comments.
@@ -150,35 +165,57 @@ function getUsersBatch (query, userid, list, pointer) {
 }
 
 function getUserData (userName) {
-	return decodeObject(format(urls.get.user))
+	return decodeObject(format(urls.get.user, userName)).then((userData) => {
+		return objectMapper(userData, mappers.user);
+	})
 }
 
 function likeUserPosts(userName) {
+	return getUserData(userName).then((userData) => {
+		if (!userData.posts.length)
+			return Promise.resolve();
+		var flow = Promise.resolve();
 
+		userData.posts.forEach(() => {
+
+		});
+
+		return flow;
+	})
 }
 
 function followUser (userId, checker) {
+	console.log("Checking if should follow");
 	if (!checker)
-		return; // Here will directly follow without checks
+		return follow(); // Here will directly follow without checks
 	return db.users.where("[plug+userid]").equals(["instagram", userId]).toArray().then((data) => { // Check if the user has to be followed
 		if (data.length > 1)
 			return Promise.reject({error: "Users number mismatch", id: "DB_USER_EXCEEDING"});
 		if (data[0].toFollow) {
-			console.log("Following authorized");
-
-
-			return getUserData(data[0].username).then((user) =>  checker.shouldFollow({user, data: data[0]}))
+			console.log("Authorized by DB");
+			return getUserData(data[0].username).then((user) =>  checker.shouldFollow({user, data: data[0]})).then((auth) => {
+				if (auth)
+					follow()
+				else 
+					console.warn("Not authorized by police")
+			});
 		}
 	}).then (() => {
 		return db.users.where("[plug+userid]").equals(["instagram", userId]).modify({toFollow: false});
 	})
 	
-
+	function follow(){
+		console.log("Authorized by police or bypassed directly");
+	}
 }
 
 function unfollowUser (userId) {
 	console.log("UnfollowUserAction")
 	return Promise.resolve();
+}
+
+function cleanDB(){ // Clean database from old users. Async mode! Don't even try to make it syncronous!
+
 }
 
 /**
@@ -483,13 +520,13 @@ export default function () {
 									userid: us.id,
 									username: us.username,
 									whitelisted: false,
-									toFollow: !(addThemIfFollowing || isFirstTime),
+									toFollow: !((!addThemIfFollowing) || isFirstTime), // TODO: Not correct here! The addThemIfFollowing will be false when we only fetch the data!
 									details: {
 										img: us.img
 									},
 									lastInteraction: now
 								}).then(() => { // Followback!
-									if (isFirstTime || addThemIfFollowing) // Not followbacking all the people the first time
+									if (isFirstTime || !addThemIfFollowing) // Not followbacking all the people the first time
 										return Promise.resolve();
 									return followUser(us.id, checker);
 								}))
