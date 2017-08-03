@@ -193,7 +193,7 @@ function followUser (userId, checker) {
 			return Promise.reject({error: "Users number mismatch", id: "DB_USER_EXCEEDING"});
 		if (data[0].toFollow) {
 			console.log("Authorized by DB");
-			return getUserData(data[0].username).then((userInfo) =>  checker.shouldFollow({me: user, user:userInfo, data: data[0]})).then((auth) => {
+			return getUserData(data[0].username).then((userInfo) =>  checker.shouldFollow({user:userInfo, data: data[0]})).then((auth) => {
 				if (auth)
 					follow()
 				else 
