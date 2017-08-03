@@ -1,5 +1,7 @@
-var path = require('path')
-var webpack = require('webpack')
+var path = require('path');
+var webpack = require('webpack');
+var OptimizeJsPlugin = require("optimize-js-plugin");
+
 var shortcuts = [
   path.resolve('./src/shared'),
   path.resolve('./src'),
@@ -152,6 +154,9 @@ if (process.env.NODE_ENV === 'production') {
           join_vars: true,
           drop_console: true
         }
+      }),
+      new OptimizeJsPlugin({
+          sourceMap: false
       }),
       new webpack.LoaderOptionsPlugin({
         minimize: true

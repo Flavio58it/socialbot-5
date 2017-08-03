@@ -201,7 +201,7 @@
 									<b-form-input
 										type="number"
 										:disabled="followConditionsMode == 'ratio'"
-										@input="followFilterManager('fixed')"
+										@input="followFilterManager()"
 										:formatter="toDefault"
 										lazy-formatter
 										v-model="settings.filters.follow.followers.number"
@@ -225,7 +225,7 @@
 									<b-form-input
 										type="number"
 										:disabled="followConditionsMode == 'ratio'"
-										@input="followFilterManager('fixed')"
+										@input="followFilterManager()"
 										:formatter="toDefault"
 										lazy-formatter
 										v-model="settings.filters.follow.following.number"
@@ -245,7 +245,7 @@
 								<div class="col-4">
 									<b-form-input
 										type="number"
-										@input="followFilterManager('ratio')"
+										@input="followFilterManager()"
 										:disabled="followConditionsMode == 'fixed'"
 										:formatter="toDefault"
 										lazy-formatter
@@ -307,6 +307,8 @@
 			if (action == "settings" && data.type == this.type) {
 				console.log("Received settings data: ", data);
 				this.settings = data.settings;
+				console.log("Ckewbecca")
+				this.followFilterManager(); // Update the inputs
 			}
 		},
 		mounted () {
@@ -326,12 +328,12 @@
 					return "0";
 				return val;
 			},
-			followFilterManager(cat){
+			followFilterManager(){
 				if (this.settings.filters.follow.following.number == 0 && this.settings.filters.follow.followers.number == 0 && this.settings.filters.follow.ratio == 0){
 					this.followConditionsMode = false;
 					return;
 				}
-				this.followConditionsMode = cat;
+				this.followConditionsMode = (this.settings.filters.follow.following.number || this.settings.filters.follow.followers.number)?"fixed":"ratio";
 			},
 			save () {
 				this.$send("saveSettings", {

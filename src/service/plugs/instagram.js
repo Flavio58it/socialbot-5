@@ -193,7 +193,7 @@ function followUser (userId, checker) {
 			return Promise.reject({error: "Users number mismatch", id: "DB_USER_EXCEEDING"});
 		if (data[0].toFollow) {
 			console.log("Authorized by DB");
-			return getUserData(data[0].username).then((user) =>  checker.shouldFollow({user, data: data[0]})).then((auth) => {
+			return getUserData(data[0].username).then((userInfo) =>  checker.shouldFollow({me: user, user:userInfo, data: data[0]})).then((auth) => {
 				if (auth)
 					follow()
 				else 
@@ -225,11 +225,13 @@ function cleanDB(){ // Clean database from old users. Async mode! Don't even try
 export default function () {
 	var csrf = false, query_id = false, user = false,
 		log = new logger({type: "instagram"}),
-		checker = false;
+		checker = false,
+		settings = false;
 
 	return {
-		init (settings) {
-			checker = new police(settings); // Init the main checker.
+		init (settingsData) {
+			settings = settingsData
+			checker = new police(settingsData); // Init the main checker.
 			// Check if user is logged in and get the tokens
 			return decodeObject(urls.home, true, {
 				cbk: {
@@ -443,11 +445,16 @@ export default function () {
 			* --- Get the user list and check if is following you. Optionally unfollow or followBack
 			* the params are followBack and unFollowback features
 			**/
-			followManager (removeThemIfUnfollowed, addThemIfFollowing) { // If both are false then the only the list is returned.
+			followManager (onlyFetch) {
 				console.log("Getting followers of ", user);
 
 				if (!user)
 					return Promise.reject({error: "User error"})
+
+				var settingsData = Promise.all([
+					settings.get("followBack"),
+					settings.get("unFollowBack")
+				])
 
 				return Promise.all([
 					getUsersBatch(query_id.followers, user.id),
@@ -490,10 +497,11 @@ export default function () {
 
 					return users;
 				}).then((users) => {
+					return settingsData.then(settings => ({settings, users}))
+				}).then((data) => {
 					var isFirstTime = false;
-
 					return db.users.toArray().then((arr) => {
-						var cache = {}, //Cache users by id
+						var cache = {}, //Cache users by id in order to avoid nested foreach
 							now = new Date().getTime(), 
 							flow = [],
 							usersCorrupted = false; 
@@ -507,26 +515,32 @@ export default function () {
 						if (arr.length == 0)
 							isFirstTime = true;
 
-						users.forEach(function(us) { // Cycle each user. Check if is present in the database. if not present and the db is not empty, the user is a new one.
+						data.users.forEach(function(us) { // Cycle each user. Check if is present in the database. if not present and the db is not empty, the user is a new one.
 							// us = users picked now from server / user = users picked from database
+							// settings[0] = followBack, settings[1] = unFollowBack
 							var user = cache[us.id];
 							if (user) { // The user is present!
 								user.found = true; // The user has been found so has not unfollowed
 								us.whitelisted = user.whitelisted;
 								// Update in real time the details to the db in order to have all info updated somehow
+								db.users.where("[plug+userid]").equals(["instagram", us.id]).modify({
+									username: user.username,
+									details: {img: user.img}
+								})
 							} else { // User not found and is present in the users array so is a new follower! (party) (except if isFirstTime)
 								flow.push(db.users.add({
 									plug: "instagram",
 									userid: us.id,
 									username: us.username,
 									whitelisted: false,
-									toFollow: !((!addThemIfFollowing) || isFirstTime), // TODO: Not correct here! The addThemIfFollowing will be false when we only fetch the data!
+									toFollow: !((!data.settings[0]) || isFirstTime),
 									details: {
 										img: us.img
 									},
-									lastInteraction: now
+									lastInteraction: now,
+									added: now
 								}).then(() => { // Followback!
-									if (isFirstTime || !addThemIfFollowing) // Not followbacking all the people the first time
+									if ((isFirstTime || !data.settings[0]) && !onlyFetch) // Not followbacking all the people the first time
 										return Promise.resolve();
 									return followUser(us.id, checker);
 								}))
@@ -534,9 +548,9 @@ export default function () {
 						});
 
 						return Promise.all(flow).then(() => { // Check the cached users and unfollow the ones that are not present and are not whitelisted!
-							if (isFirstTime || !removeThemIfUnfollowed)
+							if ((isFirstTime || !data.settings[1]) && !onlyFetch)
 								return Promise.resolve();
-							console.log("Arrived to unfollower");
+							console.log("Unfollowing and cleaning DB");
 
 							for (var u in cache) {
 								var user = cache[u];
@@ -545,9 +559,7 @@ export default function () {
 							}
 						}).then(() => arr);
 					})
-
-
-					.then(() => users);
+					.then(() => data.users);
 				})
 			}
 		}

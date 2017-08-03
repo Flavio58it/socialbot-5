@@ -23,8 +23,18 @@ function police (settings) {
 	t.shouldFollow = (data) => {
 		var settings = getSetting("follow");
 		return settings.then((settings) => {
-			console.log("Available data: ", settings, data);
-			return false
+			console.log("Available data for the policeman: ", settings, data);
+
+			if (settings.followers.number || settings.following.number) {
+					return ((settings.following.number?(settings.following.more?(settings.following.number >= data.user.follows):(settings.following.number >= data.user.follows)):true) && 
+						   (settings.followers.number?(settings.followers.more?(settings.followers.number >= data.user.followedBy):(settings.followers.number >= data.user.followedBy)):true));
+			} else if (settings.ratio) {
+				console.log("By ratio");
+				var me = data.data, user = data.user
+				return (settings.ratio >= 5)
+			}
+
+			return true;
 		});
 	}
 	

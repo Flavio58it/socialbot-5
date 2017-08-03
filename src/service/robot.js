@@ -38,12 +38,7 @@ const bot = function(settings, plug, plugName) {
 				return Promise.resolve();
 		})
 	}).then(() => {
-		return Promise.all([
-			settings.get("followBack"),
-			settings.get("unFollowBack")
-		]).then((settings) => {
-			return plug.actions.followManager(settings[0], settings[1])
-		})
+		return plug.actions.followManager(false);
 	})
 
 

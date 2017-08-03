@@ -42,7 +42,7 @@ Comm.listen("manager", function(action, data) {
 
 		case "getUsers": 
 			plugs[data.type].bot.getPlug().then((plug) => {
-				return plug.actions.followManager();
+				return plug.actions.followManager(true);
 			}).then((users) => {
 				Comm.sendMessage("usersData", {list: users, type: data.type});
 			})
