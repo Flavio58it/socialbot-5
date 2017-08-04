@@ -83,7 +83,8 @@ mappers = { // This maps the majority of the objects picked from the instagram A
 useJsonEncoding = true;
 
 var cache = {
-	query_id: false
+	query_id: false,
+	userData: false
 };
 
 // ------------------
@@ -165,8 +166,19 @@ function getUsersBatch (query, userid, list, pointer) {
 }
 
 function getUserData (userName) {
+	var now = new Date().getTime();
+	if (!cache.userData)
+		cache.userData = {}
+	if (cache.userData[userName] && cache.userData[userName].time >= (now-600000)) // Cached users to 10 minutes
+		return Promise.resolve(cache.userData[userName].data);
 	return decodeObject(format(urls.get.user, userName)).then((userData) => {
-		return objectMapper(userData, mappers.user);
+		var mapped = objectMapper(userData, mappers.user);
+		console.log("User data expired. Refetched.")
+		cache.userData[userName] = {
+			data: mapped,
+			time: now
+		}
+		return mapped;
 	})
 }
 
@@ -560,6 +572,15 @@ export default function () {
 						}).then(() => arr);
 					})
 					.then(() => data.users);
+				})
+			},
+			/**
+			* Like the users that like your photos
+			**/
+			likeBack () {
+				console.log("Starting likeBack");
+				return getUserData(user.username).then((userData) => { // The default user data does not contains the posts.
+					console.log(userData)
 				})
 			}
 		}

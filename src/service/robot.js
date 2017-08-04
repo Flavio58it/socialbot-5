@@ -39,6 +39,12 @@ const bot = function(settings, plug, plugName) {
 		})
 	}).then(() => {
 		return plug.actions.followManager(false);
+	}).then(() => {
+		return settings.get("likeBack").then((setting) => {
+			if (!setting.enabled)
+				return Promise.resolve();
+			return plug.actions.likeBack();
+		})
 	})
 
 

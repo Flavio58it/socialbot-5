@@ -36,7 +36,7 @@
 								</b-form-checkbox>
 							</div>
 							<div>
-								<b-form-checkbox v-model="settings.likeBack">
+								<b-form-checkbox v-model="settings.likeBack.enabled">
 									LikeBack 
 									<helper title="LikeBack">
 										The bot will check if the user has been liked in the last 20 days. If no, it will like a couple photos randomly in the user's dashboard.

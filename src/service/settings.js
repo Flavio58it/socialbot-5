@@ -11,7 +11,10 @@ const settings = {
 		likeDash: true, // Like the images from your dashboard
 		followBack: true, // Follow back when a user starts following you
 		unFollowBack: true, // Unfollow the people that unfollows you (managed by whitelist)
-		likeBack: true, // Like back images when a user is liking yours
+		likeBack: {
+			enabled: true,
+			photoMonitor: 3
+		}, // Like back images when a user is liking yours
 		noFollowIfInfluencer: false, //If the user is a influencer do not follow it (as it will not follow back)
 		waiter: {
 			actionLower: 10, // Wait between one action and another (min) (seconds)
