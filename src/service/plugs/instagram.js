@@ -200,16 +200,20 @@ function followUser (userId, checker) {
 	console.log("Checking if should follow");
 	if (!checker)
 		return follow(); // Here will directly follow without checks
+
+	// Followback algorhytm below ---
 	return db.users.where("[plug+userid]").equals(["instagram", userId]).toArray().then((data) => { // Check if the user has to be followed
 		if (data.length > 1)
 			return Promise.reject({error: "Users number mismatch", id: "DB_USER_EXCEEDING"});
 		if (data[0].toFollow) {
 			console.log("Authorized by DB");
 			return getUserData(data[0].username).then((userInfo) =>  checker.shouldFollow({user:userInfo, data: data[0]})).then((auth) => {
-				if (auth)
-					follow()
-				else 
+				if (auth) {
+					return follow()
+				} else {
 					console.warn("Not authorized by police")
+					return Promise.resolve(false)
+				}
 			});
 		}
 	}).then (() => {
@@ -223,7 +227,7 @@ function followUser (userId, checker) {
 
 function unfollowUser (userId) {
 	console.log("UnfollowUserAction")
-	return Promise.resolve();
+	return Promise.resolve(true);
 }
 
 function cleanDB(){ // Clean database from old users. Async mode! Don't even try to make it syncronous!
@@ -554,7 +558,14 @@ export default function () {
 								}).then(() => { // Followback!
 									if ((isFirstTime || !data.settings[0]) && !onlyFetch) // Not followbacking all the people the first time
 										return Promise.resolve();
-									return followUser(us.id, checker);
+									return followUser(us.id, checker).then((result) => {
+										if (result)
+											return log.userInteraction("FOLLOWBACK", {
+												img: us.img,
+												userId: us.id,
+												userName: us.username
+											});
+									});
 								}))
 							}
 						});

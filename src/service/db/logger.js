@@ -17,7 +17,7 @@ export default function (settings) {
 				plug: settings.type,
 				action: "USER_" + type.toUpperCase(),
 				details: {
-					img: userData.img,
+					img: userData.img, // Can be also img of the user if is followback etc.
 					imgId: userData.id,
 					userId: userData.userId,
 					userName: userData.userName,

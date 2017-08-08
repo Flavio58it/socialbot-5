@@ -15,16 +15,20 @@
 						</div>
 					</div>
 					<div :class="[(i==0)?'col-7':'col-9', 'description']">
-						<span>
+						<span v-if="log.action == 'USER_LIKE'">
 							<b>Liked</b> image <span v-if="log.details.userName">from <b>{{log.details.userName}}</b></span> 
 							<span v-if="log.details.tag">(#{{log.details.tag}})</span>
+						</span>
+						<span v-else-if="log.action == 'USER_FOLLOWBACK'">
+							<b>Followed</b> user {{log.details.userName}}
 						</span>
 						<div class="row date">
 							<div class="col">{{log.time|fromNow}}</div>
 						</div>
 						<hr/>
 						<div class="row pull-left actions">
-							<b-button variant="danger" size="sm">Unlike it</b-button>
+							<b-button v-if="log.action == 'USER_LIKE'" variant="danger" size="sm">Unlike it</b-button>
+							<b-button v-else-if="log.action == 'USER_FOLLOWBACK'" variant="danger" size="sm">Unfollow</b-button>
 						</div>
 					</div>
 				</div>
