@@ -23,7 +23,7 @@ const urls = {
 		tag: "/explore/tags/{0}/", // TagName
 		user: "/{0}/", // username
 		post: "/p/{0}/", // Get the post data
-		notifications: "/account/activity/",
+		notifications: "/accounts/activity/",
 		query: "/graphql/query/?query_id={0}"
 	}
 }, 
@@ -77,6 +77,14 @@ mappers = { // This maps the majority of the objects picked from the instagram A
 		"user.media.nodes[].likes.count": "posts.list[].likes",
 		"user.media.nodes[].thumbnail_src": "posts.list[].src",
 		"user.media.nodes[].is_video": "posts.list[].video"
+	},
+	notifications: {
+		"graphql.user.activity_feed.edge_web_activity_feed.count": "num",
+		"graphql.user.activity_feed.edge_web_activity_feed.edges[].node.type": "list[].type",
+		"graphql.user.activity_feed.edge_web_activity_feed.edges[].node.user.id": "list[].id",
+		"graphql.user.activity_feed.edge_web_activity_feed.edges[].node.user.username": "list[].username",
+		"graphql.user.activity_feed.edge_web_activity_feed.edges[].node.user.profile_pic_url": "list[].userimg",
+		"graphql.user.activity_feed.edge_web_activity_feed.edges[].node.media.thumbnail_src": "list[].imgsrc"
 	}
 },
 // Used in encodeObject. Go to the function and watch the comments.
@@ -182,6 +190,12 @@ function getUserData (userName) {
 	})
 }
 
+function getNotifications() {
+	return decodeObject(urls.get.notifications).then((notifications) => {
+		return objectMapper(notifications, mappers.notifications);
+	});
+}
+
 function likeUserPosts(userName) {
 	return getUserData(userName).then((userData) => {
 		if (!userData.posts.length)
@@ -228,6 +242,21 @@ function followUser (userId, checker) {
 function unfollowUser (userId) {
 	console.log("UnfollowUserAction")
 	return Promise.resolve(true);
+}
+
+function newDbUser(us, now, toFollow) {
+	return {
+		plug: "instagram",
+		userid: us.id,
+		username: us.username,
+		whitelisted: false,
+		toFollow: toFollow,
+		details: {
+			img: us.img
+		},
+		lastInteraction: now,
+		added: now
+	}
 }
 
 function cleanDB(){ // Clean database from old users. Async mode! Don't even try to make it syncronous!
@@ -544,18 +573,9 @@ export default function () {
 									details: {img: user.img}
 								})
 							} else { // User not found and is present in the users array so is a new follower! (party) (except if isFirstTime)
-								flow.push(db.users.add({
-									plug: "instagram",
-									userid: us.id,
-									username: us.username,
-									whitelisted: false,
-									toFollow: !((!data.settings[0]) || isFirstTime),
-									details: {
-										img: us.img
-									},
-									lastInteraction: now,
-									added: now
-								}).then(() => { // Followback!
+								flow.push(db.users.add(
+									newDbUser(us, now, !((!data.settings[0]) || isFirstTime))
+								).then(() => { // Followback!
 									if ((isFirstTime || !data.settings[0]) && !onlyFetch) // Not followbacking all the people the first time
 										return Promise.resolve();
 									return followUser(us.id, checker).then((result) => {
@@ -573,7 +593,7 @@ export default function () {
 						return Promise.all(flow).then(() => { // Check the cached users and unfollow the ones that are not present and are not whitelisted!
 							if ((isFirstTime || !data.settings[1]) && !onlyFetch)
 								return Promise.resolve();
-							console.log("Unfollowing and cleaning DB");
+							console.log("Unfollowing");
 
 							for (var u in cache) {
 								var user = cache[u];
@@ -590,8 +610,25 @@ export default function () {
 			**/
 			likeBack () {
 				console.log("Starting likeBack");
-				return getUserData(user.username).then((userData) => { // The default user data does not contains the posts.
-					console.log(userData)
+				return getNotifications().then((notifications) => { // The default user data does not contains the posts.
+					console.log("Getting notifications: ", notifications);
+					var flow = Promise.resolve();
+					notifications.list.forEach((t) => {
+						if (t.type != 1)
+							return;
+						flow.push(likeDashboard(t.username).then(() => {
+							return db.users.where("[plug+userid]").equals(["instagram", t.id]).modify({
+								lastInteraction: new Date().getTime()
+							})
+						}).then((res) => {
+							if (!res) {
+								return getUserData(t.username).then((data) => {
+									return  // Here should add new user to db
+								});
+							}
+							return Promise.resolve();
+						}))
+					})
 				})
 			}
 		}
