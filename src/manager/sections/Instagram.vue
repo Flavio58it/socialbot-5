@@ -254,6 +254,32 @@
 								</div>
 							</div>
 						</b-tab>
+						<b-tab v-if="settings.likeBack.enabled" title="LikeBack">
+							<div>
+								<b>Ignore time</b>
+								<div class="description">After you have liked back a user wait before liking his dashboard again [days]</div>
+							</div>
+							<div class="row">
+								<div class="col-4">
+									<b-form-input
+										type="number"
+										v-model="settings.likeBack.ignoreTime"
+									/>
+								</div>
+							</div>
+							<div>
+								<b>Likes number</b>
+								<div class="description">How much photos to like per user. If less photos are available will stop automatically.</div>
+							</div>
+							<div class="row">
+								<div class="col-4">
+									<b-form-input
+										type="number"
+										v-model="settings.likeBack.likes"
+									/>
+								</div>
+							</div>
+						</b-tab>
 					</b-tabs>
 				</div>
 				<div class="col">

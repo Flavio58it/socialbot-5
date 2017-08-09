@@ -3,6 +3,7 @@ import urlParams from "url-params";
 import waiter from "waiter";
 import axios from "axios";
 import logger from "../db/logger";
+import ms from "milliseconds";
 import db from "../db/db";
 import objectMapper from "object-mapper";
 import police from "../police";
@@ -203,7 +204,7 @@ function likeUserPosts(userName) {
 		var flow = Promise.resolve();
 
 		userData.posts.forEach(() => {
-
+			console.log("Post found!")
 		});
 
 		return flow;
@@ -384,7 +385,7 @@ export default function () {
 									}
 									return Promise.reject({error: "Connection error", details: (e.details || e)});
 								})
-								.then(() => waiter(wait.actionLower * 1000, wait.actionUpper * 1000))
+								.then(() => waiter(ms.seconds(wait.actionLower), ms.seconds(wait.actionUpper)))
 						})
 
 						return ops.then((prevData) => {
@@ -445,7 +446,7 @@ export default function () {
 									numberLiked++;
 									return Promise.reject(e);
 								})
-								.then(() => waiter(wait.actionLower * 1000, wait.actionUpper * 1000));
+								.then(() => waiter(ms.seconds(wait.actionLower), ms.seconds(wait.actionUpper)));
 							})
 						})
 
@@ -573,6 +574,7 @@ export default function () {
 									details: {img: user.img}
 								})
 							} else { // User not found and is present in the users array so is a new follower! (party) (except if isFirstTime)
+								//TODO: Must check if is already present in DB!
 								flow.push(db.users.add(
 									newDbUser(us, now, !((!data.settings[0]) || isFirstTime))
 								).then(() => { // Followback!
@@ -610,25 +612,33 @@ export default function () {
 			**/
 			likeBack () {
 				console.log("Starting likeBack");
-				return getNotifications().then((notifications) => { // The default user data does not contains the posts.
+				return Promise.all([
+					getNotifications(),
+					settings.get("likeBack")
+				]).then((data) => { // The default user data does not contains the posts.
+					var notifications = data[0], settings = data[1];
 					console.log("Getting notifications: ", notifications);
-					var flow = Promise.resolve();
+					var flow = Promise.resolve(), now = new Date().getTime();
 					notifications.list.forEach((t) => {
 						if (t.type != 1)
 							return;
-						flow.push(likeDashboard(t.username).then(() => {
-							return db.users.where("[plug+userid]").equals(["instagram", t.id]).modify({
-								lastInteraction: new Date().getTime()
+						var query = db.users.where("[plug+userid]").equals(["instagram", t.id]);
+						flow = flow.then(likeUserPosts(t.username).then(() => {
+							return query.modify({
+								lastInteraction: now
 							})
 						}).then((res) => {
 							if (!res) {
+								console.log("The user has not been found in database. Adding...", res)
 								return getUserData(t.username).then((data) => {
-									return  // Here should add new user to db
+									return  db.users.add(newDbUser(user, now, false))
 								});
 							}
 							return Promise.resolve();
-						}))
+						}).then(waiter(1000, 5000)));
+
 					})
+					return flow;
 				})
 			}
 		}

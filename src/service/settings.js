@@ -13,7 +13,8 @@ const settings = {
 		unFollowBack: true, // Unfollow the people that unfollows you (managed by whitelist)
 		likeBack: {
 			enabled: true,
-			photoMonitor: 3
+			likes: 4, // How much photos to like
+			ignoreTime: 25 // Days to ignore the user
 		}, // Like back images when a user is liking yours
 		noFollowIfInfluencer: false, //If the user is a influencer do not follow it (as it will not follow back)
 		waiter: {
