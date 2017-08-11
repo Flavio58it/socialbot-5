@@ -299,6 +299,8 @@ export default function () {
 									query_id = query_id?query_id:{};
 									query_id[y] = script.match(regex[y].r)[regex[y].i]
 									//console.log(y + " matched: ", script.match(regex[y].r));
+									if (!query_id[y])
+										console.warn("Query_id for " + y + " not found.");
 									if (regex[y].rr && query_id[y])
 										query_id[y] = query_id[y].match(regex[y].rr)[0]
 								} else {
@@ -569,10 +571,10 @@ export default function () {
 							// us = users picked now from server / user = users picked from database
 							// settings[0] = followBack, settings[1] = unFollowBack
 							var user = cache[us.id];
-							if (user) { // The user is present!
+							if (user) { // TODO: The user is present BUT can be present also if likeBack is applied. So if the user has been likebacked and then follows you will NOT be followed back! Must check this.
 								user.found = true; // The user has been found so has not unfollowed
 								us.whitelisted = user.whitelisted;
-								// TODO: Update in real time the details to the db in order to have all info updated somehow
+								// TODO: Update in real time the details to the db in order to have all info updated somehow [partially done]
 								db.users.where("[plug+userid]").equals(["instagram", us.id]).modify({
 									username: user.username,
 									details: {img: user.img}
@@ -590,7 +592,9 @@ export default function () {
 												img: us.img,
 												userId: us.id,
 												userName: us.username
-											});
+											}).then(db.users.where("[plug+userid]").equals(["instagram", us.id]).modify({ // Specify that has been auto_followed
+												details: {autoFollowed: true}
+											}));
 									});
 								}))
 							}

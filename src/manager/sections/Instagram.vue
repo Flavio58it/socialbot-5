@@ -236,9 +236,8 @@
 								<div class="col-12">
 									<span class="description">Filter by user following ratio</span>
 									<helper title="Following ratio filter">
-										<p>This filter will allow to follow only the users that have a follower/following situation similar to you.</p>
-										<p>A user can have a score from 1 to 100 (which 100 is the most similar to you when 1 is the most uncompatible)</p>
-										<p>This will ensure that you will follow more probably only the people that are sincerely interested in your contents (at most times)</p>
+										<p>This filter will allow to follow only the users above a follower/following ratio.</p>
+										<p></p>
 										<p>Putting 0 will disable this filter and enable the other ones.</p>
 									</helper>
 								</div>
