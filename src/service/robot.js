@@ -62,23 +62,29 @@ const bot = function(settings, plug, plugName) {
 }
 
 export default function (settings, plug, plugName) {
-	var t = this, running = false, runningOnce = false;
+	var t = this, running = false, runningOnce = false, events = {};
 
 	t.start = () => {
 		running = runningOnce = true;
 		return settings.get("enabled").then((enabled) => {
 			if (!enabled)
 				return Promise.reject({stopped: true});
-		}).then(() => bot(settings, plug, plugName)).then(() => {
+		}).then(() => {
+			events.start&&events.start(this, plugName);
+			return bot(settings, plug, plugName);
+		}).then(() => {
 			running = false;
 			triggerTimer();
 		}).catch ((e) => {
 			running = runningOnce = false;
 			triggerTimer(); // Restart after some time!
-			if (e.stopped)
+			if (e.stopped) {
 				console.warn("Bot stopped");
-			else
+				events.stop&&events.stop(this, plugName);
+			} else {
 				console.error("Bot error", e);
+				events.error&&events.error(this, plugName, e);
+			}
 			//return Promise.reject(e);
 		});
 	}
@@ -93,6 +99,10 @@ export default function (settings, plug, plugName) {
 		return plug.init().then((data) => {
 			return plug;
 		})
+	}
+
+	t.addListener = (ev, cbk) => {
+		events[ev] = cbk;
 	}
 
 

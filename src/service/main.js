@@ -15,7 +15,7 @@ var plugs = {
 		plug: new instagram(),
 		bot: false
 	}
-}
+}, error = false;
 
 Comm.listen("manager", function(action, data) {
 	switch (action) {
@@ -63,6 +63,8 @@ Comm.listen("manager", function(action, data) {
 			db.users.where("[plug+userid]").equals([data.type, data.id]).modify({whitelisted: data.add})
 		break;
 	}
+	if (error) // Sure?
+		Comm.sendMessage("backendError", {error});
 })
 
 // Start the bot when the browser is started!
@@ -71,6 +73,17 @@ for (var i in plugs) {
 	if (!plugContainer.bot) {
 		plugContainer.bot = new robot(plugContainer.settings, plugContainer.plug, i);
 		plugContainer.bot.start();
+		plugContainer.bot.addListener("error", (t, name, _error) => {
+			error = {
+				plug: name,
+				data: _error
+			}
+			Comm.sendMessage("backendError", {error});
+		});
+		plugContainer.bot.addListener("start", (t, name) => {
+			error = false;
+			Comm.sendMessage("backendError", {remove: true, plug: name});
+		});
 	}
 }
 

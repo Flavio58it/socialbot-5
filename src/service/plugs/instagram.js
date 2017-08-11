@@ -289,17 +289,23 @@ export default function () {
 							return Promise.resolve();
 						}
 						return axios(thenSrc).then((script) => script.data).then((script) => {
-							var regex = {
-								like: /\=.{1,4}(\d{17}).[^;]+SUL_REQUESTED/,
-								followers: /\=.{1,4}(\d{17}).[^;]+FOLLOW_LIST_REQUEST_UPDATED/,
-								following: /\=.{1,4}(\d{17}).[^;\d{17}]+FOLLOW_LIST_REQUEST_UPDATED/
+							var regex = { // r = regex, rr = nested regex, i = index
+								like: {r: /(?:\=|\:).{0,4}(\d{17}).[^;]/g, rr: /\d{17}/, i: 9},
+								followers: {r: /(?:\=|\:).{0,4}(\d{17}).[^;]/g, rr: /\d{17}/, i: 7},
+								following: {r: /(?:\=|\:).{0,4}(\d{17}).[^;]/g, rr: /\d{17}/, i: 6}
 							}
 							for (var y in regex) {
-								if (regex[y].test(script)){
+								if (regex[y].r.test(script)){
 									query_id = query_id?query_id:{};
-									query_id[y] = script.match(regex[y])[1]
+									query_id[y] = script.match(regex[y].r)[regex[y].i]
+									//console.log(y + " matched: ", script.match(regex[y].r));
+									if (regex[y].rr && query_id[y])
+										query_id[y] = query_id[y].match(regex[y].rr)[0]
+								} else {
+									console.error("query_id not found: ", y);
 								}
 							}
+							console.log("Query-IDS: ", query_id);
 							if (query_id){
 								cache.query_id = {
 									src: src,
@@ -307,10 +313,8 @@ export default function () {
 								}
 							} else {
 								cache.query_id = false;
-								return Promise.reject({error: "query_id picker fail"})
+								return Promise.reject({error: "query_id picker fail", id: "QUERY_ID_ENGINE_FAILURE"})
 							}
-						}).catch((e) => {
-							console.error("Query id fetcher failed. Some operations will not work. ", e)
 						})
 					}
 				}
@@ -568,7 +572,7 @@ export default function () {
 							if (user) { // The user is present!
 								user.found = true; // The user has been found so has not unfollowed
 								us.whitelisted = user.whitelisted;
-								// Update in real time the details to the db in order to have all info updated somehow
+								// TODO: Update in real time the details to the db in order to have all info updated somehow
 								db.users.where("[plug+userid]").equals(["instagram", us.id]).modify({
 									username: user.username,
 									details: {img: user.img}
@@ -612,6 +616,7 @@ export default function () {
 			**/
 			likeBack () {
 				console.log("Starting likeBack");
+				return Promise.resolve();
 				return Promise.all([
 					getNotifications(),
 					settings.get("likeBack")
@@ -623,6 +628,7 @@ export default function () {
 						if (t.type != 1)
 							return;
 						var query = db.users.where("[plug+userid]").equals(["instagram", t.id]);
+
 						flow = flow.then(likeUserPosts(t.username).then(() => {
 							return query.modify({
 								lastInteraction: now
