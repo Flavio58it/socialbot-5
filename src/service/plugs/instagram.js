@@ -7,6 +7,10 @@ import ms from "milliseconds";
 import db from "../db/db";
 import objectMapper from "object-mapper";
 import police from "../police";
+import randomArray from "randEngine";
+
+// https://www.npmjs.com/package/node-schedule
+// https://www.npmjs.com/package/node-cron
 
 const urls = {
 	home: "https://www.instagram.com",
@@ -77,6 +81,7 @@ mappers = { // This maps the majority of the objects picked from the instagram A
 		"user.media.nodes[].id": "posts.list[].id",
 		"user.media.nodes[].likes.count": "posts.list[].likes",
 		"user.media.nodes[].thumbnail_src": "posts.list[].src",
+		"user.media.nodes[].code": "posts.list[].code",
 		"user.media.nodes[].is_video": "posts.list[].video"
 	},
 	notifications: {
@@ -85,7 +90,8 @@ mappers = { // This maps the majority of the objects picked from the instagram A
 		"graphql.user.activity_feed.edge_web_activity_feed.edges[].node.user.id": "list[].id",
 		"graphql.user.activity_feed.edge_web_activity_feed.edges[].node.user.username": "list[].username",
 		"graphql.user.activity_feed.edge_web_activity_feed.edges[].node.user.profile_pic_url": "list[].userimg",
-		"graphql.user.activity_feed.edge_web_activity_feed.edges[].node.media.thumbnail_src": "list[].imgsrc"
+		"graphql.user.activity_feed.edge_web_activity_feed.edges[].node.media.thumbnail_src": "list[].imgsrc",
+		"graphql.user.activity_feed.edge_web_activity_feed.edges[].node.media.shortcode": "list[].code"
 	}
 },
 // Used in encodeObject. Go to the function and watch the comments.
@@ -130,9 +136,7 @@ function decodeObject (url, overrideDecoder, settings) {
 			return JSON.parse(data.replace(/^.+=\s\{(.+$)/, "{$1").replace(/\};$/, "}"));
 		})
 	} else {
-		return axios(getUrl(url, settings.overrideJson)).then((data) => {
-			return data.data;
-		})
+		return axios(getUrl(url, settings.overrideJson)).then((data) => data.data)
 	}
 }
 
@@ -178,11 +182,11 @@ function getUserData (userName) {
 	var now = new Date().getTime();
 	if (!cache.userData)
 		cache.userData = {}
-	if (cache.userData[userName] && cache.userData[userName].time >= (now-600000)) // Cached users to 10 minutes
+	if (cache.userData[userName] && cache.userData[userName].time >= (now - ms.minutes(20))) // Cached users for 20 minutes
 		return Promise.resolve(cache.userData[userName].data);
 	return decodeObject(format(urls.get.user, userName)).then((userData) => {
 		var mapped = objectMapper(userData, mappers.user);
-		console.log("User data expired. Refetched.")
+		console.log("User data expired for "+userName+". Refetched.");
 		cache.userData[userName] = {
 			data: mapped,
 			time: now
@@ -197,14 +201,25 @@ function getNotifications() {
 	});
 }
 
-function likeUserPosts(userName) {
+function likeUserPosts(userName, csrf, limit) {
 	return getUserData(userName).then((userData) => {
-		if (!userData.posts.length)
+		var len = userData.posts.list.length;
+		if (!len)
 			return Promise.resolve();
-		var flow = Promise.resolve();
+		var flow = Promise.resolve(),
+			r = randomArray(limit, 1, (len < limit + 1)? (limit + 1) : len);
 
-		userData.posts.forEach(() => {
-			console.log("Post found!")
+		userData.posts.list.forEach((details, i) => {
+			if (r.indexOf(i) != -1) { // If the post index is in array proceed
+				flow = flow.then(() => decodeObject(format(urls.get.post, details.code)).then((post) => { // Check the post and see if has already been liked
+					post = objectMapper(post, mappers.postData);
+					//console.log("Chosen post", post)
+					if (!post.liked)
+						return likePost(details.id, csrf).then(() => waiter(ms.seconds(1), ms.seconds(5))); // Like and wait
+					else
+						return waiter(ms.seconds(1), ms.seconds(5)); // Do not like but wait anyway... a call has been made!
+				}))
+			}
 		});
 
 		return flow;
@@ -219,7 +234,7 @@ function followUser (userId, checker) {
 	// Followback algorhytm below ---
 	return db.users.where("[plug+userid]").equals(["instagram", userId]).toArray().then((data) => { // Check if the user has to be followed
 		if (data.length > 1)
-			return Promise.reject({error: "Users number mismatch", id: "DB_USER_EXCEEDING"});
+			return Promise.reject({error: "Users number mismatch", id: "DB_USER_EXCEEDING", action: "RELOAD"});
 		if (data[0].toFollow) {
 			console.log("Authorized by DB");
 			return getUserData(data[0].username).then((userInfo) =>  checker.shouldFollow({user:userInfo, data: data[0]})).then((auth) => {
@@ -255,7 +270,7 @@ function newDbUser(us, now, toFollow) {
 		details: {
 			img: us.img
 		},
-		lastInteraction: now,
+		lastInteraction: false,
 		added: now
 	}
 }
@@ -315,7 +330,7 @@ export default function () {
 								}
 							} else {
 								cache.query_id = false;
-								return Promise.reject({error: "query_id picker fail", id: "QUERY_ID_ENGINE_FAILURE"})
+								return Promise.reject({error: "query_id picker fail", id: "QUERY_ID_ENGINE_FAILURE", action: "RELOAD"})
 							}
 						})
 					}
@@ -389,7 +404,7 @@ export default function () {
 										console.error("Post not found...");
 										return Promise.resolve();
 									}
-									return Promise.reject({error: "Connection error", details: (e.details || e)});
+									return Promise.reject({error: "Connection error.", details: (e.details || e), id: "CONNECTION_ERROR_TAG_LIKE", action: "RELOAD"});
 								})
 								.then(() => waiter(ms.seconds(wait.actionLower), ms.seconds(wait.actionUpper)))
 						})
@@ -501,7 +516,7 @@ export default function () {
 				console.log("Getting followers of ", user);
 
 				if (!user)
-					return Promise.reject({error: "User error"})
+					return Promise.reject({error: "User error, try to restart", id: "USER_DATA_NOT_FOUND", action: "RELOAD"})
 
 				var settingsData = Promise.all([
 					settings.get("followBack"),
@@ -563,7 +578,7 @@ export default function () {
 							cache[user.userid] = user;
 						})
 						if (usersCorrupted) // Missing one or more ids from cache. This is critically wrong. Should wipe all database off when this happens (or recover from username)
-							return Promise.reject({error: "The user database is corrupted.", id: "DB_USER_CORRUPTED"})
+							return Promise.reject({error: "The user database is corrupted.", id: "DB_USER_CORRUPTED", action: "RESET_DB"})
 						if (arr.length == 0)
 							isFirstTime = true;
 
@@ -571,19 +586,30 @@ export default function () {
 							// us = users picked now from server / user = users picked from database
 							// settings[0] = followBack, settings[1] = unFollowBack
 							var user = cache[us.id];
-							if (user) { // TODO: The user is present BUT can be present also if likeBack is applied. So if the user has been likebacked and then follows you will NOT be followed back! Must check this.
+							if (user && user.toFollow != 2) {
 								user.found = true; // The user has been found so has not unfollowed
 								us.whitelisted = user.whitelisted;
 								// TODO: Update in real time the details to the db in order to have all info updated somehow [partially done]
 								db.users.where("[plug+userid]").equals(["instagram", us.id]).modify({
 									username: user.username,
-									details: {img: user.img}
+									"details.img": user.img
 								})
-							} else { // User not found and is present in the users array so is a new follower! (party) (except if isFirstTime)
-								//TODO: Must check if is already present in DB!
-								flow.push(db.users.add(
-									newDbUser(us, now, !((!data.settings[0]) || isFirstTime))
-								).then(() => { // Followback!
+							} else { // User not found and is present in the users array so is a new follower! (party) (except if isFirstTime or likeBack)
+								var toFollow = !((!data.settings[0]) || isFirstTime), 
+										manageDb = Promise.resolve().then(() => {
+										if (user){ // When the user is in database but has already been added by likeBack
+											return db.users.where("[plug+userid]").equals(["instagram", us.id]).modify({
+												toFollow
+											});
+											us.whitelisted = user.whitelisted; // TODO: Not sure if needed
+										} else{ // Here normal addition.
+											return db.users.add(
+												newDbUser(us, now, toFollow)
+											);
+										}
+									})
+
+								flow.push(manageDb.then(() => { // Followback!
 									if ((isFirstTime || !data.settings[0]) && !onlyFetch) // Not followbacking all the people the first time
 										return Promise.resolve();
 									return followUser(us.id, checker).then((result) => {
@@ -593,7 +619,8 @@ export default function () {
 												userId: us.id,
 												userName: us.username
 											}).then(db.users.where("[plug+userid]").equals(["instagram", us.id]).modify({ // Specify that has been auto_followed
-												details: {autoFollowed: true}
+												"details.autoFollowed": true,
+												lastInteraction: now // If has been followed no interaction will occur for some time (TODO: May rethink this.)
 											}));
 									});
 								}))
@@ -620,7 +647,6 @@ export default function () {
 			**/
 			likeBack () {
 				console.log("Starting likeBack");
-				return Promise.resolve();
 				return Promise.all([
 					getNotifications(),
 					settings.get("likeBack")
@@ -633,20 +659,26 @@ export default function () {
 							return;
 						var query = db.users.where("[plug+userid]").equals(["instagram", t.id]);
 
-						flow = flow.then(likeUserPosts(t.username).then(() => {
-							return query.modify({
-								lastInteraction: now
-							})
-						}).then((res) => {
-							if (!res) {
-								console.log("The user has not been found in database. Adding...", res)
-								return getUserData(t.username).then((data) => {
-									return  db.users.add(newDbUser(user, now, false))
-								});
+						flow = flow.then(() => query.toArray()).then((qres) => {
+							if ((qres.length && (!qres[0].lastInteraction || (qres[0].lastInteraction  <= now - ms.days(settings.ignoreTime)))) || !qres.length) {
+								return likeUserPosts(t.username, csrf, settings.likes).then(() => {
+									return query.modify({
+										lastInteraction: now
+									})
+								}).then((res) => {
+									if (!res) {
+										console.log("The user has not been found in database. Adding...", res)
+										return getUserData(t.username).then((data) => {
+											return  db.users.add(newDbUser(user, now, 2))
+										});
+									}
+									return Promise.resolve();
+								}).then(() => waiter(1000, 5000))
+							} else {
+								console.log("The user has been ignored.");
+								return Promise.resolve();
 							}
-							return Promise.resolve();
-						}).then(waiter(1000, 5000)));
-
+						});
 					})
 					return flow;
 				})

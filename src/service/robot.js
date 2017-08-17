@@ -33,7 +33,7 @@ const bot = function(settings, plug, plugName) {
 				return Promise.all([
 					settings.get("waiter"),
 					settings.get("limits")
-				]).then ((settings) => plug.actions.likeDashboard(settings[0], settings[1].like));
+				]).then ((settings) => plug.actions.likeDashboard(settings[0], settings[1].likes.dash));
 			else
 				return Promise.resolve();
 		})

@@ -12,6 +12,7 @@ export default [
 		children: [
 			{
 				path: "instagram",
+				name: "instagram",
 				component: Instagram
 			},
 			{

@@ -1,9 +1,6 @@
 import storage from "storage";
 
 const settings = {
-	generic:  {
-		influencerTreshold: 15000 // Number of followers
-	},
 	instagram: {
 		enabled: true, // Robot enabled
 		paused: false, // Pause the execution until the reboot
@@ -16,7 +13,6 @@ const settings = {
 			likes: 4, // How much photos to like
 			ignoreTime: 25 // Days to ignore the user
 		}, // Like back images when a user is liking yours
-		noFollowIfInfluencer: false, //If the user is a influencer do not follow it (as it will not follow back)
 		waiter: {
 			actionLower: 10, // Wait between one action and another (min) (seconds)
 			actionUpper: 30, //(max)
@@ -42,10 +38,9 @@ const settings = {
 		},
 		limits: {
 			likes: {
-				tag: 20,
-				dash: 20,
-				explorer: 20,
-				user: 5
+				tag: 20,	// Max likes per tag
+				dash: 20,	// Max likes to your dashboard
+				explorer: 20 // Max likes per session for explorers tab/section
 			}
 		},
 		follow: {

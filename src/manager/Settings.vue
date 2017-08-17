@@ -20,14 +20,8 @@
 		<hr v-if="showAdvanced"/>
 		<div class="container">
 			<div class="row text-center">
-				<div class="col cat" @click="navigate('instagram')">
-					Instagram
-				</div>
-				<div class="col cat" @click="navigate('fivehpx')">
-					500px
-				</div>
-				<div class="col cat"  @click="navigate('flickr')">
-					Flickr
+				<div v-for="(cat, key) in cats" :class="['col', 'cat', (key==$route.name)?'selected':'']" @click="navigate(key)">
+					{{cat.text}}
 				</div>
 			</div>
 		</div>
@@ -44,6 +38,10 @@
 		background: $blue;
 		padding: $spacer-small;
 		font-weight: bold;
+
+		&.selected {
+			opacity: .85;
+		}
 	}
 	#content {
 		padding-top: $spacer;
@@ -57,7 +55,12 @@
 	export default {
 		data () {
 			return {
-				showAdvanced: false
+				showAdvanced: false,
+				cats: {
+					instagram: {text: "Instagram"},
+					fivehpx: {text: "500px"},
+					flickr: {text: "Flickr"}
+				}
 			}
 		},
 		methods: {

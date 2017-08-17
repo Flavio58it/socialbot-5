@@ -332,7 +332,6 @@
 			if (action == "settings" && data.type == this.type) {
 				console.log("Received settings data: ", data);
 				this.settings = data.settings;
-				console.log("Ckewbecca")
 				this.followFilterManager(); // Update the inputs
 			}
 		},

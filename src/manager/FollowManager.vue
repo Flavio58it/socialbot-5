@@ -36,6 +36,7 @@
 						<b-badge :variant="user.follows_me?'success':'danger'" :title="user.follows_me?'The user is following you':'The user is not following you'">Follower</b-badge>
 						<b-badge v-if="user.status == 'followback'" variant="info" title="You are following him back">Followback</b-badge>
 						<b-badge v-if="user.status == 'following'" variant="warning" title="You are following him">Following</b-badge>
+						<b-badge v-if="user.details && user.details.autoFollowed" variant="">Auto-followed</b-badge>
 					</div>
 					<hr/>
 					<div>

@@ -16,8 +16,8 @@ const genericMapper = { // The default mapper for the settings.
 function police (settings) {
 	var t = this, catsettings = settings.getAll();
 
-	t.shouldLike = (numberLikes) => {
-
+	t.shouldLike = (data) => {
+		return true
 	}
 
 	t.shouldFollow = (data) => {
