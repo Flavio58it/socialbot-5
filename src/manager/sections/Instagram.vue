@@ -99,8 +99,9 @@
 										<div>
 											<p>This condition allows to select precisely what type of photos the bot will like based on image description.</p>
 											<p>Examples: food|vegan|#veggie|#red|blue</p>
-											<p>Here can be used hashtags and normal text. The pipe "|" char separates the text. Is sufficient that one of this words/sentences are present to trigger the like/unlike functionality.</p>
+											<p>Here can be used hashtags and normal text. The pipe "|" char separates the text. Is sufficient that one of this words/sentences are present to trigger the like/skip functionality.</p>
 											<p>If you have previously liked a post it will not be unliked.</p>
+											<p>This filter will apply to all like actions (tags/dashboard/likeback)</p>
 										</div>
 									</helper>
 								</div>
@@ -108,7 +109,7 @@
 							<div class="row">
 								<div class="col-6">
 									 <b-form-select 
-									 	v-model="settings.filters.likes.isInclusive" 
+									 	v-model="settings.filters.likes.isTextInclusive" 
 									 	:options="[
 									 		{text: 'Include if', value: 'true'},
 									 		{text: 'Exclude if', value: 'false'}
@@ -122,21 +123,30 @@
 									/>
 								</div>
 							</div>
-							<div class="description">Like by the number of likes condition</div>
+							<div class="description">Like by the number of likes condition (0 is disabled)</div>
 							<div class="row">
-								<div class="col-6">
+								<div class="col-3">
 									 <b-form-select 
-									 	v-model="settings.filters.likes.isInclusive" 
+									 	v-model="settings.filters.likes.isLikeNumberInclusive"
 									 	:options="[
 									 		{text: 'Include if', value: 'true'},
 									 		{text: 'Exclude if', value: 'false'}
 									 	]" 
 									 	class="mb-3"/>
 								</div>
-								<div class="col-6">
+								<div class="col-4">
+									 <b-form-select 
+									 	v-model="settings.filters.likes.isLikeNumberMoreLess" 
+									 	:options="[
+									 		{text: 'More than', value: 'true'},
+									 		{text: 'Less than', value: 'false'}
+									 	]" 
+									 	class="mb-3"/>
+								</div>
+								<div class="col-5">
 									<b-form-input
 										type="number"
-										v-model="settings.filters.likes.text"
+										v-model="settings.filters.likes.isLikeNumber"
 									/>
 								</div>
 							</div>
@@ -275,6 +285,18 @@
 									<b-form-input
 										type="number"
 										v-model="settings.likeBack.likes"
+									/>
+								</div>
+							</div>
+							<div>
+								<b>Managed users per round</b>
+								<div class="description">How much users to like per round. The missing users will be managed in the next one.</div>
+							</div>
+							<div class="row">
+								<div class="col-4">
+									<b-form-input
+										type="number"
+										v-model="settings.likeBack.maxUsersLike"
 									/>
 								</div>
 							</div>

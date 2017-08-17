@@ -96,7 +96,7 @@ export default function (settings, plug, plugName) {
 	t.getPlug = () => {
 		if (runningOnce)
 			return Promise.resolve(plug);
-		return plug.init().then((data) => {
+		return plug.init(settings).then((data) => {
 			return plug;
 		})
 	}

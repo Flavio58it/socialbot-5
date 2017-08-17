@@ -653,7 +653,7 @@ export default function () {
 				]).then((data) => { // The default user data does not contains the posts.
 					var notifications = data[0], settings = data[1];
 					console.log("Getting notifications: ", notifications);
-					var flow = Promise.resolve(), now = new Date().getTime();
+					var flow = Promise.resolve(), now = new Date().getTime(), likebacked = 0;
 					notifications.list.forEach((t) => {
 						if (t.type != 1)
 							return;
@@ -661,13 +661,16 @@ export default function () {
 
 						flow = flow.then(() => query.toArray()).then((qres) => {
 							if ((qres.length && (!qres[0].lastInteraction || (qres[0].lastInteraction  <= now - ms.days(settings.ignoreTime)))) || !qres.length) {
+								if (likebacked >= settings.maxUsersLike)
+									return Promise.resolve()
+								likebacked ++;
 								return likeUserPosts(t.username, csrf, settings.likes).then(() => {
 									return query.modify({
 										lastInteraction: now
 									})
 								}).then((res) => {
 									if (!res) {
-										console.log("The user has not been found in database. Adding...", res)
+										console.log("The user has not been found in database. Adding...")
 										return getUserData(t.username).then((data) => {
 											return  db.users.add(newDbUser(user, now, 2))
 										});

@@ -11,7 +11,8 @@ const settings = {
 		likeBack: {
 			enabled: true,
 			likes: 4, // How much photos to like
-			ignoreTime: 25 // Days to ignore the user
+			ignoreTime: 7, // Days to ignore the user
+			maxUsersLike: 10 // Maximum users to like per session
 		}, // Like back images when a user is liking yours
 		waiter: {
 			actionLower: 10, // Wait between one action and another (min) (seconds)
@@ -20,8 +21,11 @@ const settings = {
 		},
 		filters: { // Various filters for liking/following
 			likes: { // When like a post
-				isInclusive: false,
+				isTextInclusive: false,
+				isLikeNumberInclusive: false,
+				isLikeNumberMoreLess: false,
 				text: "",
+				isLikeNumber: 0,
 				videos: true
 			},
 			follow: {
