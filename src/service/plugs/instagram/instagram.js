@@ -2,282 +2,24 @@ import format from "string-template";
 import urlParams from "url-params";
 import waiter from "waiter";
 import axios from "axios";
-import logger from "../db/logger";
+import logger from "../../db/logger";
 import ms from "milliseconds";
-import db from "../db/db";
+import db from "../../db/db";
 import objectMapper from "object-mapper";
-import police from "../police";
-import randomArray from "randEngine";
+import police from "../../police";
+
+import mappers from "./mappers";
+import {getUrl, decodeObject, _postData} from "./utils";
+import actions from "./actions";
+import urls from "./urls";
 
 // https://www.npmjs.com/package/node-schedule
 // https://www.npmjs.com/package/node-cron
 
-const urls = {
-	home: "https://www.instagram.com",
-	json: {
-		name: "__a",
-		val: "1"
-	},
-	post: {
-		like: "/web/likes/{0}/like/", // post id
-		unlike: "/web/likes/{0}/like/", // post id
-		follow: "/web/friendships/{0}/follow/",
-		unfollow: "/web/friendships/{0}/unfollow/"
-	},
-	get: {
-		tag: "/explore/tags/{0}/", // TagName
-		user: "/{0}/", // username
-		post: "/p/{0}/", // Get the post data
-		notifications: "/accounts/activity/",
-		query: "/graphql/query/?query_id={0}"
-	}
-}, 
-mappers = { // This maps the majority of the objects picked from the instagram APIs
-	media: {
-		"tag.media.nodes": "posts",
-		"tag.media.page_info.end_cursor": "nextPage"
-	},
-	dashboard: {
-		"graphql.user.edge_web_feed_timeline.edges": "posts",
-		"graphql.user.edge_web_feed_timeline.page_info.end_cursor": "nextPage"
-	},
-	postLike: { // Post in a list of posts (edges) - like area
-		"id": "id",
-		"owner.id": "userId",
-		"owner.username": "userName",
-		"caption": "comment",
-		"viewer_has_liked": "liked",
-		"code": "code",
-		"display_src": "img",
-		"display_url": "img",
-		"is_video": "isVideo",
-		"likes.count": "likes"
-	},
-	post: { // Post in a list of posts (edges) - dashboard area
-		"node.id": "id",
-		"node.owner.id": "userId",
-		"node.owner.username": "userName",
-		"node.caption": "comment",
-		"node.viewer_has_liked": "liked",
-		"node.code": "code",
-		"node.display_src": "img",
-		"node.display_url": "img",
-		"node.is_video": "isVideo",
-		"node.likes.count": "likes"
-	},
-	postData: { // Post as a singular post (in an ajax specific for that post)
-		"graphql.shortcode_media.viewer_has_liked": "liked"
-	},
-	user: { // User homepage (dashboard + posts)
-		"user.username": "username",
-		"user.full_name": "fullName",
-		"user.id": "id",
-		"user.followed_by.count": "followedBy",
-		"user.follows.count": "follows",
-		"user.biography": "bio",
-		"user.follows_viewer": "followMe",
-		"user.has_blocked_viewer": "blocked",
-		"user.media.page_info.end_cursor": "posts.nextPage",
-		"user.media.nodes[].id": "posts.list[].id",
-		"user.media.nodes[].likes.count": "posts.list[].likes",
-		"user.media.nodes[].thumbnail_src": "posts.list[].src",
-		"user.media.nodes[].code": "posts.list[].code",
-		"user.media.nodes[].is_video": "posts.list[].video"
-	},
-	notifications: {
-		"graphql.user.activity_feed.edge_web_activity_feed.count": "num",
-		"graphql.user.activity_feed.edge_web_activity_feed.edges[].node.type": "list[].type",
-		"graphql.user.activity_feed.edge_web_activity_feed.edges[].node.user.id": "list[].id",
-		"graphql.user.activity_feed.edge_web_activity_feed.edges[].node.user.username": "list[].username",
-		"graphql.user.activity_feed.edge_web_activity_feed.edges[].node.user.profile_pic_url": "list[].userimg",
-		"graphql.user.activity_feed.edge_web_activity_feed.edges[].node.media.thumbnail_src": "list[].imgsrc",
-		"graphql.user.activity_feed.edge_web_activity_feed.edges[].node.media.shortcode": "list[].code"
-	}
-},
-// Used in encodeObject. Go to the function and watch the comments.
-useJsonEncoding = true;
-
-var cache = {
+export var cache = {
 	query_id: false,
 	userData: false
 };
-
-// ------------------
-// Generic functions -----------------
-function getUrl(url, overrideJson){
-	if (/^chrome-extension:/.test(url))
-		url = url.replace(/^.+\/\/.[^\/]+(.+)/, "$1");
-	return ((!/^https?:/.test(url))?urls.home:"") + ((useJsonEncoding && !overrideJson)?urlParams.add(url, urls.json.name, urls.json.val):url);
-}
-
-function decodeObject (url, overrideDecoder, settings) {
-	var settings = settings || {cbk:{}};
-	if (!useJsonEncoding || overrideDecoder === true) {
-		// This is emergency fallback if the json method will not work anymore. Is dirty but is working.
-		// parse page html and return the object of the page
-		var el = document.createElement("html");
-
-		return axios(getUrl(url, true))
-		.then((response) => {
-			return response.data;
-		})
-		.then((data) => {
-			el.innerHTML = data;
-			return el;
-		})
-		.then((el) => {
-			if (settings.cbk.onData)
-				return Promise.resolve(settings.cbk.onData(el)).then(() => el);
-			else
-				return Promise.resolve(el);
-		})
-		.then((el) => {
-			var data = document.evaluate("//script[contains(., 'window._sharedData')]", el).iterateNext().innerHTML;	
-			return JSON.parse(data.replace(/^.+=\s\{(.+$)/, "{$1").replace(/\};$/, "}"));
-		})
-	} else {
-		return axios(getUrl(url, settings.overrideJson)).then((data) => data.data)
-	}
-}
-
-function _postData (csrf) {
-	return {
-		method: "POST",
-		headers: {
-			"content-type":"application/x-www-form-urlencoded",
-			"x-requested-with": "XMLHttpRequest",
-			"x-instagram-ajax":"1",
-			"x-csrftoken": csrf
-		}
-	}
-}
-
-// -----------------
-// Action functions ----------------
-function likePost (postId, csrf) {
-	return axios(getUrl(format(urls.post.like, postId), true), _postData(csrf));
-}
-
-function getUsersBatch (query, userid, list, pointer) {
-	if (!list)
-		var list = [];
-	var data = {
-		"id": userid,
-		"first": 100
-	};
-	if (pointer)
-		data.after = pointer;
-	return decodeObject(urlParams.add(format(urls.get.query, query), "variables", JSON.stringify(data)), false, {overrideJson: true})
-		.then(data => data.data.user)
-		.then((data) => {
-			var fdata = data.edge_followed_by?data.edge_followed_by:data.edge_follow;
-			list.push(...fdata.edges);
-			if (fdata.page_info.has_next_page && fdata.page_info.end_cursor)
-				return getUsersBatch(query, userid, list, fdata.page_info.end_cursor);
-			return list;
-		})
-}
-
-function getUserData (userName) {
-	var now = new Date().getTime();
-	if (!cache.userData)
-		cache.userData = {}
-	if (cache.userData[userName] && cache.userData[userName].time >= (now - ms.minutes(20))) // Cached users for 20 minutes
-		return Promise.resolve(cache.userData[userName].data);
-	return decodeObject(format(urls.get.user, userName)).then((userData) => {
-		var mapped = objectMapper(userData, mappers.user);
-		console.log("User data expired for "+userName+". Refetched.");
-		cache.userData[userName] = {
-			data: mapped,
-			time: now
-		}
-		return mapped;
-	})
-}
-
-function getNotifications() {
-	return decodeObject(urls.get.notifications).then((notifications) => {
-		return objectMapper(notifications, mappers.notifications);
-	});
-}
-
-function likeUserPosts(userName, csrf, limit) {
-	return getUserData(userName).then((userData) => {
-		var len = userData.posts.list.length;
-		if (!len)
-			return Promise.resolve();
-		var flow = Promise.resolve(),
-			r = randomArray(limit, 1, (len < limit + 1)? (limit + 1) : len);
-
-		userData.posts.list.forEach((details, i) => {
-			if (r.indexOf(i) != -1) { // If the post index is in array proceed
-				flow = flow.then(() => decodeObject(format(urls.get.post, details.code)).then((post) => { // Check the post and see if has already been liked
-					post = objectMapper(post, mappers.postData);
-					//console.log("Chosen post", post)
-					if (!post.liked)
-						return likePost(details.id, csrf).then(() => waiter(ms.seconds(1), ms.seconds(5))); // Like and wait
-					else
-						return waiter(ms.seconds(1), ms.seconds(5)); // Do not like but wait anyway... a call has been made!
-				}))
-			}
-		});
-
-		return flow;
-	})
-}
-
-function followUser (userId, checker) {
-	console.log("Checking if should follow");
-	if (!checker)
-		return follow(); // Here will directly follow without checks
-
-	// Followback algorhytm below ---
-	return db.users.where("[plug+userid]").equals(["instagram", userId]).toArray().then((data) => { // Check if the user has to be followed
-		if (data.length > 1)
-			return Promise.reject({error: "Users number mismatch", id: "DB_USER_EXCEEDING", action: "RELOAD"});
-		if (data[0].toFollow) {
-			console.log("Authorized by DB");
-			return getUserData(data[0].username).then((userInfo) =>  checker.shouldFollow({user:userInfo, data: data[0]})).then((auth) => {
-				if (auth) {
-					return follow()
-				} else {
-					console.warn("Not authorized by police")
-					return Promise.resolve(false)
-				}
-			});
-		}
-	}).then (() => {
-		return db.users.where("[plug+userid]").equals(["instagram", userId]).modify({toFollow: false});
-	})
-	
-	function follow(){
-		console.log("Authorized by police or bypassed directly");
-	}
-}
-
-function unfollowUser (userId) {
-	console.log("UnfollowUserAction")
-	return Promise.resolve(true);
-}
-
-function newDbUser(us, now, toFollow) {
-	return {
-		plug: "instagram",
-		userid: us.id,
-		username: us.username,
-		whitelisted: false,
-		toFollow: toFollow,
-		details: {
-			img: us.img
-		},
-		lastInteraction: false,
-		added: now
-	}
-}
-
-function cleanDB(){ // Clean database from old users. Async mode! Don't even try to make it syncronous!
-
-}
 
 /**
 * -------------- Exposed functions
@@ -391,7 +133,7 @@ export default function () {
 										return waiter(1000, 5000).then(() => data);
 									});
 								})
-								.then(() => likePost(d.id, csrf))
+								.then(() => actions.likePost(d.id, csrf))
 								.then((data) => {log.userInteraction("LIKE", d, {tag: tagName});return data;})
 								.then((data) => {
 									numberLiked++;
@@ -458,7 +200,7 @@ export default function () {
 								if (post.liked){
 									return Promise.reject({alreadyLiked: true})
 								}
-								return likePost(post.id, csrf)
+								return actions.likePost(post.id, csrf)
 								.then((d) => {log.userInteraction("LIKE", post);return d;})
 								.then((d) => {
 									numberLiked++;
@@ -524,8 +266,8 @@ export default function () {
 				])
 
 				return Promise.all([
-					getUsersBatch(query_id.followers, user.id),
-					getUsersBatch(query_id.following, user.id)
+					actions.getUsersBatch(query_id.followers, user.id),
+					actions.getUsersBatch(query_id.following, user.id)
 				]).then((res) => { // Here we have the followers and the following. Let's differentiate!
 					var users = [], indexer = [];
 					console.log("All users", res);
@@ -545,7 +287,7 @@ export default function () {
 
 					res[1].forEach((t) => {
 						var index = indexer.indexOf(t.node.id);
-						if (index > -1) { // Check if the user has been aleeady picked
+						if (index > -1) { // Check if the user has been already picked
 							users[index].status = "followback";
 							return;
 						}
@@ -604,7 +346,7 @@ export default function () {
 											us.whitelisted = user.whitelisted; // TODO: Not sure if needed
 										} else{ // Here normal addition.
 											return db.users.add(
-												newDbUser(us, now, toFollow)
+												actions.newDbUser(us, now, toFollow)
 											);
 										}
 									})
@@ -612,7 +354,7 @@ export default function () {
 								flow.push(manageDb.then(() => { // Followback!
 									if ((isFirstTime || !data.settings[0]) && !onlyFetch) // Not followbacking all the people the first time
 										return Promise.resolve();
-									return followUser(us.id, checker).then((result) => {
+									return actions.followUser(us.id, checker).then((result) => {
 										if (result)
 											return log.userInteraction("FOLLOWBACK", {
 												img: us.img,
@@ -635,7 +377,7 @@ export default function () {
 							for (var u in cache) {
 								var user = cache[u];
 								if (!user.found && !user.whitelisted)
-									unfollowUser(user.id);
+									actions.unfollowUser(user.id);
 							}
 						}).then(() => arr);
 					})
@@ -648,7 +390,7 @@ export default function () {
 			likeBack () {
 				console.log("Starting likeBack");
 				return Promise.all([
-					getNotifications(),
+					actions.getNotifications(),
 					settings.get("likeBack")
 				]).then((data) => { // The default user data does not contains the posts.
 					var notifications = data[0], settings = data[1];
@@ -664,15 +406,15 @@ export default function () {
 								if (likebacked >= settings.maxUsersLike)
 									return Promise.resolve()
 								likebacked ++;
-								return likeUserPosts(t.username, csrf, settings.likes).then(() => {
+								return actions.likeUserPosts(t.username, csrf, settings.likes).then(() => {
 									return query.modify({
 										lastInteraction: now
 									})
 								}).then((res) => {
 									if (!res) {
 										console.log("The user has not been found in database. Adding...")
-										return getUserData(t.username).then((data) => {
-											return  db.users.add(newDbUser(user, now, 2))
+										return actions.getUserData(t.username).then((data) => {
+											return  db.users.add(actions.newDbUser(user, now, 2))
 										});
 									}
 									return Promise.resolve();

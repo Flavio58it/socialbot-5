@@ -7,7 +7,7 @@ import logger from "./db/logger.js";
 
 import robot from "./robot";
 
-import instagram from "./plugs/instagram";
+import instagram from "./plugs/instagram/instagram";
 
 var plugs = {
 	instagram: {
