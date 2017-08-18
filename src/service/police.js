@@ -10,14 +10,25 @@ const genericMapper = { // The default mapper for the settings.
 		"filters.follow.following": "following",
 		"filters.follow.followers": "followers",
 		"filters.follow.ratio": "ratio"
+	},
+	like: {
+		"filters.likes": "options"
 	}
 };
 
 function police (settings) {
-	var t = this, catsettings = settings.getAll();
+	var t = this, catsettings = settings.getAll(), mapOverride = false, dataMapOverride = false;
 
 	t.shouldLike = (data) => {
-		return true
+		var settings = getSetting("like"), data = ;
+		return settings.then((settings) => {
+			console.log("Available data for like policeman: ", settings, data);
+			if (!settings.videos && data.isVideo)
+				return false;
+
+			return true;
+		})
+		
 	}
 
 	t.shouldFollow = (data) => {
@@ -37,12 +48,23 @@ function police (settings) {
 			return true;
 		});
 	}
+
+	// Set mapper only for one time
+	t._setMapper = (mapper) => { mapOverride = mapper; return t;}
+	t._setDataMapper = (mapper) => { dataMapOverride = mapper; return t;}
 	
 
 	// -------- FUNC
 
-	function getSetting (cat, altMapper) {
-		return catsettings.then((cats) => objectMapper(cats, altMapper || genericMapper[cat]));
+	function getSetting (cat) {
+		return catsettings.then((cats) => objectMapper(cats, mapOverride || genericMapper[cat])).then((data) => {
+			mapOverride = false;
+			return data;
+		});
+	}
+
+	function getData (data) {
+		return dataMapOverride?objectMapper(data, dataMapOverride):data;
 	}
 	
 }

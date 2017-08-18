@@ -91,11 +91,7 @@ export default function () {
 			})
 		},
 		actions: {
-			/**
-			* ----- Like the images by tag
-			*
-			**/
-			likeTagImages (tagName, wait, limit) {
+			likeTagImages (tagName, wait, limit) { // Like the images by tag
 				if (!csrf)
 					return Promise.reject({error: "Init failed"});
 
@@ -124,23 +120,28 @@ export default function () {
 								ops = ops.then(() => {
 									// If the user or the bot has already liked the post the like process is aborted, as the previous posts has already been viewed.
 									if (numberLiked >= limit)
-										return Promise.reject({likeLimitReached: true});
+										return Promise.reject({id: "LIKE_LIMIT_REACHED"});
 									return decodeObject(format(urls.get.post, d.code)).then((data) => {
 										data = objectMapper(data, mappers.postData)
 										if (data.liked) {
-											return Promise.reject({alreadyLiked: true})
+											return Promise.reject({id: "ALREADY_LIKED"})
 										}
 										return waiter(1000, 5000).then(() => data);
 									});
 								})
+								.then(() => checker.shouldLike(d))
 								.then(() => actions.likePost(d.id, csrf))
 								.then((data) => {log.userInteraction("LIKE", d, {tag: tagName});return data;})
 								.then((data) => {
 									numberLiked++;
 									return data;
 								}).catch((e) => {
-									if (e.likeLimitReached || e.alreadyLiked){ // Passing the likeLimit as is not an error to manage here.
+									if (e.id == "LIKE_LIMIT_REACHED" || e.id == "ALREADY_LIKED"){ // Passing the likeLimit as is not an error to manage here.
 										return Promise.reject(e);
+									}
+									if (e.id == "LIKE_REJECTED"){
+										console.warn("Like rejected by police");
+										return Promise.resolve();
 									}
 									if (e.response && e.response.status == 404) {
 										console.error("Post not found...");
@@ -160,13 +161,13 @@ export default function () {
 								return Promise.resolve(prevData);
 							}
 						}).catch((e) => {
-							if (e.alreadyLiked) {
+							if (e.id == "ALREADY_LIKED") {
 								console.warn("Already liked. Aborting...");
 								return Promise.resolve({
 									data,
 									liked: numberLiked
 								});
-							} else if (e.likeLimitReached) {
+							} else if (e.id == "LIKE_LIMIT_REACHED") {
 								console.warn("Like limit reached...");
 								return Promise.resolve({
 									data,
