@@ -95,7 +95,8 @@ export default function () {
 				if (!csrf)
 					return Promise.reject({error: "Init failed"});
 
-				var numberLiked = 0;
+				var numberLiked = 0,
+					rejector = 0; // When a like is rejected this increases. When too much rejections happens, the numberLikes must increase in order to prevent hangs of the system (too strict filters)
 
 				function like (pointer) {
 					var nextQuery = pointer?
@@ -129,7 +130,10 @@ export default function () {
 										return waiter(1000, 5000).then(() => data);
 									});
 								})
-								.then(() => checker.shouldLike(d))
+								.then(() => checker.shouldLike(d).then((res) => {
+									if  (!res)
+										return Promise.reject({id: "LIKE_REJECTED"});
+								}))
 								.then(() => actions.likePost(d.id, csrf))
 								.then((data) => {log.userInteraction("LIKE", d, {tag: tagName});return data;})
 								.then((data) => {
@@ -141,6 +145,11 @@ export default function () {
 									}
 									if (e.id == "LIKE_REJECTED"){
 										console.warn("Like rejected by police");
+										rejector++;
+										if (rejector > 5) { // Like reject protection system. See the declaration of the var for explanation.
+											numberLiked++;
+											rejector = 0;
+										}
 										return Promise.resolve();
 									}
 									if (e.response && e.response.status == 404) {
@@ -187,7 +196,7 @@ export default function () {
 			**/
 
 			likeDashboard (wait, limit) {
-				var numberLiked = 0;
+				var numberLiked = 0, rejector = 0;
 
 				function like(pointer) {
 					return decodeObject(urls.home).then((data) => {
@@ -201,12 +210,24 @@ export default function () {
 								if (post.liked){
 									return Promise.reject({alreadyLiked: true})
 								}
-								return actions.likePost(post.id, csrf)
+								return checker.shouldLike(d).then((res) => {
+									if  (!res)
+										return Promise.reject({id: "LIKE_REJECTED"});
+								}).then(() => actions.likePost(post.id, csrf))
 								.then((d) => {log.userInteraction("LIKE", post);return d;})
 								.then((d) => {
 									numberLiked++;
 									return d;
 								}).catch((e) => {
+									if (e.id == "LIKE_REJECTED"){
+										console.warn("Like rejected by police");
+										rejector++;
+										if (rejector > 5) { // Like reject protection system. See the declaration of the var for explanation.
+											numberLiked++;
+											rejector = 0;
+										}
+										return Promise.resolve();
+									}
 									numberLiked++;
 									return Promise.reject(e);
 								})

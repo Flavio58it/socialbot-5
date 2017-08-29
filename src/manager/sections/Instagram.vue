@@ -107,7 +107,7 @@
 								</div>
 							</div>
 							<div class="row">
-								<div class="col-6">
+								<div class="col-4">
 									 <b-form-select 
 									 	v-model="settings.filters.likes.isTextInclusive" 
 									 	:options="[
@@ -116,7 +116,7 @@
 									 	]" 
 									 	class="mb-3"/>
 								</div>
-								<div class="col-6">
+								<div class="col-8">
 									<b-form-input
 										:textarea="true"
 										v-model="settings.filters.likes.text"

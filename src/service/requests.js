@@ -3,7 +3,7 @@
 * Manage the origin and referrer headers in order to simulate a real client
 **/
 
-function _updater(details) {
+function _updater(details, domain) {
   var enableFix = false;
   for (var i = 0; i < details.requestHeaders.length; ++i) {
     if (details.requestHeaders[i].name === 'Origin') {
@@ -18,11 +18,11 @@ function _updater(details) {
     //console.log("Headers fix enabled: ", details)
     details.requestHeaders.push({
     	name: "origin",
-    	value: "https://www.instagram.com/"
+    	value: domain
     })
     details.requestHeaders.push({
     	name: "referer",
-    	value: "https://www.instagram.com/"
+    	value: domain
     })
     //console.log("Headers fix result: ", details)
   }
@@ -35,8 +35,8 @@ export default (function (domain) {
 	return {
 		listen () {
       if (!listening)
-  			chrome.webRequest.onBeforeSendHeaders.addListener(_updater, {
-  			    urls: ['*://*.instagram.com/*']
+  			chrome.webRequest.onBeforeSendHeaders.addListener((details) => _updater(details, domain), {
+  			    urls: [domain+ "/*"]
   			}, [
   			    "blocking", "requestHeaders"
   			]);
@@ -44,7 +44,7 @@ export default (function (domain) {
 		},
 		unlisten () {
       console.log("Unlistened")
-			chrome.webRequest.onBeforeSendHeaders.removeListener(_updater);
+			chrome.webRequest.onBeforeSendHeaders.removeListener((details) => _updater(details, domain));
       listening = false;
 		}
 	}
