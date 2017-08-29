@@ -20,7 +20,7 @@ function police (settings) {
 	var t = this, catsettings = settings.getAll(), mapOverride = false, dataMapOverride = false;
 
 	t.shouldLike = (data) => {
-		var settings = getSetting("like"), data = {};
+		var settings = getSetting("like");
 		return settings.then((settings) => {
 			console.log("Available data for like policeman: ", settings, data);
 			if (!settings.videos && data.isVideo)

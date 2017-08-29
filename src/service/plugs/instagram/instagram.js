@@ -46,16 +46,17 @@ export default function () {
 							return Promise.resolve();
 						}
 						return axios(thenSrc).then((script) => script.data).then((script) => {
+							console.groupCollapsed("IDs parser");
 							var regex = { // r = regex, rr = nested regex, i = index
 								like: {r: /(?:\=|\:).{0,4}(\d{17}).[^;]/g, rr: /\d{17}/, i: 9},
-								followers: {r: /(?:\=|\:).{0,4}(\d{17}).[^;]/g, rr: /\d{17}/, i: 7},
-								following: {r: /(?:\=|\:).{0,4}(\d{17}).[^;]/g, rr: /\d{17}/, i: 6}
+								followers: {r: /(?:\=|\:).{0,4}(\d{17}).[^;]/g, rr: /\d{17}/, i: 6},
+								following: {r: /(?:\=|\:).{0,4}(\d{17}).[^;]/g, rr: /\d{17}/, i: 7}
 							}
 							for (var y in regex) {
 								if (regex[y].r.test(script)){
 									query_id = query_id?query_id:{};
 									query_id[y] = script.match(regex[y].r)[regex[y].i]
-									//console.log(y + " matched: ", script.match(regex[y].r));
+									console.log(y + " matched: ", script.match(regex[y].r));
 									if (!query_id[y])
 										console.warn("Query_id for " + y + " not found.");
 									if (regex[y].rr && query_id[y])
@@ -72,8 +73,9 @@ export default function () {
 								}
 							} else {
 								cache.query_id = false;
-								return Promise.reject({error: "query_id picker fail", id: "QUERY_ID_ENGINE_FAILURE", action: "RELOAD"})
+								return Promise.reject({error: "Cannot get query data. Try to restart or wait for an update from the dev.", id: "QUERY_ID_ENGINE_FAILURE", action: "RELOAD"})
 							}
+							console.groupEnd();
 						})
 					}
 				}
@@ -360,7 +362,7 @@ export default function () {
 								})
 							} else { // User not found and is present in the users array so is a new follower! (party) (except if isFirstTime or likeBack)
 								var toFollow = !((!data.settings[0]) || isFirstTime), 
-										manageDb = Promise.resolve().then(() => {
+									manageDb = Promise.resolve().then(() => {
 										if (user){ // When the user is in database but has already been added by likeBack
 											return db.users.where("[plug+userid]").equals(["instagram", us.id]).modify({
 												toFollow
