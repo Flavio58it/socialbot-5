@@ -1,8 +1,8 @@
--webkit-font-smoothing: antialiased;
 * {box-sizing: border-box;}
 body {
 	margin:0;
 	padding: 1px;
+  -webkit-font-smoothing: antialiased;
 }
 
 .btn {border-radius: 2px !important;} /* Remove ugly button radius of bootstrap framework */
