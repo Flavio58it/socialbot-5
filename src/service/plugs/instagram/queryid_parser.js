@@ -18,7 +18,7 @@ function queryIdParser(data) {
 			following: "17874545323001329"
 		}
 	}
-	return Promise.resolve();
+	return Promise.resolve(cache.query_id.id);
 	/*
 	// Getting the query id token from the only found position. Yes, is a script (puke)
 	var src = data.querySelector("script[src*='Commons.js']").src, thenSrc = getUrl(src, true);

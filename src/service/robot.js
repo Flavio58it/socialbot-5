@@ -83,6 +83,11 @@ export default function (settings, plug, plugName) {
 				events.stop&&events.stop(this, plugName);
 			} else {
 				console.error("Bot error", e);
+				if (e.request && !e.request.status && !e.id) // Create user friendly generic error
+					e = {
+						id: "NETWORK_GENERIC_ERROR",
+						error: e.toString()
+					}
 				events.error&&events.error(this, plugName, e);
 			}
 			//return Promise.reject(e);

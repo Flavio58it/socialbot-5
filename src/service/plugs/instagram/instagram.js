@@ -39,7 +39,9 @@ export default function () {
 			// Check if user is logged in and get the tokens
 			return decodeObject(urls.home, true, {
 				cbk: {
-					onData: queryIdParser
+					onData: (data) => queryIdParser(data).then((queryd) => {
+						query_id = queryd;
+					})
 				}
 			}).then((data) => {
 				// Getting data from homepage, using the fallback method. The original json is much lighter and misses basic info as csrf_token.
