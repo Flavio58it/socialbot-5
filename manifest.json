@@ -9,6 +9,7 @@
 
   "permissions":[
     "*://*.instagram.com/*", 
+    "*://*.cdninstagram.com/*",
     "webRequest",
     "webRequestBlocking",
     "storage", 
@@ -20,13 +21,13 @@
     ],
     "persistent": true
   },
-  /*"content_scripts":[
+  "content_scripts":[
      {
       "matches": ["*://*.instagram.com/*"],
       "js": ["/dist/content.js"],
       "all_frames": false
     }
-  ],*/
+  ],
   "icons": {
       "128": "/assets/img/web_player_remote_logo.png"
   },

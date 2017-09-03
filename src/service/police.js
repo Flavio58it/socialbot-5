@@ -25,7 +25,7 @@ function police (settings) {
 			console.log("Available data for like policeman: ", settings, data);
 			if (!settings.videos && data.isVideo)
 				return false;
-
+			
 			return true;
 		})
 		
@@ -64,7 +64,9 @@ function police (settings) {
 	}
 
 	function getData (data) {
-		return dataMapOverride?objectMapper(data, dataMapOverride):data;
+		var d = dataMapOverride?objectMapper(data, dataMapOverride):data;
+		dataMapOverride = false;
+		return d;
 	}
 	
 }
