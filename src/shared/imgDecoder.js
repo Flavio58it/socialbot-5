@@ -52,7 +52,7 @@ export default function (src) {
 
 					//debugger;
 
-					xypix.sumval = xypix.sumval + con[2]; // con = [R, G, B]
+					xypix.sumval = xypix.sumval + ((con[0]+con[1]+con[2]) / 3); // con = [R, G, B]
 					xypix.sumindex = xypix.sumindex + 1;
 
 					grid[x_assigned][y_assigned] = xypix;

@@ -16,7 +16,8 @@ if (process.env.NODE_ENV === 'development') {
 				images = document.querySelectorAll("main article a div img");
 			
 			images.forEach((img) => {
-				arr.push(img.src);
+				if (img.src.indexOf(".cdninstagram.com") >= 0)
+					arr.push(img.src);
 			})
 
 			_comm.send("imagesResult", {
