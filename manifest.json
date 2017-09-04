@@ -5,7 +5,7 @@
   "short_name": "FollowHunter",
   "description": "Automatize repetitive actions for gaining followers on Instagram",
   "version": "0.1",
-  "minimum_chrome_version": "34",
+  "minimum_chrome_version": "59",
 
   "permissions":[
     "*://*.instagram.com/*", 

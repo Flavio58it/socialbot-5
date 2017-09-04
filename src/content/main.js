@@ -4,7 +4,6 @@
 **/
 
 import comm from "comm/comm";
-import decoder from "imgDecoder";
 
 if (process.env.NODE_ENV === 'development') {
 	console.log("Development mode... Initializing image picker!");
@@ -12,9 +11,18 @@ if (process.env.NODE_ENV === 'development') {
 
 	_comm.initReceiver((action, data) => {
 		if (action == "getImages") {
-			var images = document.querySelectorAll("main article a div img");
+			var images = false, arr = [];
+			if (data.plug == "instagram")
+				images = document.querySelectorAll("main article a div img");
 			
-		}
-	}
+			images.forEach((img) => {
+				arr.push(img.src);
+			})
 
+			_comm.send("imagesResult", {
+				plug: data.plug,
+				results: arr
+			})
+		}
+	});
 }

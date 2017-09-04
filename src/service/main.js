@@ -3,7 +3,8 @@ import settings from "./settings";
 
 import storage from "storage";
 import db from "./db/db";
-import logger from "./db/logger.js";
+import logger from "./db/logger";
+import {getImagesData, startTrainer} from "./neural";
 
 import robot from "./robot";
 
@@ -19,6 +20,12 @@ var plugs = {
 
 Comm.listen("manager", function(action, data) {
 	switch (action) {
+		case "sendAll":
+			Comm.sendMessage(data.forwardAction, data.data);
+		break;
+		case "trainAI":
+			startTrainer("instagram", "landscape");
+		break;
 		case "init":
 			getAllInitInfo();
 		break;
@@ -58,14 +65,24 @@ Comm.listen("manager", function(action, data) {
 				Comm.sendMessage("logs", {list: data, forWhich: data.forWhich});
 			});
 		break;
-
 		case "whitelistUser": // Whitelist a user
 			db.users.where("[plug+userid]").equals([data.type, data.id]).modify({whitelisted: data.add})
 		break;
 	}
 	if (error) // Sure?
 		Comm.sendMessage("backendError", {error});
-})
+});
+
+Comm.listen("content", function(action, data) {
+	switch (action) {
+		case "imagesResult":
+			getImagesData(data.results).then((arr) => {
+				console.log("Results: ", arr);
+				Comm.sendMessage("moderateImages", {arr, plug: data.plug});
+			});
+		break;
+	}
+});
 
 // Start the bot when the browser is started!
 for (var i in plugs) {

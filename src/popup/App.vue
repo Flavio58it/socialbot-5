@@ -30,17 +30,11 @@
   export default {
     data () {
       return {
-
+        
       }
     },
     mounted () {
       this.$send("init");
-    },
-    message (action, data){
-
-    },
-    methods: {
-
     },
     components: {
         Headbar,
