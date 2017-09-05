@@ -4,7 +4,7 @@ var ai = require("./AI.json");
 var synaptic = require("./synaptic.js");
 
 function trainer () {
-	var brain = new synaptic.Architect.Perceptron(23, 18, 11, 4)
+	var brain = new synaptic.Architect.Perceptron(23, 18, 13, 4);
 	console.log("Init completed");
 	var trainer = new synaptic.Trainer(brain)
 	console.log("Training...");
