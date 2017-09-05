@@ -4,7 +4,7 @@ import settings from "./settings";
 import storage from "storage";
 import db from "./db/db";
 import logger from "./db/logger";
-import {getImagesData, startTrainer} from "./neural";
+import {getImagesData} from "./ai/neural";
 
 import robot from "./robot";
 
@@ -22,9 +22,6 @@ Comm.listen("manager", function(action, data) {
 	switch (action) {
 		case "sendAll":
 			Comm.sendMessage(data.forwardAction, data.data);
-		break;
-		case "trainAI":
-			startTrainer("instagram", "landscape");
 		break;
 		case "init":
 			getAllInitInfo();

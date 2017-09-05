@@ -4,8 +4,18 @@
 		<template v-if="!exported">
 			<div v-if="trainImages" id="aitrainer" class="row">
 	          <hr/>
-	          <div v-for="(image, i) in trainImages" :class="['col-2', (image.output === 1?'ok':'nok'), 'image']">
-	            <img @click.prevent="toggleOutput(i)" :src="image.src" >
+	          <div v-for="(image, i) in trainImages" :class="['col-2', 'image']">
+	            <img :src="image.src">
+	            <div class="container">
+		            <div class="row">
+			            <input v-model="image.output[0]" class="col"></input>
+			            <input v-model="image.output[1]" class="col"></input>
+			        </div>
+			        <div class="row">
+			            <input v-model="image.output[2]" class="col"></input>
+			            <input v-model="image.output[3]" class="col"></input>
+			        </div>
+			    </div>
 	          </div>
 	          <hr/>
 	          <a href="#" @click.prevent="save" class="button apply">Export</a>
@@ -13,7 +23,6 @@
       	  <Loading v-else/>
       </template>
       <textarea v-if="exported" v-model="exported" cols="30" rows="10" class="col-12" :readonly="true"></textarea>
-      <a href="#" @click.prevent="train">Train</a>
 	</div>
 </template>
 
@@ -25,14 +34,7 @@
 		img {
 			cursor: pointer;
 			width: 100%;
-			height: 100%;
-		}
-
-		&.ok img{
-			border: 1px solid green;
-		}
-		&.nok img{
-			border: 1px solid red;
+			height: 70%;
 		}
 	}
 </style>
@@ -58,17 +60,11 @@
 	      }
 	    },
 	    methods: {
-	    	toggleOutput (i) {
-	    		this.trainImages[i].output = (this.trainImages[i].output === 1)?0:1;
-	    	},
 	    	save () {
 	    		this.trainImages.forEach((images) => {
 	    			delete images.src;
 	    		})
 	    		this.exported = JSON.stringify(this.trainImages)
-	    	},
-	    	train () {
-	    		this.$send("trainAI", {})
 	    	}
 	    },
 		components: {

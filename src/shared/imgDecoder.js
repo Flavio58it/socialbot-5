@@ -3,15 +3,25 @@
 *
 **/
 
-var gx = 63, gy = 63, // Counting also 0! 0-127
-roundCache = {}; 
+import colorNamer from "color-namer";
+import color from "color";
 
-var rounder = (num) => {
-	if (roundCache[num])
-		return roundCache[num];
-	if (num == 0)
-		return 0;
-	return Math.round(num);
+var colorData = {};
+
+function colorCache(r, g, b) {
+	if (!colorData[r])
+		colorData[r] = {}
+	if (!colorData[r][g])
+		colorData[r][g] = {}
+	if (!colorData[r][g][b])
+		colorData[r][g][b] = false
+
+	if (colorData[r][g][b])
+		return colorData[r][g][b];
+	var colorDef = `rgb(${r}, ${g}, ${b})`;
+	var color = colorNamer(colorDef, {pick: ["basic"]}).basic[0].name //roygbiv
+	colorData[r][g][b] = color;
+	return color;
 }
 
 export default function (src) {
@@ -27,48 +37,58 @@ export default function (src) {
 			canvas.width = xw;
 			canvas.height = yh;
 			context.drawImage(my_img, 0, 0, xw, yh);
-			var grid = {}, 
-			x_co = xw / gx, // x_co = How much pixels are compressed to one pixel (x)
-			y_co = yh / gy; // y_co = How much pixels are compressed to one pixel (y)
+			var grid = {
+				black: 		0,
+				blue: 		0,
+				cyan: 		0,
+				green: 		0,
+				teal: 		0,
+				turquoise: 	0,
+				indigo: 	0,
+				gray: 		0,
+				purple: 	0,
+				brown: 		0,
+				tan: 		0,
+				violet: 	0,
+				beige: 		0,
+				fuchsia: 	0,
+				gold: 		0,
+				magenta: 	0,
+				orange: 	0,
+				pink: 		0,
+				red: 		0,
+				white: 		0,
+				yellow: 	0,
+
+				// Here are the pixels that are dark or light (used for image luminosity)
+				dark: 		0,
+				light: 		0
+			}, divisor = 0;
+
+			//debugger;
 
 			// Grid of all pixels created
 			for (var x = 0; x < xw; x++) {
-				var x_assigned = rounder(x / x_co); // x_assigned = Which pixel is compressed
-
-				grid[x_assigned] = grid[x_assigned] || {};
-
-				var y_assigned, 
-					xypix, 
-					rowcon = context.getImageData(x, 0, 1, xw).data; // Getting one row per time in order to increase performance
+				var rowcon = context.getImageData(x, 0, 1, xw).data; // Getting one row per time in order to increase performance
 
 				for (var y = 0; y < yh; y++) {
-					y_assigned = rounder(y / y_co); // y_assigned = Which pixel is compressed 
-					xypix = grid[x_assigned][y_assigned]; // This grid should be gx*gy
 					var con = [rowcon[((y+1) * 4) - 4], rowcon[((y+1) * 4) - 3], rowcon[((y+1) * 4) - 2]]; // getImageData throws an array Uint8ClampedArray... converting it to something useful
-					xypix = xypix || {
-						sumval: 0,
-						sumindex: 0
-					};
 
-					//debugger;
-
-					xypix.sumval = xypix.sumval + ((con[0]+con[1]+con[2]) / 3); // con = [R, G, B]
-					xypix.sumindex = xypix.sumindex + 1;
-
-					grid[x_assigned][y_assigned] = xypix;
-
+					grid[colorCache(con[0], con[1], con[2])] += 1;
+					if (color({r: con[0], g: con[1], b: con[2]}).luminosity() <= 0.5)
+						grid["dark"] += 1;
+					else
+						grid["light"] += 1;
+					divisor+=1;
 				}
 			}
 
 			var array = [];
 
-			for (var x in grid) {// Converted to monodimensional array!
-				for (var y in grid[x]) {
-					var pixel = grid[x][y];
-					array.push(((pixel.sumval/pixel.sumindex) / 255).toFixed(3)); // Normalize to average and then to 0/1 range for AI
-				}
+			for (var cname in grid) {
+				array.push(grid[cname] / divisor);
 			}
-
+			console.log(grid);
 			s(array); 
 		}
 

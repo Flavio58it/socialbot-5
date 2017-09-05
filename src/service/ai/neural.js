@@ -12,7 +12,12 @@ export function getImagesData (imgArray) {
 			arr.push({
 				src: img,
 				input,
-				output: 1
+				output: [
+					0.5, // Cool factor
+					0.5, // Landscape
+					0.5, // People
+					0.5  // Arhitecture
+				]
 			})
 		})
 	})
