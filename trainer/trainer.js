@@ -4,13 +4,13 @@ var ai = require("./AI.json");
 var synaptic = require("./synaptic.js");
 
 function trainer () {
-	var brain = new synaptic.Architect.Perceptron(23, 18, 13, 4);
+	var brain = new synaptic.Architect.Perceptron(23, 18, 12, 4);
 	console.log("Init completed");
 	var trainer = new synaptic.Trainer(brain)
 	console.log("Training...");
 	trainer.train(trainer_data, {
-		rate: (iterations, error) => (error > 0.79)?0.01:((error > 0.69)?0.001:0.0001),
-		iterations: 1800000,
+		rate: (iterations, error) => (error > 0.64)?0.01:((error > 0.61)?0.001:0.0001),
+		iterations: 200000,
 		error: .005,
 		shuffle: true,
 		//log: 10000,
@@ -19,7 +19,7 @@ function trainer () {
 			every: 10000,
 			do: function(data) {
 				console.log("iterations", data.iterations, "error", data.error, "rate", data.rate);
-				if (data.error < 0.61)
+				if (data.error < 0.58)
 					return true; // abort/stop training
 			}
 		}
