@@ -29,7 +29,7 @@ export default function (src) {
 
 	return new Promise ((s, f) => {
 		my_img.onload = () => {
-			console.log("Image loaded... doing things!")
+			console.log("Image loaded... parsing: ", src);
 			var canvas = document.createElement('canvas'),
 				context = canvas.getContext('2d'),
 				xw = my_img.width, 
@@ -88,7 +88,7 @@ export default function (src) {
 			for (var cname in grid) {
 				array.push(grid[cname] / divisor);
 			}
-			console.log(grid);
+			console.log(array);
 			s(array); 
 		}
 

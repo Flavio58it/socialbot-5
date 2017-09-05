@@ -1,8 +1,12 @@
-import syn from "synaptic";
 import decoder from "imgDecoder";
+import brain from "./brain";
 
-function compare () {
-	Network.fromJSON(exported)
+export function imageRecognition (src) {
+	return decoder(src).then((sample) => {
+		var result = brain(sample);
+		console.log("This is what i have seen: ", result);
+		return result;
+	});
 }
 
 export function getImagesData (imgArray) {

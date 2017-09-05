@@ -4,7 +4,7 @@ import settings from "./settings";
 import storage from "storage";
 import db from "./db/db";
 import logger from "./db/logger";
-import {getImagesData} from "./ai/neural";
+import {getImagesData, imageRecognition} from "./ai/neural";
 
 import robot from "./robot";
 
@@ -77,6 +77,9 @@ Comm.listen("content", function(action, data) {
 				console.log("Results: ", arr);
 				Comm.sendMessage("moderateImages", {arr, plug: data.plug});
 			});
+		break;
+		case "checkThisImage":
+			imageRecognition(data.src);
 		break;
 	}
 });

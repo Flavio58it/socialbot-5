@@ -26,4 +26,13 @@ if (process.env.NODE_ENV === 'development') {
 			})
 		}
 	});
+
+	setTimeout(() => {
+		console.log("Wei!");
+		var yeaimg = document.querySelectorAll("main article a div img");
+
+		_comm.send("checkThisImage", {
+			src: yeaimg[0].src
+		})
+	}, 1000)
 }

@@ -2,6 +2,6 @@
 node_modules/
 dist/
 synaptic.js
-AI.json
+AI.js
 npm-debug.log
 yarn-error.log
