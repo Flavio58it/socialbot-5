@@ -25,7 +25,7 @@ function police (settings) {
 	brain = false;
 
 	getSetting("like").then((settings) => {
-		if (settings.brain != false) {
+		if (settings.options.brain != false) {
 			brain = new imageRecognition(); // Create brain instance
 		}
 	})
@@ -34,10 +34,10 @@ function police (settings) {
 		var settings = getSetting("like");
 		return settings.then((settings) => {
 			console.log("Available data for like policeman: ", settings, data);
-			if (!settings.videos && data.isVideo)
+			if (!settings.options.videos && data.isVideo)
 				return false;
 			// All other ifs (for the like checker)
-			if (settings.brain != false) { // As is the last returns are locked here.
+			if (settings.options.brain != false) { // As is the last returns are locked here.
 				return brain.watch(data.imgThumb).then((seen) => {
 					if (seen[1] < 0.5 && seen[2] < 0.5 && seen[3] < 0.5)
 						return true; // If the ai dont know what to do
