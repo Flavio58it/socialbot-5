@@ -1,12 +1,22 @@
-import decoder from "imgDecoder";
-import brain from "./brain";
+import decoder from "imgDecoder/imgDecoder";
+import brain_neurons from "./brain";
+var synaptic = require("synaptic");
 
-export function imageRecognition (src) {
-	return decoder(src).then((sample) => {
-		var result = brain(sample);
-		console.log("This is what i have seen: ", result);
-		return result;
-	});
+export function imageRecognition () {
+	var t = this, brain = synaptic.Network.fromJSON(brain_neurons);
+
+	t.watch = (src) => {
+		if (!src)
+			return Promise.reject({error: "No image src for neural analysis", id: "NEURAL_NO_SRC", action: "RELOAD"});
+		return decoder(src).then((sample) => {
+			var result = brain.activate(sample);
+			console.log("This is what i have seen: ", result);
+			return result;
+		}, () => {
+			console.error("Decoder has failed. Giving dummy data in order to activate fallbacks.");
+			return [0,0,0,0];
+		});
+	}
 }
 
 export function getImagesData (imgArray) {

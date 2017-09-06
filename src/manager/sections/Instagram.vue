@@ -123,6 +123,7 @@
 									/>
 								</div>
 							</div>
+
 							<div class="description">Like by the number of likes condition (0 is disabled)</div>
 							<div class="row">
 								<div class="col-3">
@@ -148,6 +149,22 @@
 										type="number"
 										v-model="settings.filters.likes.isLikeNumber"
 									/>
+								</div>
+							</div>
+							<div class="description">
+								Like if AI has approved the image in the selected category (Artificial Intelligence) 
+							</div>
+							<div class="row">
+								<div class="col-8">
+									 <b-form-select 
+									 	v-model="settings.filters.likes.brain" 
+									 	:options="[
+									 		{text: 'Disabled', value: false},
+									 		{text: 'Landscape', value: 'landscape'},
+									 		{text: 'People (selfies etc.)', value: 'people'},
+									 		{text: 'Arhitecture (cities/streets)', value: 'arhitecture'}
+									 	]" 
+									 	class="mb-3"/>
 								</div>
 							</div>
 							<div>

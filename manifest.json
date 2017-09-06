@@ -35,5 +35,6 @@
   "browser_action": {
     "default_popup": "/pages/popup.html",
     "default_title": "Watching"
-  }
+  },
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
 }

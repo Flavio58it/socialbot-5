@@ -26,7 +26,8 @@ const settings = {
 				isLikeNumberMoreLess: false,
 				text: "",
 				isLikeNumber: 0,
-				videos: true
+				videos: true,
+				brain: false // landscape, people, arhitecture
 			},
 			follow: {
 				followers: {

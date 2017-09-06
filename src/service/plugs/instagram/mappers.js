@@ -18,6 +18,7 @@ export default {
 		"code": "code",
 		"display_src": "img",
 		"display_url": "img",
+		"thumbnail_src": "imgThumb",
 		"is_video": "isVideo",
 		"likes.count": "likes"
 	},

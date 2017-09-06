@@ -27,12 +27,12 @@ if (process.env.NODE_ENV === 'development') {
 		}
 	});
 
-	setTimeout(() => {
+	/*setTimeout(() => {
 		console.log("Wei!");
 		var yeaimg = document.querySelectorAll("main article a div img");
 
 		_comm.send("checkThisImage", {
-			src: yeaimg[0].src
+			src: yeaimg[2].src
 		})
-	}, 1000)
+	}, 1000)*/
 }

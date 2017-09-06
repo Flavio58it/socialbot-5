@@ -5,7 +5,7 @@
 			<div v-if="trainImages" id="aitrainer" class="row">
 	          <hr/>
 	          <div v-for="(image, i) in trainImages" :class="['col-2', 'image']">
-	            <img :src="image.src">
+	            <img @click.prevent="removeImage(i)" :src="image.src">
 	            <div class="container">
 		            <div class="row">
 			            <input v-model="image.output[0]" class="col"></input>
@@ -65,6 +65,9 @@
 	    			delete images.src;
 	    		})
 	    		this.exported = JSON.stringify(this.trainImages)
+	    	},
+	    	removeImage (i) {
+	    		this.trainImages.splice(i, 1);
 	    	}
 	    },
 		components: {

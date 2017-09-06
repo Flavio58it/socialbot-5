@@ -4,6 +4,7 @@
 **/
 
 import objectMapper from "object-mapper";
+import {imageRecognition} from "./ai/neural";
 
 const genericMapper = { // The default mapper for the settings.
 	follow: {
@@ -17,7 +18,17 @@ const genericMapper = { // The default mapper for the settings.
 };
 
 function police (settings) {
-	var t = this, catsettings = settings.getAll(), mapOverride = false, dataMapOverride = false;
+	var t = this, 
+	catsettings = settings.getAll(), 
+	mapOverride = false, 
+	dataMapOverride = false,
+	brain = false;
+
+	getSetting("like").then((settings) => {
+		if (settings.brain != false) {
+			brain = new imageRecognition(); // Create brain instance
+		}
+	})
 
 	t.shouldLike = (data) => {
 		var settings = getSetting("like");
@@ -25,6 +36,19 @@ function police (settings) {
 			console.log("Available data for like policeman: ", settings, data);
 			if (!settings.videos && data.isVideo)
 				return false;
+			// All other ifs (for the like checker)
+			if (settings.brain != false) { // As is the last returns are locked here.
+				return brain.watch(data.imgThumb).then((seen) => {
+					if (settings.options.brain == "landscape")
+						return seen[1] >= 0.6 && seen[2] <= 0.5 && seen[3] <= 0.5;
+					if (settings.options.brain == "people")
+						return seen[2] >= 0.6 && seen[1] <= 0.5 && seen[3] <= 0.5;
+					if (settings.options.brain == "arhitecture")
+						return seen[3] >= 0.6 && seen[1] <= 0.5 && seen[2] <= 0.5;
+
+					return true; // If the ai is not sure...
+				});
+			}
 			
 			return true;
 		})
