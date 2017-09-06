@@ -39,6 +39,8 @@ function police (settings) {
 			// All other ifs (for the like checker)
 			if (settings.brain != false) { // As is the last returns are locked here.
 				return brain.watch(data.imgThumb).then((seen) => {
+					if (seen[1] < 0.5 && seen[2] < 0.5 && seen[3] < 0.5)
+						return true; // If the ai dont know what to do
 					if (settings.options.brain == "landscape")
 						return seen[1] >= 0.6 && seen[2] <= 0.5 && seen[3] <= 0.5;
 					if (settings.options.brain == "people")
@@ -46,7 +48,7 @@ function police (settings) {
 					if (settings.options.brain == "arhitecture")
 						return seen[3] >= 0.6 && seen[1] <= 0.5 && seen[2] <= 0.5;
 
-					return true; // If the ai is not sure...
+					return true; // Should never
 				});
 			}
 			
