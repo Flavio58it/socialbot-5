@@ -12,9 +12,9 @@ export function imageRecognition () {
 			var result = brain.activate(sample);
 			console.log("This is what i have seen: ", result);
 			return result;
-		}, () => {
+		}).catch(() => {
 			console.error("Decoder has failed. Giving dummy data in order to activate fallbacks.");
-			return [0,0,0,0];
+			return Promise.resolve([0,0,0,0]);
 		});
 	}
 }
@@ -33,6 +33,8 @@ export function getImagesData (imgArray) {
 					0.5  // Arhitecture
 				]
 			})
+		}, (e) => {
+			console.error("Image broken ", e);
 		})
 	})
 

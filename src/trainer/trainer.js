@@ -3,14 +3,17 @@ var fs = require("fs");
 var ai = require("./AI.json");
 var synaptic = require("./synaptic.js");
 
-function trainer () {
-	var brain = new synaptic.Architect.Perceptron(25, 18,  4); // third 12?
+function trainer (params) {
+	var iterator = params.splice(params.length-2, 1)[0], refiner = params.splice(params.length-1, 1)[0];
+	params.unshift(25);
+	params.push(4);
+	var brain = new synaptic.Architect.Perceptron(...params); // One hidden layer basta e avanza (seems)
 	console.log("Init completed");
 	var trainer = new synaptic.Trainer(brain)
-	console.log("Training...");
+	console.log("Training: iterator", iterator, "refiner", refiner, "initParams", params);
 	trainer.train(trainer_data, {
-		rate: (iterations, error) => iterations > 80000?0.001:0.01, //(error > 0.64)?0.01:((error > 0.61)?0.001:0.0001),
-		iterations: 100000,
+		rate: (iterations, error) => (iterations > refiner)?0.001:0.01, //(error > 0.64)?0.01:((error > 0.61)?0.001:0.0001),
+		iterations: iterator,
 		error: .005,
 		shuffle: true,
 		//log: 10000,
@@ -27,10 +30,6 @@ function trainer () {
 
 	console.log("Done")
 
-	//console.log(brain.activate(landscape))
-
-	//console.log(brain.standalone().toString())
-
 	fs.writeFile("./AI.json", JSON.stringify(brain.toJSON()), 'utf-8') // brain.standalone().toString()
 	console.log("Writed");
 }
@@ -40,7 +39,10 @@ function test (sample) {
 	console.log(ai(sample))
 }
 
-trainer();
+var params = process.argv
+params.splice(0,2);
+
+trainer(params);
 
 
 //test(landscape)

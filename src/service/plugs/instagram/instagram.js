@@ -111,6 +111,7 @@ export default function () {
 									}
 									if (e.id == "LIKE_REJECTED"){
 										console.warn("Like rejected by police");
+										//log.userInteraction(e.id, d, {tag: tagName});
 										rejector++;
 										if (rejector > 5) { // Like reject protection system. See the declaration of the var for explanation.
 											numberLiked++;

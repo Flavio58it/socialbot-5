@@ -27,7 +27,8 @@ const settings = {
 				text: "",
 				isLikeNumber: 0,
 				videos: true,
-				brain: false // landscape, people, arhitecture
+				brain: false, // landscape, people, arhitecture
+				brainFallback: true // If image is not recognized will like or not?
 			},
 			follow: {
 				followers: {

@@ -30,11 +30,15 @@ export default function (src) {
 			canvas.height = yh;
 			context.drawImage(my_img, 0, 0, xw, yh);
 
-			var rows = [], divisor = 0; // Object of grids
+			var rows = [], divisor = 0, error = false; // Object of grids
 
 			// Grid of all pixels created
 			for (var x = 0; x < xw; x++) {
 				var rowcon = context.getImageData(x, 0, 1, xw).data; // Getting one row per time in order to increase performance
+
+				if (error)
+					break;
+
 				decoder.postMessage({
 					rowcon,
 					yh,
@@ -45,6 +49,8 @@ export default function (src) {
 
 			messengers[id] = (data) => {
 				if (data.grid === false) {
+					error = true;
+					delete messengers[id];
 					f()
 				} else {
 					rows.push(data.grid)

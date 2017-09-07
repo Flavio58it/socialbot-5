@@ -151,18 +151,35 @@
 									/>
 								</div>
 							</div>
-							<div class="description">
-								Like if AI has approved the image in the selected category (Artificial Intelligence) 
-							</div>
 							<div class="row">
-								<div class="col-8">
+								<div class="col-6">
+									<div class="description">
+										AI Setting
+										<helper title="Artificial Intelligence Setting">
+											<div>
+												Like if AI has approved the image in the selected category 
+											</div>
+										</helper>
+									</div>
 									 <b-form-select 
 									 	v-model="settings.filters.likes.brain" 
 									 	:options="[
 									 		{text: 'Disabled', value: false},
-									 		{text: 'Landscape', value: 'landscape'},
+									 		{text: 'Landscape (Nature)', value: 'landscape'},
 									 		{text: 'People (selfies etc.)', value: 'people'},
 									 		{text: 'Arhitecture (cities/streets)', value: 'arhitecture'}
+									 	]" 
+									 	class="mb-3"/>
+								</div>
+								<div v-if="settings.filters.likes.brain" class="col-6">
+									<div class="description">
+										AI Fallback
+									</div>
+									 <b-form-select 
+									 	v-model="settings.filters.likes.brainFallback" 
+									 	:options="[
+									 		{text: 'Do not like', value: false},
+									 		{text: 'Like anyway', value: true}
 									 	]" 
 									 	class="mb-3"/>
 								</div>
