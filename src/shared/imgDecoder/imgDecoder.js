@@ -74,7 +74,7 @@ export default function (src) {
 
 			var array = [];
 
-			console.log(grid);
+			//console.log(grid);
 
 			for (var x in grid) {// Converted to monodimensional array!
 				for (var y in grid[x]) {
@@ -86,7 +86,7 @@ export default function (src) {
 				}
 			}
 
-			console.log(array);
+			//console.log(array);
 			s(array); 
 		}
 
