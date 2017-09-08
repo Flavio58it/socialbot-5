@@ -154,7 +154,7 @@
 							<div class="row">
 								<div class="col-6">
 									<div class="description">
-										AI Setting
+										AI Setting <b>HIGHLY EXPERIMENTAL</b>
 										<helper title="Artificial Intelligence Setting">
 											<div>
 												Like if AI has approved the image in the selected category 
