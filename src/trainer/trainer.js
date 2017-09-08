@@ -3,14 +3,15 @@ var fs = require("fs");
 var ai = require("./AI.json");
 var synaptic = require("./synaptic.js");
 
-function trainer (params) {
+function trainer (params, input, out) {
 	var iterator = params.splice(params.length-2, 1)[0], refiner = params.splice(params.length-1, 1)[0];
-	params.unshift(25);
-	params.push(4);
-	var brain = new synaptic.Architect.Perceptron(...params); // One hidden layer basta e avanza (seems)
+	params.unshift(input);
+	params.push(out);
+	var brain = new synaptic.Architect.Perceptron(...params);
+	brain.setOptimize(false);
 	console.log("Init completed");
 	var trainer = new synaptic.Trainer(brain)
-	console.log("Training: iterator", iterator, "refiner", refiner, "initParams", params);
+	console.log("Training: iterator", iterator, "refiner", refiner, "initParams", params, "inputLength sample", trainer_data[0].input.length);
 	trainer.train(trainer_data, {
 		rate: (iterations, error) => (iterations > refiner)?0.001:0.01, //(error > 0.64)?0.01:((error > 0.61)?0.001:0.0001),
 		iterations: iterator,
@@ -19,7 +20,7 @@ function trainer (params) {
 		//log: 10000,
 		cost: synaptic.Trainer.cost.CROSS_ENTROPY,
 		schedule: {
-			every: 10000,
+			every: 50,
 			do: function(data) {
 				console.log("iterations", data.iterations, "error", data.error, "rate", data.rate);
 				/*if (data.error < 0.58)
@@ -42,7 +43,7 @@ function test (sample) {
 var params = process.argv
 params.splice(0,2);
 
-trainer(params);
+trainer(params, 363, 4);
 
 
 //test(landscape)
