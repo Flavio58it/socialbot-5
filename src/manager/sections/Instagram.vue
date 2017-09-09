@@ -158,6 +158,8 @@
 										<helper title="Artificial Intelligence Setting">
 											<div>
 												Like if AI has approved the image in the selected category 
+
+												<p>Please note that the AI will cover all the normal cases with only tiny margin of error. If the image is messed up (strong contrast, messed color balance, white stripes) the "brain" will have problems to understand what is going on and the correct result is not ensured.</p>
 											</div>
 										</helper>
 									</div>
