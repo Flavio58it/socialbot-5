@@ -11,7 +11,7 @@ function trainer (params, input, out) {
 	brain.setOptimize(false);
 	console.log("Init completed");
 	var trainer = new synaptic.Trainer(brain)
-	var schedule = 20, rp = iterator/schedule, started = new Date().getTime(), last = started;
+	var schedule = 20, started = new Date().getTime(), last = started;
 	console.log("Training: iterator", iterator, "| refiner", refiner, "| initParams", params, "| inputLength sample", trainer_data[0].input.length);
 	trainer.train(trainer_data, {
 		rate: (iterations, error) => (iterations > refiner)?0.001:0.01, //(error > 0.64)?0.01:((error > 0.61)?0.001:0.0001),
@@ -24,7 +24,7 @@ function trainer (params, input, out) {
 			every: schedule,
 			do: function(data) {
 				var now = new Date().getTime()
-				console.log("iterations", data.iterations, "error", data.error, "rate", data.rate, "TIME: finish|", ((now-last) * rp) / 1000 / 60, "min");
+				console.log("iterations", data.iterations, "error", data.error, "rate", data.rate, "TIME: finish|", ((now-last) * ((iterator-data.iterations)/schedule)) / 1000 / 60, "min");
 				last = now;
 				/*if (data.error < 0.58)
 					return true; // abort/stop training*/
