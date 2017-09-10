@@ -24,7 +24,7 @@ function trainer (params, input, out) {
 			every: schedule,
 			do: function(data) {
 				var now = new Date().getTime()
-				console.log("iterations", data.iterations, "error", data.error, "rate", data.rate, "TIME: finish|", ((now-last) * ((iterator-data.iterations)/schedule)) / 1000 / 60, "min");
+				console.log("iterations", data.iterations, "error", data.error, "rate", data.rate, "Finish: ", parseInt(((now-last) * ((iterator-data.iterations)/schedule)) / 1000 / 60), "min |", parseInt((data.iterations * 100) / iterator), "%");
 				last = now;
 				/*if (data.error < 0.58)
 					return true; // abort/stop training*/
