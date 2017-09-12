@@ -104,7 +104,7 @@ const lib = {
 			return db.users.where("[plug+userid]").equals(["instagram", userId]).modify({toFollow: false});
 		})
 		
-		function follow(){
+		function follow(){ // TODO, perform the call when you are sure that is working :D
 			console.log("Authorized by police or bypassed directly");
 		}
 	},

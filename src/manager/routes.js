@@ -3,6 +3,8 @@ import Settings from "./Settings.vue";
 import NotFound from "components/NotFound.vue";
 
 import Instagram from "./sections/Instagram.vue";
+import Fivehpx from "./sections/Fivehpx.vue";
+
 import Home from "./Home.vue";
 import Trainer from "./Trainer.vue";
 
@@ -17,6 +19,11 @@ export default [
 				path: "instagram",
 				name: "instagram",
 				component: Instagram
+			},
+			{
+				path: "fivehpx",
+				name: "fivehpx",
+				component: Fivehpx
 			},
 			{
 				path: "*",

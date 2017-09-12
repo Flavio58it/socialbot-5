@@ -9,11 +9,17 @@ import {getImagesData} from "./ai/neural";
 import robot from "./robot";
 
 import instagram from "./plugs/instagram/instagram";
+import fivehpx from "./plugs/fivehpx/fivehpx";
 
 var plugs = {
 	instagram: {
 		settings: new settings("instagram"),
 		plug: new instagram(),
+		bot: false
+	},
+	fivehpx: {
+		settings: new settings("fivehpx"),
+		plug: new fivehpx(),
 		bot: false
 	}
 }, error = false;
