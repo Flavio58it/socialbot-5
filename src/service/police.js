@@ -19,7 +19,7 @@ const genericMapper = { // The default mapper for the settings.
 
 function police (settings) {
 	var t = this, 
-	catsettings = settings.getAll(), 
+	catsettings = () => settings.getAll(),  // Must be in a function in order to update with nwe data.
 	mapOverride = false, 
 	dataMapOverride = false,
 	brain = false;
@@ -31,21 +31,23 @@ function police (settings) {
 	})
 
 	t.shouldLike = (data) => {
-		var settings = getSetting("like");
-		return settings.then((settings) => {
+		var settings = [getSetting("like"), catsettings()];
+		return Promise.all(settings).then((settings) => {
+			if (!settings[1].enabled)
+				return Promise.reject({stopped: true});
 			console.log("Available data for like policeman: ", settings, data);
-			if (!settings.options.videos && data.isVideo)
+			if (!settings[0].options.videos && data.isVideo)
 				return false;
 			// All other ifs (for the like checker)
-			if (settings.options.brain != false) { // As is the last returns are locked here.
+			if (settings[0].options.brain != false) { // As is the last returns are locked here.
 				return brain.watch(data.imgThumb).then((seen) => {
 					if (seen[1] < 0.5 && seen[2] < 0.5 && seen[3] < 0.5)
-						return settings.options.brainFallback; // If the ai dont know what to do
-					if (settings.options.brain == "landscape")
+						return settings[0].options.brainFallback; // If the ai dont know what to do
+					if (settings[0].options.brain == "landscape")
 						return seen[1] >= 0.6 && seen[2] <= 0.5 && seen[3] <= 0.5;
-					if (settings.options.brain == "people")
+					if (settings[0].options.brain == "people")
 						return seen[2] >= 0.6 && seen[1] <= 0.5 && seen[3] <= 0.5;
-					if (settings.options.brain == "arhitecture")
+					if (settings[0].options.brain == "arhitecture")
 						return seen[3] >= 0.6 && seen[1] <= 0.5 && seen[2] <= 0.5;
 
 					return true; // Should never
@@ -58,17 +60,19 @@ function police (settings) {
 	}
 
 	t.shouldFollow = (data) => {
-		var settings = getSetting("follow");
-		return settings.then((settings) => {
+		var settings = [getSetting("follow"), catsettings()];
+		return Promise.all(settings).then((settings) => {
+			if (!settings[1].enabled)
+				return Promise.reject({stopped: true});
 			console.log("Available data for the policeman: ", settings, data);
 
-			if (settings.followers.number || settings.following.number) {
-					return ((settings.following.number?(settings.following.more?(settings.following.number >= data.user.follows):(settings.following.number >= data.user.follows)):true) && 
-						   (settings.followers.number?(settings.followers.more?(settings.followers.number >= data.user.followedBy):(settings.followers.number >= data.user.followedBy)):true));
-			} else if (settings.ratio) {
+			if (settings[0].followers.number || settings[0].following.number) {
+					return ((settings[0].following.number?(settings[0].following.more?(settings[0].following.number >= data.user.follows):(settings[0].following.number >= data.user.follows)):true) && 
+						   (settings[0].followers.number?(settings[0].followers.more?(settings[0].followers.number >= data.user.followedBy):(settings[0].followers.number >= data.user.followedBy)):true));
+			} else if (settings[0].ratio) {
 				console.log("By ratio");
 				var me = data.data, user = data.user
-				return (settings.ratio >= 5)
+				return (settings[0].ratio >= 5)
 			}
 
 			return true;
@@ -83,7 +87,7 @@ function police (settings) {
 	// -------- FUNC
 
 	function getSetting (cat) {
-		return catsettings.then((cats) => objectMapper(cats, mapOverride || genericMapper[cat])).then((data) => {
+		return catsettings().then((cats) => objectMapper(cats, mapOverride || genericMapper[cat])).then((data) => {
 			mapOverride = false;
 			return data;
 		});

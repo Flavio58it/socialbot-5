@@ -18,10 +18,10 @@ export default function (sub) {
 	var t = this;
 
 	t.set = (name, val) => {
-		var obj = {};
-		obj[sub] = obj[sub] || {}
-		obj[sub][name] = val;
-		return storage.set(obj);
+		return t.getAll().then((obj) => {
+			obj[name] = val;
+			return storage.set(obj);
+		})
 	}
 
 	t.get = (name) => {

@@ -62,7 +62,7 @@ const bot = function(settings, plug, plugName) {
 }
 
 export default function (settings, plug, plugName) {
-	var t = this, running = false, runningOnce = false, events = {};
+	var t = this, running = false, runningOnce = false, events = {}, rebooting = false;
 
 	t.start = () => {
 		running = runningOnce = true;
@@ -79,8 +79,15 @@ export default function (settings, plug, plugName) {
 			running = runningOnce = false;
 			triggerTimer(); // Restart after some time!
 			if (e.stopped) {
-				console.warn("Bot stopped");
-				events.stop&&events.stop(this, plugName);
+				if (rebooting) {
+					console.info("Rebooting");
+					events.reboot&&events.reboot(this, plugName);
+					rebooting = false;
+					t.start();
+				} else {
+					console.warn("Bot stopped");
+					events.stop&&events.stop(this, plugName);
+				}
 			} else {
 				console.error("Bot error", e);
 				if (e.request && !e.request.status && !e.id) // Create user friendly generic error
@@ -94,8 +101,21 @@ export default function (settings, plug, plugName) {
 		});
 	}
 
-	t.isRunning = () => {
-		return running;
+	t.getStatus = () => {
+		return {
+			running,
+			rebooting
+		};
+	}
+
+	t.reboot = () => {
+		if (running)
+			settings.set("enabled", false).then(() => {
+				console.log("Reboot command");
+				rebooting = true;
+			})
+		else
+			t.start();
 	}
 
 	t.getPlug = () => {
@@ -113,7 +133,7 @@ export default function (settings, plug, plugName) {
 
 	function triggerTimer () {
 		settings.get("waiter").then((wait) => {
-			waiter(wait.roundPause * 1000 * 60).then(t.start); // Converted from minutes
+			waiter(wait.roundPause * 1000 * 60).then(() => (!running)?t.start:""); // Converted from minutes
 		});
 	}
 

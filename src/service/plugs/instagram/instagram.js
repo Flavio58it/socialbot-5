@@ -108,8 +108,7 @@ export default function () {
 								}).catch((e) => {
 									if (e.id == "LIKE_LIMIT_REACHED" || e.id == "ALREADY_LIKED"){ // Passing the likeLimit as is not an error to manage here.
 										return Promise.reject(e);
-									}
-									if (e.id == "LIKE_REJECTED"){
+									} else if (e.id == "LIKE_REJECTED"){
 										console.warn("Like rejected by police");
 										//log.userInteraction(e.id, d, {tag: tagName});
 										rejector++;
@@ -118,11 +117,11 @@ export default function () {
 											rejector = 0;
 										}
 										return Promise.resolve();
-									}
-									if (e.response && e.response.status == 404) {
+									} else if (e.response && e.response.status == 404) {
 										console.error("Post not found...");
 										return Promise.resolve();
-									}
+									} else if (e.stopped) // Pass the stopper
+										return Promise.reject(e);
 									return Promise.reject({error: "Connection error.", details: (e.details || e), id: "CONNECTION_ERROR_TAG_LIKE", action: "RELOAD"});
 								})
 								.then(() => waiter(ms.seconds(wait.actionLower), ms.seconds(wait.actionUpper)))
@@ -177,7 +176,7 @@ export default function () {
 								if (post.liked){
 									return Promise.reject({alreadyLiked: true})
 								}
-								return checker.shouldLike(d).then((res) => {
+								return checker.shouldLike(post).then((res) => { // Before was d... not exists!
 									if  (!res)
 										return Promise.reject({id: "LIKE_REJECTED"});
 								}).then(() => actions.likePost(post.id, csrf))
@@ -194,7 +193,8 @@ export default function () {
 											rejector = 0;
 										}
 										return Promise.resolve();
-									}
+									} else if (e.stopped) // Pass the stopper
+										return Promise.reject(e);
 									numberLiked++;
 									return Promise.reject(e);
 								})
@@ -222,7 +222,8 @@ export default function () {
 									data,
 									liked: numberLiked
 								})
-							}
+							} else if (e.stopped) // Pass the stopper
+								return Promise.reject(e);
 							return Promise.reject(e);
 						})
 					})

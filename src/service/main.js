@@ -42,12 +42,14 @@ Comm.listen("manager", function(action, data) {
 			plugs[data.type].settings.getAll().then((settings) => {
 				Comm.sendMessage("settings", {
 					type: data.type,
-					settings
+					settings,
+					status: plugs[data.type].bot.getStatus()
 				});
 			});
 		break;
 		case "saveSettings":
 			plugs[data.type].settings.setAll(data.settings);
+			plugs[data.type].bot.reboot();
 		break;
 
 		case "getUsers": 
@@ -69,7 +71,7 @@ Comm.listen("manager", function(action, data) {
 			});
 		break;
 		case "whitelistUser": // Whitelist a user
-			db.users.where("[plug+userid]").equals([data.type, data.id]).modify({whitelisted: data.add})
+			db.users.where("[plug+userid]").equals([data.type, data.id]).modify({whitelisted: data.add});
 		break;
 	}
 	if (error) // Sure?

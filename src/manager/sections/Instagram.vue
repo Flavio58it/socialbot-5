@@ -347,7 +347,7 @@
 				</div>
 			</div>
 			<div>
-				<button @click="save" class="btn btn-primary btn-lg float-right save">Save</button>
+				<button @click="save" class="btn btn-primary btn-lg float-right save" title="Save and restart the bot">Save</button>
 			</div>
 			<div  class="clearfix"/>
 			<hr/>
