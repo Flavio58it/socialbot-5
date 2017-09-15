@@ -62,31 +62,38 @@ const bot = function(settings, plug, plugName) {
 }
 
 export default function (settings, plug, plugName) {
-	var t = this, running = false, runningOnce = false, events = {}, rebooting = false;
+	var t = this, 
+	running = false, 
+	runningOnce = false, 
+	events = {}, 
+	rebooting = false, preRebootStatus = true;
 
 	t.start = () => {
 		running = runningOnce = true;
+		events.runstatus&&events.runstatus(t, plugName);
 		return settings.get("enabled").then((enabled) => {
 			if (!enabled)
 				return Promise.reject({stopped: true});
 		}).then(() => {
-			events.start&&events.start(this, plugName);
+			events.start&&events.start(t, plugName);
 			return bot(settings, plug, plugName);
 		}).then(() => {
 			running = false;
 			triggerTimer();
 		}).catch ((e) => {
-			running = runningOnce = false;
+			running = false;
+			events.runstatus&&events.runstatus(t, plugName);
 			triggerTimer(); // Restart after some time!
 			if (e.stopped) {
 				if (rebooting) {
 					console.info("Rebooting");
-					events.reboot&&events.reboot(this, plugName);
+					events.reboot&&events.reboot(t, plugName);
 					rebooting = false;
-					t.start();
+					settings.set("enabled", preRebootStatus).then(() => t.start());
+					preRebootStatus = true;
 				} else {
 					console.warn("Bot stopped");
-					events.stop&&events.stop(this, plugName);
+					events.stop&&events.stop(t, plugName);
 				}
 			} else {
 				console.error("Bot error", e);
@@ -95,7 +102,7 @@ export default function (settings, plug, plugName) {
 						id: "NETWORK_GENERIC_ERROR",
 						error: e.toString()
 					}
-				events.error&&events.error(this, plugName, e);
+				events.error&&events.error(t, plugName, e);
 			}
 			//return Promise.reject(e);
 		});
@@ -109,11 +116,15 @@ export default function (settings, plug, plugName) {
 	}
 
 	t.reboot = () => {
+		console.log("Reboot command. Running:", running)
 		if (running)
-			settings.set("enabled", false).then(() => {
-				console.log("Reboot command");
-				rebooting = true;
+			settings.get("enabled").then((enabled) => {
+				preRebootStatus = enabled;
 			})
+			.then(() => settings.set("enabled", false))
+			.then(() => {
+				rebooting = true;
+			});
 		else
 			t.start();
 	}
@@ -133,7 +144,7 @@ export default function (settings, plug, plugName) {
 
 	function triggerTimer () {
 		settings.get("waiter").then((wait) => {
-			waiter(wait.roundPause * 1000 * 60).then(() => (!running)?t.start:""); // Converted from minutes
+			waiter(wait.roundPause * 1000 * 60).then(() => (!running)?t.start():false); // Converted from minutes
 		});
 	}
 

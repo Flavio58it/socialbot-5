@@ -1,6 +1,10 @@
 <template>
 	<div class="container">
-		<div v-if="settings">
+		<div v-if="status.rebooting">
+			<Loading/>
+			<div class="text-center">Rebooting. Please reload after a couple of seconds.</div>
+		</div>
+		<div v-else-if="settings">
 			<div class="row">
 				<div class="col">
 					<b-tabs>
@@ -159,7 +163,7 @@
 											<div>
 												Like if AI has approved the image in the selected category 
 
-												<p>Please note that the AI will cover all the normal cases with only tiny margin of error. If the image is messed up (strong contrast, messed color balance, white stripes) the "brain" will have problems to understand what is going on and the correct result is not ensured.</p>
+												<p>Please note that the AI will cover all the normal cases with only tiny margin of error. If the image is messed up (strong contrast, messed color balance, white stripes) the correct result is not ensured.</p>
 											</div>
 										</helper>
 									</div>
@@ -383,13 +387,15 @@
 			return {
 				type: "instagram",
 				followConditionsMode: false,
-				settings: false
+				settings: false,
+				status: false
 			}
 		},
 		message (action, data) {
 			if (action == "settings" && data.type == this.type) {
 				console.log("Received settings data: ", data);
 				this.settings = data.settings;
+				this.status = data.status;
 				this.followFilterManager(); // Update the inputs
 			}
 		},

@@ -48,8 +48,7 @@ Comm.listen("manager", function(action, data) {
 			});
 		break;
 		case "saveSettings":
-			plugs[data.type].settings.setAll(data.settings);
-			plugs[data.type].bot.reboot();
+			plugs[data.type].settings.setAll(data.settings).then(() => plugs[data.type].bot.reboot());
 		break;
 
 		case "getUsers": 
@@ -105,6 +104,9 @@ for (var i in plugs) {
 		plugContainer.bot.addListener("start", (t, name) => {
 			error = false;
 			Comm.sendMessage("backendError", {remove: true, plug: name});
+		});
+		plugContainer.bot.addListener("runstatus", (t, name) => {
+			Comm.sendMessage("statusChange", {status: t.getStatus(), plug: name});
 		});
 	}
 }
