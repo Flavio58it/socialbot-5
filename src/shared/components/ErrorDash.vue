@@ -36,6 +36,7 @@
 
 <script>
 	export default {
+		props: ["filter"],
 		data () {
 			return {
 				errorData: false
@@ -43,6 +44,8 @@
 		},
 		message (action, data) {
 			if (action == "backendError") {
+				if (this.filter && data.type != this.filter)
+					return;
 				if (!data.remove)
 					this.errorData = data.error
 				else

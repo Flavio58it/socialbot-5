@@ -19,7 +19,7 @@ const genericMapper = { // The default mapper for the settings.
 
 function police (settings) {
 	var t = this, 
-	catsettings = () => settings.getAll(),  // Must be in a function in order to update with nwe data.
+	catsettings = () => settings.getAll(),  // Must be in a function in order to update with new data.
 	mapOverride = false, 
 	dataMapOverride = false,
 	brain = false;
@@ -38,6 +38,7 @@ function police (settings) {
 			console.log("Available data for like policeman: ", settings, data);
 			if (!settings[0].options.videos && data.isVideo)
 				return false;
+			if (settings[0].options.isLikeNumber);
 			// All other ifs (for the like checker)
 			if (settings[0].options.brain != false) { // As is the last returns are locked here.
 				return brain.watch(data.imgThumb).then((seen) => {

@@ -18,6 +18,9 @@
 			</div>
 		</div>
 		<hr v-if="showAdvanced"/>
+		<div class="container errorContainer">
+			<ErrorDash class="row"/>
+		</div>
 		<div class="container">
 			<div class="row text-center">
 				<div v-for="(cat, key) in cats" :class="['col', 'cat', (key==$route.name)?'selected':'']" @click="navigate(key)">
@@ -49,9 +52,14 @@
 	.advanced a {
 		color:red;
 	}
+	.errorContainer {
+		padding-bottom: $spacer-small;
+	}
 </style>
 
 <script>
+	import ErrorDash from "components/ErrorDash.vue";
+
 	export default {
 		data () {
 			return {
@@ -67,6 +75,9 @@
 			navigate (section) {
 				this.$router.push("/settings/" + section)
 			}
+		},
+		components: {
+			ErrorDash
 		}
 	}
 </script>

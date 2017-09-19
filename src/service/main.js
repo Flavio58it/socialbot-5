@@ -56,6 +56,11 @@ Comm.listen("manager", function(action, data) {
 				return plug.actions.followManager(true);
 			}).then((users) => {
 				Comm.sendMessage("usersData", {list: users, type: data.type});
+			}).catch((_error) => {
+				error = {
+					plug: data.type,
+					data: _error
+				}
 			})
 		break;
 		case "getLogs": 

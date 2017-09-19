@@ -8,7 +8,7 @@ export default {
 	likeBack: {
 		enabled: true,
 		likes: 4, // How much photos to like
-		ignoreTime: 7, // Days to ignore the user
+		ignoreTime: 30, // Days to ignore the user
 		maxUsersLike: 10 // Maximum users to like per session
 	}, // Like back images when a user is liking yours
 	waiter: {

@@ -392,6 +392,7 @@ export default function () {
 						var query = db.users.where("[plug+userid]").equals(["instagram", t.id]);
 
 						flow = flow.then(() => query.toArray()).then((qres) => {
+							console.log("QRES: ", qres);
 							if ((qres.length && (!qres[0].lastInteraction || (qres[0].lastInteraction  <= now - ms.days(settings.ignoreTime)))) || !qres.length) {
 								if (likebacked >= settings.maxUsersLike)
 									return Promise.resolve()
@@ -408,7 +409,7 @@ export default function () {
 										});
 									}
 									return Promise.resolve();
-								}).then(() => waiter(1000, 5000))
+								}).then(() => waiter(1000, 10000))
 							} else {
 								console.log("The user has been ignored.");
 								return Promise.resolve();

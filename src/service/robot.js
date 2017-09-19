@@ -129,7 +129,7 @@ export default function (settings, plug, plugName) {
 			t.start();
 	}
 
-	t.getPlug = () => {
+	t.getPlug = () => { // Not working anymore... I think because of runningOnce
 		if (runningOnce)
 			return Promise.resolve(plug);
 		return plug.init(settings).then((data) => {
