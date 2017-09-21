@@ -39,7 +39,7 @@ function police (settings) {
 			console.log("Available data for like policeman: ", settings, data);
 			if (!settings[0].options.videos && data.isVideo)
 				return false;
-			if (settings[0].options.isLikeNumber) { // Match by like number
+			if (settings[0].options.isLikeNumber && settings[0].options.isLikeNumber != "0") { // Match by like number
 				var likeNumber = parseInt(settings[0].options.isLikeNumber);
 				if (settings[0].options.isLikeNumberInclusive && settings[0].options.isLikeNumberMoreLess && likeNumber >= data.likes)
 					return false;
@@ -51,8 +51,8 @@ function police (settings) {
 					return false;
 			}
 
-			if (settings[0].options.text) { // Match by the text in image comment
-				var result = textMatcher(settings[0].options.text, data.comment);
+			if (settings[0].options.text.trim()) { // Match by the text in image comment
+				var result = textMatcher(settings[0].options.text.trim(), data.comment);
 				if (result && !settings[0].options.isTextInclusive)
 					return false;
 				if (!result && settings[0].options.isTextInclusive)
