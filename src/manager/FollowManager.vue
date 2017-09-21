@@ -15,12 +15,12 @@
 				<b-form-checkbox v-model="filters.state" value="whitelisted">Whitelisted</b-form-checkbox>
 			</div>
 			<div class="col-1 text-right">
-				<a v-if="clUsers.elements > 50" href = "#" @click.prevent="expanded = !expanded" title="Toggle expand">
+				<a v-if="clUsers.elements > 50" href = "#" @click.prevent="toggleExpand" title="Toggle expand">
 					<i :class="['fa', expanded?'fa-compress':'fa-expand']"/>
 				</a>
 			</div>
 		</div>
-		<div :class="['row', 'list', expanded?'expanded':'']" @mouseenter="stopScroll(true)" @mouseleave="stopScroll(false)">
+		<div :class="['row', 'list', expanded?'expanded':'']" :style="expanded" @mouseenter="stopScroll(true)" @mouseleave="stopScroll(false)">
 			<div v-for="user in clUsers.list" class="user col-6 row">
 				<div class="col-3">
 					<a>
@@ -90,7 +90,7 @@
 		border-radius: 3px;
 
 		&.expanded {
-			max-height: 1000px;
+			max-height: inherit;
 		}
 
 		.userInfo {
@@ -110,7 +110,7 @@
 	import Loading from "components/Loading.vue";
 
 	export default {
-		props: ["type"],
+		props: ["plug"],
 		data () {
 			return {
 				showAll: false,
@@ -123,23 +123,34 @@
 			}
 		},
 		mounted () {
-			this.$send("getUsers", {type: this.type})
+			this.$send("getUsers", {plug: this.plug})
 		},
 		message (action, data) {
-			if (action == "usersData" && data.type == this.type)
+			if (action == "usersData" && data.plug == this.plug)
 				this.users = data.list;
 		},
 		methods: {
 			whitelist (user, mode) {
-				this.$send("whitelistUser", {id: user.id, add: mode, type: this.type});
+				this.$send("directAction", {operation: "whitelistUser", id: user.id, add: mode, plug: this.plug});
 				user.whitelisted = mode;
 				this.$forceUpdate();
 			},
 			stopScroll (enabled) {
-				if (enabled)
-					document.body.classList.add("stop-scrolling")
-				else
+				if (enabled) {
+					document.body.classList.add("stop-scrolling");
+					window.scrollTo(0,document.body.scrollHeight);
+				} else
 					document.body.classList.remove("stop-scrolling")
+			},
+			toggleExpand () {
+				if (this.expanded)
+					this.expanded = false;
+				else {
+					this.expanded = {"height": (window.innerHeight - 50) + "px"};
+					this.$nextTick(() => {
+						window.scrollTo(0,document.body.scrollHeight);
+					})
+				}
 			}
 		},
 		computed: {

@@ -39,26 +39,26 @@ Comm.listen("manager", function(action, data) {
 			db.delete();
 		break;
 		case "getSettings":
-			plugs[data.type].settings.getAll().then((settings) => {
+			plugs[data.plug].settings.getAll().then((settings) => {
 				Comm.sendMessage("settings", {
-					type: data.type,
+					plug: data.plug,
 					settings,
-					status: plugs[data.type].bot.getStatus()
+					status: plugs[data.plug].bot.getStatus()
 				});
 			});
 		break;
 		case "saveSettings":
-			plugs[data.type].settings.setAll(data.settings).then(() => plugs[data.type].bot.reboot());
+			plugs[data.plug].settings.setAll(data.settings).then(() => plugs[data.plug].bot.reboot());
 		break;
 
 		case "getUsers": 
-			plugs[data.type].bot.getPlug().then((plug) => {
+			plugs[data.plug].bot.getPlug().then((plug) => {
 				return plug.actions.followManager(true);
 			}).then((users) => {
-				Comm.sendMessage("usersData", {list: users, type: data.type});
+				Comm.sendMessage("usersData", {list: users, plug: data.plug});
 			}).catch((_error) => {
 				error = {
-					plug: data.type,
+					plug: data.plug,
 					data: _error
 				}
 			})
@@ -74,8 +74,10 @@ Comm.listen("manager", function(action, data) {
 				Comm.sendMessage("logs", {list: data, forWhich: data.forWhich});
 			});
 		break;
-		case "whitelistUser": // Whitelist a user
-			db.users.where("[plug+userid]").equals([data.type, data.id]).modify({whitelisted: data.add});
+		case "directAction": // Direct operations to users by popup page and followManager
+			switch(data.operation){
+				case "whitelistUser": db.users.where("[plug+userid]").equals([data.plug, data.id]).modify({whitelisted: data.add});break;// Whitelist a user
+			}
 		break;
 	}
 	if (error) // Sure?
@@ -110,8 +112,8 @@ for (var i in plugs) {
 			error = false;
 			Comm.sendMessage("backendError", {remove: true, plug: name});
 		});
-		plugContainer.bot.addListener("runstatus", (t, name) => {
-			Comm.sendMessage("statusChange", {status: t.getStatus(), plug: name});
+		plugContainer.bot.addListener("reboot", (t, name) => {
+			Comm.sendMessage("statusUpdate", {status: t.getStatus(), plug: name});
 		});
 	}
 }

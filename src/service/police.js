@@ -5,6 +5,7 @@
 
 import objectMapper from "object-mapper";
 import {imageRecognition} from "./ai/neural";
+import textMatcher from "textMatcher";
 
 const genericMapper = { // The default mapper for the settings.
 	follow: {
@@ -38,8 +39,26 @@ function police (settings) {
 			console.log("Available data for like policeman: ", settings, data);
 			if (!settings[0].options.videos && data.isVideo)
 				return false;
-			if (settings[0].options.isLikeNumber);
-			// All other ifs (for the like checker)
+			if (settings[0].options.isLikeNumber) { // Match by like number
+				var likeNumber = parseInt(settings[0].options.isLikeNumber);
+				if (settings[0].options.isLikeNumberInclusive && settings[0].options.isLikeNumberMoreLess && likeNumber >= data.likes)
+					return false;
+				if (settings[0].options.isLikeNumberInclusive && !settings[0].options.isLikeNumberMoreLess && likeNumber <= data.likes)
+					return false;
+				if (!settings[0].options.isLikeNumberInclusive && settings[0].options.isLikeNumberMoreLess && likeNumber <= data.likes)
+					return false;
+				if (!settings[0].options.isLikeNumberInclusive && !settings[0].options.isLikeNumberMoreLess && likeNumber >= data.likes)
+					return false;
+			}
+
+			if (settings[0].options.text) { // Match by the text in image comment
+				var result = textMatcher(settings[0].options.text, data.comment);
+				if (result && !settings[0].options.isTextInclusive)
+					return false;
+				if (!result && settings[0].options.isTextInclusive)
+					return false;
+			}
+			
 			if (settings[0].options.brain != false) { // As is the last returns are locked here.
 				return brain.watch(data.imgThumb).then((seen) => {
 					if (seen[1] < 0.5 && seen[2] < 0.5 && seen[3] < 0.5)

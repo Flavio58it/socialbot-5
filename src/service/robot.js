@@ -5,6 +5,8 @@ const bot = function(settings, plug, plugName) {
 	var request = false;
 	return plug.init(settings).then((data) => {
 		console.info("Logged in: ", data.logged);
+		if (!data.logged)
+			return Promise.reject({id: "LOGGED_OUT", error: "Login failure. Please go to the homepage and login.", action: "PLUG_HOME"})
 		request = new requests(data.domain).listen(); // See the requests module for the explanation
 		return settings.get("follow").then((follow) => follow.tags)
 	}).then((data) => {
@@ -54,7 +56,6 @@ const bot = function(settings, plug, plugName) {
 		if (request)
 			request.unlisten();
 	}).catch((e) => {
-		//console.error("Round error", e);
 		if (request)
 			request.unlisten();
 		return Promise.reject(e);
@@ -66,7 +67,8 @@ export default function (settings, plug, plugName) {
 	running = false, 
 	runningOnce = false, 
 	events = {}, 
-	rebooting = false, preRebootStatus = true;
+	rebooting = false, 
+	preRebootStatus = true;
 
 	t.start = () => {
 		running = runningOnce = true;
@@ -87,9 +89,9 @@ export default function (settings, plug, plugName) {
 			if (e.stopped) {
 				if (rebooting) {
 					console.info("Rebooting");
-					events.reboot&&events.reboot(t, plugName);
 					rebooting = false;
 					settings.set("enabled", preRebootStatus).then(() => t.start());
+					events.reboot&&events.reboot(t, plugName);
 					preRebootStatus = true;
 				} else {
 					console.warn("Bot stopped");

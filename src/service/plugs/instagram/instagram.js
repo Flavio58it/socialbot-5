@@ -49,7 +49,6 @@ export default function () {
 				csrf = data.config.csrf_token;
 				user = data.config.viewer;
 				return {
-						// TODO: Check login status
 						connectionOk: true,
 						logged: (data && !data.entry_data.LandingPage),
 						domain: urls.home

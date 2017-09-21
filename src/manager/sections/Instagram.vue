@@ -1,6 +1,6 @@
 <template>
 	<SettingSection
-		:type="type" 
+		:plug="type" 
 		:settings.sync="settings"
 		@loaded="followFilterManager"
 	>
@@ -41,8 +41,8 @@
 							<b-form-checkbox v-model="props.settings.likeBack.enabled">
 								LikeBack 
 								<helper title="LikeBack">
-									<p>When a user like one of the your images the bot will check their gallery and Like back a couple of images.</p>
-									<p>In order to not over-like a user who likes more than one photo a control will be performed. If the user has been liked by the bot in the last {{settings.likeBack.ignoreTime}} days will be skipped.</p>
+									<p>When a user like one of the your images the bot will check their gallery and like back a couple of images.</p>
+									<p>In order to not over-like a user who likes more than one of your photos a control will be performed. If the user has been already liked by the bot in the last {{settings.likeBack.ignoreTime}} days will be skipped.</p>
 								</helper>
 								<div class="description">When a user likes a photo of yours the bot will like a couple of theirs.</div>
 							</b-form-checkbox>
@@ -114,8 +114,8 @@
 								 <b-form-select 
 								 	v-model="props.settings.filters.likes.isTextInclusive" 
 								 	:options="[
-								 		{text: 'Include if', value: 'true'},
-								 		{text: 'Exclude if', value: 'false'}
+								 		{text: 'Include if', value: true},
+								 		{text: 'Exclude if', value: false}
 								 	]" 
 								 	class="mb-3"/>
 							</div>
@@ -133,8 +133,8 @@
 								 <b-form-select 
 								 	v-model="props.settings.filters.likes.isLikeNumberInclusive"
 								 	:options="[
-								 		{text: 'Include if', value: 'true'},
-								 		{text: 'Exclude if', value: 'false'}
+								 		{text: 'Include if', value: true},
+								 		{text: 'Exclude if', value: false}
 								 	]" 
 								 	class="mb-3"/>
 							</div>
@@ -142,8 +142,8 @@
 								 <b-form-select 
 								 	v-model="props.settings.filters.likes.isLikeNumberMoreLess" 
 								 	:options="[
-								 		{text: 'More than', value: 'true'},
-								 		{text: 'Less than', value: 'false'}
+								 		{text: 'More than', value: true},
+								 		{text: 'Less than', value: false}
 								 	]" 
 								 	class="mb-3"/>
 							</div>
@@ -238,8 +238,8 @@
 								<b-form-select 
 								 	v-model="props.settings.filters.follow.followers.more"
 								 	:options="[
-								 		{text: 'More than', value: 'true'},
-								 		{text: 'Less than', value: 'false'}
+								 		{text: 'More than', value: true},
+								 		{text: 'Less than', value: false}
 								 	]" 
 								 	:disabled="followConditionsMode == 'ratio'"
 								 	class="mb-3"
@@ -262,8 +262,8 @@
 								<b-form-select 
 								 	v-model="props.settings.filters.follow.following.more"
 								 	:options="[
-								 		{text: 'More than', value: 'true'},
-								 		{text: 'Less than', value: 'false'}
+								 		{text: 'More than', value: true},
+								 		{text: 'Less than', value: false}
 								 	]" 
 								 	:disabled="followConditionsMode == 'ratio'"
 								 	class="mb-3"

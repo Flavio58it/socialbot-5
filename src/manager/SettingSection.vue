@@ -2,9 +2,14 @@
 	<div class="container">
 		<div v-if="status.rebooting">
 			<Loading/>
-			<div class="text-center">Rebooting. Please reload after a couple of seconds.</div>
+			<div class="text-center">Rebooting. Please wait.</div>
 		</div>
 		<div v-else-if="settings">
+			<div class="row">
+				<div class="col">
+					Running: {{status.running}}
+				</div>
+			</div>
 			<div class="row">
 				<div class="col">
 					<slot :settings="settings" name="left"/>
@@ -21,9 +26,25 @@
 			</div>
 			<div  class="clearfix"/>
 			<hr/>
-			<b>Followers manager</b>
-			<div class="description">Here you can manage the your followers. </div>
-			<FollowManager :type="type"/>
+			<b>
+				Followers manager
+
+				<Helper title="Followers manager">
+					<p>With this tool you can see the overall situation of the your account.</p>
+					<p>You can filter by name and the user situation towards you and then perform actions</p>
+
+					<hr/>
+					<b>Badges:</b>
+					<div>
+						<div><b-badge variant="success">Follower</b-badge> - The user is following you</div>
+						<div><b-badge variant="danger">Follower</b-badge> - The user is NOT following you</div>
+						<div><b-badge variant="info">Followback</b-badge> - You are following him back</div>
+						<div><b-badge variant="warning">Following</b-badge> - You are following him (and he is not following you)</div>
+					</div>
+				</Helper>
+			</b>
+			<div class="description">Here you can manage your followers.</div>
+			<FollowManager :plug="plug"/>
 		</div>
 		<Loading v-else/>
 	</div>
@@ -37,33 +58,38 @@
 	import Loading from "components/Loading.vue";
 	import Tags from "./Tags.vue";
 	import FollowManager from "./FollowManager.vue";
+	import Helper from "components/Helper.vue";
 
 	export default {
-		props: ["type", "settings"],
+		props: ["plug", "settings"],
 		data () {
 			return {
 				status: false
 			}
 		},
 		message (action, data) {
-			if (action == "settings" && data.type == this.type && data.status)
+			if (action == "settings" && data.plug == this.plug && data.status)
 				this.status = data.status;
 		},
 		mounted () {
-			this.$send("getSettings", {type: this.type});
+			this.$send("getSettings", {plug: this.plug});
 		},
 		message (action, data) {
-			if (action == "settings" && data.type == this.type) {
+			if (data.plug != this.plug)
+				return;
+			if (action == "settings") {
 				console.log("Received settings data: ", data);
 				this.$emit("update:settings", data.settings);
 				this.status = data.status;
 				this.$emit("loaded");
-			}
+			} else if (action == "statusUpdate")
+				this.status = data.status;
 		},
 		methods: {
 			save () {
+				this.status = {rebooting: true};
 				this.$send("saveSettings", {
-					type: this.type, 
+					plug: this.plug, 
 					settings: this.settings
 				});
 			}
@@ -71,7 +97,8 @@
 		components: {
 			Loading,
 			FollowManager,
-			Tags
+			Tags,
+			Helper
 		}
 	}
 </script>
