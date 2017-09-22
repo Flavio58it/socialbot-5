@@ -44,6 +44,7 @@
 		},
 		message (action, data) {
 			if (action == "backendError") {
+				console.error("Backend error: ", data.errorData);
 				if (this.filter && data.type != this.filter)
 					return;
 				if (!data.remove)

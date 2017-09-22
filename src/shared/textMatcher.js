@@ -10,8 +10,11 @@ function splitText(input) {
 export default function (matchText, inputText) { // 
 	var match = splitText(matchText), result = false;
 
+	if (!inputText || !matchText)
+		return false;
+
 	match.forEach((t) => {
-		if (inputText.indexOf(inputText) > -1)
+		if (inputText.indexOf(t) > -1)
 			result = true;
 	})
 

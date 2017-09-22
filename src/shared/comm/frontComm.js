@@ -23,14 +23,15 @@ function install (Vue, options) {
 		created: function (){
 			var fun = this.$options.message;
 			if (typeof fun == "function") {
+				this.__fc_uniqueId__ = new Date().getTime();
 				callbacks.push({cbk: fun, context: this});
 				options.debug&&console.log("Callback added: ", fun);
 			}
 		},
 		beforeDestroy: function (){
-			var fun = this.$options.message;
+			var fun = this.$options.message, t = this;
 			callbacks.forEach(function(aFun, i){
-				if (fun && fun.toString() == aFun.cbk.toString()) {
+				if (fun && (aFun.context.__fc_uniqueId__ === t.__fc_uniqueId__)) {
 					options.debug&&console.log("Callback removed: ", aFun);
 					callbacks.splice(i, 1);
 				}

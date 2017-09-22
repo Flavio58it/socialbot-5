@@ -65,19 +65,20 @@ const bot = function(settings, plug, plugName) {
 export default function (settings, plug, plugName) {
 	var t = this, 
 	running = false, 
-	runningOnce = false, 
+	inited = false, 
 	events = {}, 
 	rebooting = false, 
 	preRebootStatus = true;
 
 	t.start = () => {
-		running = runningOnce = true;
+		running = true;
 		events.runstatus&&events.runstatus(t, plugName);
 		return settings.get("enabled").then((enabled) => {
 			if (!enabled)
 				return Promise.reject({stopped: true});
 		}).then(() => {
 			events.start&&events.start(t, plugName);
+			inited = true;
 			return bot(settings, plug, plugName);
 		}).then(() => {
 			running = false;
@@ -131,10 +132,11 @@ export default function (settings, plug, plugName) {
 			t.start();
 	}
 
-	t.getPlug = () => { // Not working anymore... I think because of runningOnce
-		if (runningOnce)
+	t.getPlug = () => {
+		if (inited)
 			return Promise.resolve(plug);
 		return plug.init(settings).then((data) => {
+			inited = true;
 			return plug;
 		})
 	}

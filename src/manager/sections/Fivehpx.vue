@@ -3,8 +3,13 @@
 		:plug="type"
 		:settings.sync="settings"
 	>
-		<template slot="left" scope="props">
-			
+		<template slot="left" scope="data">
+			<div>
+				<b-form-checkbox v-model="data.settings.enabled">
+					<b>Bot enabled</b>
+					<div class="description">Enable the bot</div>
+				</b-form-checkbox>
+			</div>
 		</template>
 	</SettingSection>
 </template>
