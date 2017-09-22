@@ -4,13 +4,15 @@
 **/
 
 function splitText(input) {
-	return input.split("|");
+	if (typeof input == "string")
+		return input.split("|");
+	return input;
 }
 
-export default function (matchText, inputText) { // 
-	var match = splitText(matchText), result = false;
+export default function (match, inputText) { // 
+	var match = splitText(match), result = false;
 
-	if (!inputText || !matchText)
+	if (!inputText || !match)
 		return false;
 
 	match.forEach((t) => {

@@ -119,12 +119,7 @@
 								 	]" 
 								 	class="mb-3"/>
 							</div>
-							<div class="col-8">
-								<b-form-input
-									:textarea="true"
-									v-model="props.settings.filters.likes.text"
-								/>
-							</div>
+							<FilterOptions class="col-8" v-model="props.settings.filters.likes.textFilters"/>
 						</div>
 
 						<div class="description">Like by the number of likes condition (0 is disabled)</div>
@@ -359,6 +354,7 @@
 <script>
 	import Helper from "components/Helper.vue";
 	import SettingSection from "../SettingSection.vue";
+	import FilterOptions from "../FilterOptions.vue";
 
 	export default {
 		data () {
@@ -392,7 +388,8 @@
 		},
 		components: {
 			Helper,
-			SettingSection
+			SettingSection,
+			FilterOptions
 		}
 	}
 </script>

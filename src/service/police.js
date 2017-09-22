@@ -51,8 +51,8 @@ function police (settings) {
 					return false;
 			}
 
-			if (settings[0].options.text.trim()) { // Match by the text in image comment
-				var result = textMatcher(settings[0].options.text.trim(), data.comment);
+			if (settings[0].options.textFilters && settings[0].options.textFilters.length) { // Match by the text in image comment
+				var result = textMatcher(settings[0].options.textFilters, data.comment);
 				if (result && !settings[0].options.isTextInclusive)
 					return false;
 				if (!result && settings[0].options.isTextInclusive)

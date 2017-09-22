@@ -21,7 +21,7 @@ export default {
 			isTextInclusive: false,
 			isLikeNumberInclusive: false,
 			isLikeNumberMoreLess: false,
-			text: "",
+			textFilters: [],
 			isLikeNumber: 0,
 			videos: true,
 			brain: false, // landscape, people, arhitecture
