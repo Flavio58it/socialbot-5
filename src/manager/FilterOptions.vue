@@ -10,7 +10,7 @@
 		<div class="col-3">
 			<i @click="addEditModal" class="fa fa-gear fa-2x"/>
 		</div>
-		<b-modal id="modalFilters" ref="modalFilters" title="Add/Edit comment filters" :ok-only="true">
+		<b-modal id="modalFilters" ref="modalFilters" title="Add/Edit comment filters" :ok-only="true" @hide="cleanArray">
 			<div class="content">
 				Text will be counted as lowercase
 			</div>
@@ -84,12 +84,16 @@
 			},
 			saveEl () {
 				this.editIndex = false
-				this.value.forEach(function(t, i) {
-					if (!t)
-						this.value.splice(i, 1);
-				})
+				this.cleanArray();
 				this.$emit("input", this.value);
 				this.newEntry();
+			},
+			cleanArray () {
+				var tt = this;
+				this.value.forEach(function(t, i) {
+					if (!t)
+						tt.value.splice(i, 1);
+				})
 			},
 			remEl (i) {
 				this.value.splice(i, 1);
