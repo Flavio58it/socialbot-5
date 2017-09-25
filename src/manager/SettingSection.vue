@@ -44,11 +44,13 @@
 				</Helper>
 			</b>
 			<div class="description">Here you can manage your followers.</div>
-			<FollowManager :plug="plug"/>
+			
 		</div>
 		<Loading v-else/>
 	</div>
 </template>
+
+<!-- <FollowManager :plug="plug"/> -->
 
 <style lang="scss" scoped>
 	.save {width: 200px;}

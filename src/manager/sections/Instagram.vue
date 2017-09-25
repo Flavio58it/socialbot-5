@@ -97,12 +97,11 @@
 								Like conditions
 							</b>
 							<div class="description">
-								Use pipes "|" to separate words or hashtags  
+								Select images to like basing on content of description
 								<helper title="Like condition">
 									<div>
-										<p>This condition allows to select precisely what type of photos the bot will like based on image description.</p>
-										<p>Examples: food|vegan|#veggie|#red|blue</p>
-										<p>Here can be used hashtags and normal text. The pipe "|" char separates the text. Is sufficient that one of this words/sentences are present to trigger the like/skip functionality.</p>
+										<p>This condition allows to select precisely what type of photos the bot will like basing on image description.</p>
+										<p>Click on the gear and insert text, hashtags or regex filters.</p>
 										<p>If you have previously liked a post it will not be unliked.</p>
 										<p>This filter will apply to all like actions (tags/dashboard/likeback)</p>
 									</div>
