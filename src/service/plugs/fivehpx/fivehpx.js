@@ -19,11 +19,14 @@ export default function() {
 
 			return axios(urls.home).then((home) => {
 				return {
-					logged: false
+					logged: true
 				}
 			})
 		},
 		actions: {
+			likeTagImages (tagName, wait, limit) {
+				return Promise.resolve()
+			},
 			followManager (mode) {
 				return Promise.resolve([])
 			}

@@ -1,6 +1,5 @@
 export default {
 	enabled: true, // Robot enabled
-	paused: false, // Pause the execution until the reboot
 	notifications: false, // Show notification when is present
 	likeDash: true, // Like the images from your dashboard
 	followBack: true, // Follow back when a user starts following you

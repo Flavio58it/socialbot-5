@@ -26,7 +26,10 @@
 								@keyup.enter.stop="saveEl"
 							/>
 						</div>
-						<div class="col-2 align-left"><i @click.prevent.stop="saveEl" class="fa fa-save"/><i @click.prevent.stop="remEl(i)" class="fa fa-remove"/></div>
+						<div class="col-2 align-left">
+							<i @click.prevent.stop="saveEl" class="fa fa-save"/>
+							<i v-if="(value[i] != '' && i == (value.length-1)) || (i != (value.length-1))" @click.prevent.stop="remEl(i)" class="fa fa-remove"/>
+						</div>
 					</div>
 					<div v-else class="editable tags row">
 						<div class="col-2">

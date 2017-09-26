@@ -22,7 +22,7 @@ export default function (settings) {
 					userId: userData.userId,
 					userName: userData.userName,
 					video: userData.isVideo,
-					comment: details.comment || undefined,
+					//comment: details.comment || undefined,
 					tag: details.tag || undefined
 				},
 				time: new Date().getTime()

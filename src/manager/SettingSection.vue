@@ -28,7 +28,6 @@
 			<hr/>
 			<b>
 				Followers manager
-
 				<Helper title="Followers manager">
 					<p>With this tool you can see the overall situation of the your account.</p>
 					<p>You can filter by name and the user situation towards you and then perform actions</p>
@@ -44,16 +43,23 @@
 				</Helper>
 			</b>
 			<div class="description">Here you can manage your followers.</div>
-			
+			<!-- <FollowManager :plug="plug"/> -->
 		</div>
 		<Loading v-else/>
 	</div>
 </template>
 
-<!-- <FollowManager :plug="plug"/> -->
-
-<style lang="scss" scoped>
+<style lang="scss">
 	.save {width: 200px;}
+	.description {
+		font-size: $font-small;
+	}
+	.tab-pane {
+		padding: $spacer;
+		background-color: white;
+		border: 1px solid #ddd;
+		border-top: 0;
+	}
 </style>
 
 <script>

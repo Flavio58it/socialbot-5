@@ -4,41 +4,41 @@
 		:settings.sync="settings"
 		@loaded="followFilterManager"
 	>
-			<template slot="left" scope="props">
+			<template slot="left" scope="data">
 				<b-tabs>
 					<b-tab title="General">
 						<div>
-							<b-form-checkbox v-model="props.settings.enabled">
+							<b-form-checkbox v-model="data.settings.enabled">
 								<b>Bot enabled</b>
 								<div class="description">Enable the bot</div>
 							</b-form-checkbox>
 						</div>
 						<div>
-							<b-form-checkbox v-model="props.settings.notifications">
+							<b-form-checkbox v-model="data.settings.notifications">
 								Notifications
 								<div class="description">Show notifications on desktop</div>
 							</b-form-checkbox>
 						</div>
 						<div>
-							<b-form-checkbox v-model="props.settings.likeDash">
+							<b-form-checkbox v-model="data.settings.likeDash">
 								Like dashboard
 								<div class="description">Like the images from your dashboard</div>
 							</b-form-checkbox>
 						</div>
 						<div>
-							<b-form-checkbox v-model="props.settings.followBack">
+							<b-form-checkbox v-model="data.settings.followBack">
 								Followback
 								<div class="description">Follow back the people who follows you</div>
 							</b-form-checkbox>
 						</div>
 						<div>
-							<b-form-checkbox v-model="props.settings.unFollowBack">
+							<b-form-checkbox v-model="data.settings.unFollowBack">
 								UnFollowback
 								<div class="description">When a user unfollows you will be unfollowed back. (Whitelist applied)</div>
 							</b-form-checkbox>
 						</div>
 						<div>
-							<b-form-checkbox v-model="props.settings.likeBack.enabled">
+							<b-form-checkbox v-model="data.settings.likeBack.enabled">
 								LikeBack 
 								<helper title="LikeBack">
 									<p>When a user like one of the your images the bot will check their gallery and like back a couple of images.</p>
@@ -59,7 +59,7 @@
 								<b-form-input
 									type="number"
 									:formatter="checkLowerLimitValid"
-									v-model="props.settings.waiter.actionLower"
+									v-model="data.settings.waiter.actionLower"
 									lazy-formatter
 								/>
 							</div>
@@ -68,7 +68,7 @@
 								<b-form-input
 									type="number"
 									:formatter="checkUpperLimitValid"
-									v-model="props.settings.waiter.actionUpper"
+									v-model="data.settings.waiter.actionUpper"
 									lazy-formatter
 								/>
 							</div>
@@ -86,7 +86,7 @@
 								Time (minutes)
 								<b-form-input
 									type="number"
-									v-model="props.settings.waiter.roundPause"
+									v-model="data.settings.waiter.roundPause"
 								/>
 							</div>
 						</div>
@@ -111,21 +111,21 @@
 						<div class="row">
 							<div class="col-4">
 								 <b-form-select 
-								 	v-model="props.settings.filters.likes.isTextInclusive" 
+								 	v-model="data.settings.filters.likes.isTextInclusive" 
 								 	:options="[
 								 		{text: 'Include if', value: true},
 								 		{text: 'Exclude if', value: false}
 								 	]" 
 								 	class="mb-3"/>
 							</div>
-							<FilterOptions class="col-8" v-model="props.settings.filters.likes.textFilters"/>
+							<FilterOptions class="col-8" v-model="data.settings.filters.likes.textFilters"/>
 						</div>
 
 						<div class="description">Like by the number of likes condition (0 is disabled)</div>
 						<div class="row">
 							<div class="col-3">
 								 <b-form-select 
-								 	v-model="props.settings.filters.likes.isLikeNumberInclusive"
+								 	v-model="data.settings.filters.likes.isLikeNumberInclusive"
 								 	:options="[
 								 		{text: 'Include if', value: true},
 								 		{text: 'Exclude if', value: false}
@@ -134,7 +134,7 @@
 							</div>
 							<div class="col-4">
 								 <b-form-select 
-								 	v-model="props.settings.filters.likes.isLikeNumberMoreLess" 
+								 	v-model="data.settings.filters.likes.isLikeNumberMoreLess" 
 								 	:options="[
 								 		{text: 'More than', value: true},
 								 		{text: 'Less than', value: false}
@@ -144,7 +144,7 @@
 							<div class="col-5">
 								<b-form-input
 									type="number"
-									v-model="props.settings.filters.likes.isLikeNumber"
+									v-model="data.settings.filters.likes.isLikeNumber"
 								/>
 							</div>
 						</div>
@@ -160,7 +160,7 @@
 									</helper>
 								</div>
 								 <b-form-select 
-								 	v-model="props.settings.filters.likes.brain" 
+								 	v-model="data.settings.filters.likes.brain" 
 								 	:options="[
 								 		{text: 'Disabled', value: false},
 								 		{text: 'Landscape (Nature)', value: 'landscape'},
@@ -169,12 +169,12 @@
 								 	]" 
 								 	class="mb-3"/>
 							</div>
-							<div v-if="props.settings.filters.likes.brain" class="col-6">
+							<div v-if="data.settings.filters.likes.brain" class="col-6">
 								<div class="description">
 									AI Fallback
 								</div>
 								 <b-form-select 
-								 	v-model="props.settings.filters.likes.brainFallback" 
+								 	v-model="data.settings.filters.likes.brainFallback" 
 								 	:options="[
 								 		{text: 'Do not like', value: false},
 								 		{text: 'Like anyway', value: true}
@@ -191,21 +191,21 @@
 								Hashtag follower
 								<b-form-input
 									type="number"
-									v-model="props.settings.limits.likes.tag"
+									v-model="data.settings.limits.likes.tag"
 								/>
 							</div>
 							<div class="col-4">
 								Dashboard
 								<b-form-input
 									type="number"
-									v-model="props.settings.limits.likes.dash"
+									v-model="data.settings.limits.likes.dash"
 								/>
 							</div>
 							<div class="col-4">
 								Explore <helper title="Explore">The section listing the people that you don't follow but you may like</helper>
 								<b-form-input
 									type="number"
-									v-model="props.settings.limits.likes.explorer"
+									v-model="data.settings.limits.likes.explorer"
 								/>
 							</div>
 						</div>
@@ -214,7 +214,7 @@
 						</div>
 						<div class="row">
 							<div class="col">
-								<b-form-checkbox v-model="props.settings.filters.likes.videos">
+								<b-form-checkbox v-model="data.settings.filters.likes.videos">
 									Like videos
 									<div class="description">Like also if the post is a video</div>
 								</b-form-checkbox>
@@ -230,7 +230,7 @@
 							<div class="description col-12">Filter by user followers number</div>
 							<div class="col-6">
 								<b-form-select 
-								 	v-model="props.settings.filters.follow.followers.more"
+								 	v-model="data.settings.filters.follow.followers.more"
 								 	:options="[
 								 		{text: 'More than', value: true},
 								 		{text: 'Less than', value: false}
@@ -246,7 +246,7 @@
 									@input="followFilterManager()"
 									:formatter="toDefault"
 									lazy-formatter
-									v-model="props.settings.filters.follow.followers.number"
+									v-model="data.settings.filters.follow.followers.number"
 								/>
 							</div>
 						</div>
@@ -254,7 +254,7 @@
 							<div class="description col-12">Filter by user following number</div>
 							<div class="col-6">
 								<b-form-select 
-								 	v-model="props.settings.filters.follow.following.more"
+								 	v-model="data.settings.filters.follow.following.more"
 								 	:options="[
 								 		{text: 'More than', value: true},
 								 		{text: 'Less than', value: false}
@@ -270,7 +270,7 @@
 									@input="followFilterManager()"
 									:formatter="toDefault"
 									lazy-formatter
-									v-model="props.settings.filters.follow.following.number"
+									v-model="data.settings.filters.follow.following.number"
 								/>
 							</div>
 						</div>
@@ -290,12 +290,12 @@
 									:disabled="followConditionsMode == 'fixed'"
 									:formatter="toDefault"
 									lazy-formatter
-									v-model="props.settings.filters.follow.ratio"
+									v-model="data.settings.filters.follow.ratio"
 								/>
 							</div>
 						</div>
 					</b-tab>
-					<b-tab v-if="props.settings.likeBack.enabled" title="LikeBack">
+					<b-tab v-if="data.settings.likeBack.enabled" title="LikeBack">
 						<div>
 							<b>Ignore time</b>
 							<div class="description">After you have liked back a user wait before liking his dashboard again [days]</div>
@@ -304,7 +304,7 @@
 							<div class="col-4">
 								<b-form-input
 									type="number"
-									v-model="props.settings.likeBack.ignoreTime"
+									v-model="data.settings.likeBack.ignoreTime"
 								/>
 							</div>
 						</div>
@@ -316,7 +316,7 @@
 							<div class="col-4">
 								<b-form-input
 									type="number"
-									v-model="props.settings.likeBack.likes"
+									v-model="data.settings.likeBack.likes"
 								/>
 							</div>
 						</div>
@@ -328,7 +328,7 @@
 							<div class="col-4">
 								<b-form-input
 									type="number"
-									v-model="props.settings.likeBack.maxUsersLike"
+									v-model="data.settings.likeBack.maxUsersLike"
 								/>
 							</div>
 						</div>
@@ -339,15 +339,7 @@
 </template>
 
 <style lang="scss" scoped>
-	.description {
-		font-size: $font-small;
-	}
-	.tab-pane {
-		padding: $spacer;
-		background-color: white;
-		border: 1px solid #ddd;
-		border-top: 0;
-	}
+	
 </style>
 
 <script>

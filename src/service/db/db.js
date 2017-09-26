@@ -8,6 +8,6 @@ db.version(1).stores({
 	stats: "++id, plug, likes, followers, unfollowers, followbacks, followNumber"
 });
 
-db.users.limit(1).delete(); // Simulate a user to follow
+//db.users.limit(1).delete(); // Simulate a user to follow
 
 export default db;
