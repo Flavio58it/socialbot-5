@@ -16,7 +16,11 @@ export default function (match, inputText) { //
 		return false;
 
 	match.forEach((t) => {
-		if (inputText.indexOf(t) > -1)
+		if (t.indexOf("#") == 0 || t.indexOf("@") == 0)
+			result = inputText.indexOf(t + " ") > -1
+		else if(/^\/.+\/$/.test(t))
+			result = new RegExp(t.replace(/^\/(.*)\/$/, "$1"), "g").test(inputText)
+		else if (inputText.indexOf(t) > -1)
 			result = true;
 	})
 

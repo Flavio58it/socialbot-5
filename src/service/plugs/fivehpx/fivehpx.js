@@ -1,11 +1,8 @@
 import axios from "axios";
 
 import urls from "./urls";
+import mappers from "./mappers";
 import police from "../../police";
-
-
-
-
 
 export default function() {
 	var settings = false,

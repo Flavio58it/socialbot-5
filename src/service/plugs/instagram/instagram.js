@@ -391,7 +391,7 @@ export default function () {
 						var query = db.users.where("[plug+userid]").equals(["instagram", t.id]);
 
 						flow = flow.then(() => query.toArray()).then((qres) => {
-							console.log("QRES: ", qres);
+							//console.log("QRES: ", qres);
 							if ((qres.length && (!qres[0].lastInteraction || (qres[0].lastInteraction  <= now - ms.days(settings.ignoreTime)))) || !qres.length) {
 								if (likebacked >= settings.maxUsersLike)
 									return Promise.resolve()

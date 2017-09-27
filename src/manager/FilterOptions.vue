@@ -12,8 +12,9 @@
 		</div>
 		<b-modal id="modalFilters" ref="modalFilters" title="Add/Edit comment filters" :ok-only="true" @hide="cleanArray">
 			<div class="content">
-				Text will be counted as lowercase
+				Text will be counted as lowercase. The spaces cannot be used!
 			</div>
+			<hr/>
 			<div v-if="value.length">
 				<div v-for="(option, i) in value">
 					<div v-if="editIndex !== false && editIndex == i" class="row">
@@ -24,6 +25,7 @@
 							<b-form-input
 								v-model="value[i]"
 								@keyup.enter.stop="saveEl"
+								@keyup.space.prevent.stop="saveEl"
 							/>
 						</div>
 						<div class="col-2 align-left">
@@ -96,22 +98,35 @@
 				this.value.forEach(function(t, i) {
 					if (!t)
 						tt.value.splice(i, 1);
+					else
+						t = t.trim();
 				})
 			},
 			remEl (i) {
 				this.value.splice(i, 1);
+			},
+			focusInput () {
+				this.$nextTick(() => {// Wait a moment!
+					this.$el.querySelector("input").focus();
+				});
 			},
 			newEntry () {
 				if (this.editIndex !== false)
 					return;
 				this.value.push("");
 				this.editIndex = this.value.length - 1;
+				this.focusInput()
 			},
 			variantCreator (opt) {
 				if (opt.indexOf("#") == 0)
 					return {
 						badge: "success",
 						text: "Hashtag"
+					}
+				if (opt.indexOf("@") == 0)
+					return {
+						badge: "primary",
+						text: "Person"
 					}
 				else if(/^\/.+\/$/.test(opt))
 					return {

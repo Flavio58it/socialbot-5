@@ -5,7 +5,7 @@
 
 import objectMapper from "object-mapper";
 import {imageRecognition} from "./ai/neural";
-import textMatcher from "textMatcher";
+import matcher from "matcher";
 
 const genericMapper = { // The default mapper for the settings.
 	follow: {
@@ -52,7 +52,7 @@ function police (settings) {
 			}
 
 			if (settings[0].options.textFilters && settings[0].options.textFilters.length) { // Match by the text in image comment
-				var result = textMatcher(settings[0].options.textFilters, data.comment);
+				var result = matcher(settings[0].options.textFilters, data.comment);
 				if (result && !settings[0].options.isTextInclusive)
 					return false;
 				if (!result && settings[0].options.isTextInclusive)
