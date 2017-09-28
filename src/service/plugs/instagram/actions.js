@@ -64,11 +64,13 @@ const lib = {
 			var flow = Promise.resolve(),
 				r = randomArray(limit, 1, (len < limit + 1)? (limit + 1) : len);
 
+			console.log("Liking: ", userName, r);
+
 			userData.posts.list.forEach((details, i) => {
 				if (r.indexOf(i) != -1) { // If the post index is in array proceed
+					console.log("I: ", details, i);
 					flow = flow.then(() => decodeObject(format(urls.get.post, details.code)).then((post) => { // Check the post and see if has already been liked
 						post = objectMapper(post, mappers.postData);
-						//console.log("Chosen post", post)
 						if (!post.liked)
 							return lib.likePost(details.id, csrf).then(() => waiter(ms.seconds(1), ms.seconds(5))); // Like and wait
 						else

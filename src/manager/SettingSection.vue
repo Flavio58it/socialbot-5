@@ -26,8 +26,8 @@
 			</div>
 			<div  class="clearfix"/>
 			<hr/>
-			<b>
-				Followers manager
+			<div>
+				<b>Followers manager</b>
 				<Helper title="Followers manager">
 					<p>With this tool you can see the overall situation of the your account.</p>
 					<p>You can filter by name and the user situation towards you and then perform actions</p>
@@ -41,7 +41,7 @@
 						<div><b-badge variant="warning">Following</b-badge> - You are following him (and he is not following you)</div>
 					</div>
 				</Helper>
-			</b>
+			</div>
 			<div class="description">Here you can manage your followers.</div>
 			<!-- <FollowManager :plug="plug"/> -->
 		</div>
@@ -69,7 +69,10 @@
 	import Helper from "components/Helper.vue";
 
 	export default {
-		props: ["plug", "settings"],
+		props: [
+			"plug", 
+			"settings"
+		],
 		data () {
 			return {
 				status: false

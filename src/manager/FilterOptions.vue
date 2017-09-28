@@ -10,7 +10,7 @@
 		<div class="col-3">
 			<i @click="addEditModal" class="fa fa-gear fa-2x"/>
 		</div>
-		<b-modal id="modalFilters" ref="modalFilters" title="Add/Edit comment filters" :ok-only="true" @hide="cleanArray">
+		<b-modal id="modalFilters" ref="modalFilters" title="Add/Edit comment filters" :ok-only="true" @hide="cleanArray" @show="editIndex = false">
 			<div class="content">
 				Text will be counted as lowercase. The spaces cannot be used!
 			</div>
