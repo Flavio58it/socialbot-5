@@ -254,6 +254,8 @@ export default function () {
 					settings.get("unFollowBack")
 				])
 
+				//return Promise.resolve();
+
 				return Promise.all([
 					actions.getUsersBatch(query_id.followers, user.id),
 					actions.getUsersBatch(query_id.following, user.id)
@@ -348,7 +350,7 @@ export default function () {
 											return log.userInteraction("FOLLOWBACK", {
 												img: us.img,
 												userId: us.id,
-												userName: us.username
+												username: us.username
 											}).then(db.users.where("[plug+userid]").equals(["instagram", us.id]).modify({ // Specify that has been auto_followed
 												"details.autoFollowed": true,
 												lastInteraction: now // If has been followed no interaction will occur for some time (TODO: May rethink this.)
@@ -391,21 +393,18 @@ export default function () {
 						var query = db.users.where("[plug+userid]").equals(["instagram", t.id]);
 
 						flow = flow.then(() => query.toArray()).then((qres) => {
-							console.log("QR: ", qres);
 							if ((qres.length && (!qres[0].lastInteraction || (qres[0].lastInteraction  <= now - ms.days(settings.ignoreTime)))) || !qres.length) {
 								if (likebacked >= settings.maxUsersLike)
 									return Promise.resolve()
 								likebacked ++;
-								return actions.likeUserPosts(t.username, csrf, settings.likes).then(() => {
-									console.log("User already present")
+								return actions.likeUserPosts(t.username, csrf, settings.likes, checker, log).then(() => {
 									return query.modify({
 										lastInteraction: now
 									})
 								}).then((res) => {
 									if (!res) {
-										console.log("The user has not been found in database. Adding...")
 										return actions.getUserData(t.username).then((data) => {
-											return  db.users.add(actions.newDbUser(user, now, 2))
+											return  db.users.add(actions.newDbUser(t, now, 2))
 										});
 									}
 									return Promise.resolve();

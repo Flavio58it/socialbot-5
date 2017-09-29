@@ -20,7 +20,13 @@
 							<span v-if="log.details.tag">(#{{log.details.tag}})</span>
 						</span>
 						<span v-else-if="log.action == 'USER_FOLLOWBACK'">
-							<b>Followed</b> user {{log.details.userName}}
+							<b>Followed back </b> user {{log.details.userName}}
+						</span>
+						<span v-else-if="log.action == 'USER_UNFOLLOWBACK'">
+							<b>Unfollowed back </b> user {{log.details.userName}}
+						</span>
+						<span v-else-if="log.action == 'USER_LIKEBACK'">
+							<b>Likeback to </b> user <b>{{log.details.userName}}</b>
 						</span>
 						<div class="row date">
 							<div class="col">{{log.time|fromNow}}</div>

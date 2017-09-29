@@ -11,6 +11,7 @@ import {cache} from "./instagram";
 import {getUrl, decodeObject, _postData} from "./utils";
 import mappers from "./mappers";
 import urls from "./urls";
+import logger from "../../db/logger";
 
 const lib = {
 	likePost: function (postId, csrf) {
@@ -35,16 +36,16 @@ const lib = {
 			return list;
 		})
 	},
-	getUserData: function(userName) {
+	getUserData: function(username) {
 		var now = new Date().getTime();
 		if (!cache.userData)
 			cache.userData = {}
-		if (cache.userData[userName] && cache.userData[userName].time >= (now - ms.minutes(20))) // Cached users for 20 minutes
-			return Promise.resolve(cache.userData[userName].data);
-		return decodeObject(format(urls.get.user, userName)).then((userData) => {
+		if (cache.userData[username] && cache.userData[username].time >= (now - ms.minutes(20))) // Cached users for 20 minutes
+			return Promise.resolve(cache.userData[username].data);
+		return decodeObject(format(urls.get.user, username)).then((userData) => {
 			var mapped = objectMapper(userData, mappers.user);
-			console.log("User data expired for "+userName+". Refetched.");
-			cache.userData[userName] = {
+			console.log("User data expired for "+username+". Refetched.");
+			cache.userData[username] = {
 				data: mapped,
 				time: now
 			}
@@ -56,23 +57,27 @@ const lib = {
 			return objectMapper(notifications, mappers.notifications);
 		});
 	},
-	likeUserPosts: function (userName, csrf, limit) {
-		return lib.getUserData(userName).then((userData) => {
+	likeUserPosts: function (username, csrf, limit, checker, log) {
+		return lib.getUserData(username).then((userData) => {
 			var len = userData.posts.list.length;
 			if (!len)
 				return Promise.resolve();
 			var flow = Promise.resolve(),
 				r = randomArray(limit, 1, (len < limit + 1)? (limit + 1) : len);
 
-			console.log("Liking: ", userName, r);
-
 			userData.posts.list.forEach((details, i) => {
 				if (r.indexOf(i) != -1) { // If the post index is in array proceed
-					console.log("I: ", details, i);
 					flow = flow.then(() => decodeObject(format(urls.get.post, details.code)).then((post) => { // Check the post and see if has already been liked
 						post = objectMapper(post, mappers.postData);
 						if (!post.liked)
-							return lib.likePost(details.id, csrf).then(() => waiter(ms.seconds(1), ms.seconds(5))); // Like and wait
+							return lib
+								.likePost(details.id, csrf)
+								.then(() => {
+									//console.log("POPOST: ", details);
+									userData.img = details.src; // Overwriting user image with post image
+									return log.userInteraction("LIKEBACK", userData, {})
+								})
+								.then(() => waiter(ms.seconds(1), ms.seconds(5))); // Like and wait TODO: Check with police!
 						else
 							return waiter(ms.seconds(1), ms.seconds(5)); // Do not like but wait anyway... a call has been made!
 					}))
@@ -124,7 +129,7 @@ const lib = {
 			details: {
 				img: us.img
 			},
-			lastInteraction: false,
+			lastInteraction: toFollow == 2?now:false,
 			added: now
 		}
 	},

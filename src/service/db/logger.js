@@ -10,17 +10,17 @@ export default function (settings) {
 		/**
 		* Logs various type of data to the log db table. The various functions will be compatible with the templates used in FE
 		**/
-		userInteraction (type, userData, details) { // Types: LIKE, FOLLOWBACK, UNFOLLOW, NEW, COMMENT
+		userInteraction (type, userData, details) { // Types: LIKE, LIKEBACK, FOLLOWBACK, UNFOLLOW, NEW, COMMENT
 			var details = details || {};
-			console.log("Logging userData: ", userData);
+			console.log("Logging action: ", type," Data: ", userData, "Details", details);
 			return db.logs.add({
 				plug: settings.type,
 				action: "USER_" + type.toUpperCase(),
 				details: {
-					img: userData.img, // Can be also img of the user if is followback etc.
+					img: details.img || userData.img, // Can be also img of the user if is followback etc.
 					imgId: userData.id,
 					userId: userData.userId,
-					userName: userData.userName,
+					userName: userData.username,
 					video: userData.isVideo,
 					//comment: details.comment || undefined,
 					tag: details.tag || undefined

@@ -12,7 +12,7 @@ export default {
 	postLike: { // Post in a list of posts (edges) - like area
 		"id": "id",
 		"owner.id": "userId",
-		"owner.username": "userName",
+		"owner.username": "username",
 		"caption": "comment",
 		"viewer_has_liked": "liked",
 		"code": "code",
@@ -25,7 +25,7 @@ export default {
 	post: { // Post in a list of posts (edges) - dashboard area
 		"node.id": "id",
 		"node.owner.id": "userId",
-		"node.owner.username": "userName",
+		"node.owner.username": "username",
 		"node.caption": "comment",
 		"node.viewer_has_liked": "liked",
 		"node.code": "code",
@@ -41,6 +41,7 @@ export default {
 		"user.username": "username",
 		"user.full_name": "fullName",
 		"user.id": "id",
+		"user.profile_pic_url": "img",
 		"user.followed_by.count": "followedBy",
 		"user.follows.count": "follows",
 		"user.biography": "bio",
