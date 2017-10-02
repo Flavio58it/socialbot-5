@@ -29,13 +29,15 @@ function _updater(details, domain) {
   return {requestHeaders: details.requestHeaders};
 }
 
-export default (function (domain) {
-  var listening = false;
+export default (function (domain, override) {
+  var listening = false, requestHeader = override || domain;
+
+  console.info("Request overrider enabled on: ", domain, "on", override);
 
 	return {
 		listen () {
       if (!listening)
-  			chrome.webRequest.onBeforeSendHeaders.addListener((details) => _updater(details, domain), {
+  			chrome.webRequest.onBeforeSendHeaders.addListener((details) => _updater(details, requestHeader), {
   			    urls: [domain+ "/*"]
   			}, [
   			    "blocking", "requestHeaders"
@@ -44,7 +46,7 @@ export default (function (domain) {
 		},
 		unlisten () {
       console.log("Unlistened")
-			chrome.webRequest.onBeforeSendHeaders.removeListener((details) => _updater(details, domain));
+			chrome.webRequest.onBeforeSendHeaders.removeListener((details) => _updater(details, requestHeader));
       listening = false;
 		}
 	}

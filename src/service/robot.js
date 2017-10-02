@@ -7,7 +7,7 @@ const bot = function(settings, plug, plugName) {
 		console.info("Logged in: ", data.logged);
 		if (!data.logged)
 			return Promise.reject({id: "LOGGED_OUT", error: "Login failure. Please go to the homepage and login.", action: "PLUG_HOME"})
-		request = new requests(data.domain).listen(); // See the requests module for the explanation
+		request = new requests(data.domain.match, data.domain.res).listen(); // See the requests module for the explanation
 		return settings.get("follow").then((follow) => follow.tags)
 	}).then((data) => {
 		// LIke all the tag images

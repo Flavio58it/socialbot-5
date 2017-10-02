@@ -9,7 +9,7 @@ import objectMapper from "object-mapper";
 import police from "../../police";
 
 import mappers from "./mappers";
-import {getUrl, decodeObject, _postData} from "./utils";
+import {getUrl, decodeObject} from "./utils";
 import actions from "./actions";
 import urls from "./urls";
 import queryIdParser from "./queryid_parser";
@@ -51,7 +51,9 @@ export default function () {
 				return {
 						connectionOk: true,
 						logged: (data && !data.entry_data.LandingPage),
-						domain: urls.home
+						domain: {
+							match: urls.home
+						}
 				}
 			})
 		},

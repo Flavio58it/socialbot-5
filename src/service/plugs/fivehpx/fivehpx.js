@@ -3,12 +3,14 @@ import waiter from "waiter";
 import objectMapper from "object-mapper";
 
 import urls from "./urls";
-import {getUrl} from "./utils";
+import {getUrl, _postData} from "./utils";
 import mappers from "./mappers";
 import police from "../../police";
 
 export default function() {
 	var settings = false,
+		checker = false,
+		csrf = false,
 		userData = false;
 
 
@@ -18,8 +20,16 @@ export default function() {
 			checker = new police(settingsData); 
 
 			return axios(urls.home).then((home) => {
+				var dom = document.createElement("html");
+				dom.innerHTML = home.data;
+				csrf = dom.querySelector("meta[name*='csrf-token']").getAttribute("content");
+
 				return {
-					logged: true
+					logged: true,
+					domain: {
+						match: urls.api,
+						res: urls.home
+					}
 				}
 			})
 		},
@@ -29,10 +39,15 @@ export default function() {
 				var numberLikes = 0;
 
 				function like () {
-					return axios(getUrl(urls.get.tag, [tagName, 0])).then((data) => {
-						return objectMapper(data, mappers.tagList);
+					return axios(getUrl(urls.get.tag, [tagName, 1]), _postData(csrf)).then((data) => {
+						return objectMapper(data.data, mappers.postTagList);
 					}).then((data) => {
+						console.log(data)
 						var flow = Promise.resolve();
+
+						data.list.forEach((t) => {
+
+						});
 						
 					})
 				}

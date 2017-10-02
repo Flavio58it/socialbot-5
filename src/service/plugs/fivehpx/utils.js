@@ -9,3 +9,14 @@ export function getUrl(url, template){ // Template is an array of values
 		url = format(url, template);
 	return url;
 }
+
+export function _postData (csrf) {
+	return {
+		method: "GET",
+		headers: {
+			"content-type":"application/json",
+			"x-requested-with": "XMLHttpRequest",
+			"X-CSRF-Token": csrf
+		}
+	}
+}
