@@ -38,15 +38,19 @@ export default function() {
 
 				var numberLikes = 0;
 
-				function like () {
-					return axios(getUrl(urls.get.tag, [tagName, 1]), _postData(csrf)).then((data) => {
+				function like (page) {
+					return axios(getUrl(urls.get.tag, [tagName, page || 1]), _postData(csrf)).then((data) => {
 						return objectMapper(data.data, mappers.postTagList);
 					}).then((data) => {
 						console.log(data)
 						var flow = Promise.resolve();
 
 						data.list.forEach((t) => {
+							flow = flow.then(() => {
+								if (numberLiked >= limit)
+									return Promise.reject({id: "LIKE_LIMIT_REACHED"});
 
+							})
 						});
 						
 					})
