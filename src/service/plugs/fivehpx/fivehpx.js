@@ -5,6 +5,7 @@ import objectMapper from "object-mapper";
 import urls from "./urls";
 import {getUrl, _postData} from "./utils";
 import mappers from "./mappers";
+import actions from "./actions";
 import police from "../../police";
 
 export default function() {
@@ -51,6 +52,35 @@ export default function() {
 									return Promise.reject({id: "LIKE_LIMIT_REACHED"});
 
 							})
+							.then(() => checker.shouldLike(t).then((res) => {
+								if  (!res)
+									return Promise.reject({id: "LIKE_REJECTED"});
+							}))
+							.then(() => actions.likePost(d.id, csrf))
+							.then((data) => {log.userInteraction("LIKE", d, {tag: tagName});return data;})
+							.then((data) => {
+								numberLiked++;
+								return data;
+							}).catch((e) => {
+								if (e.id == "LIKE_LIMIT_REACHED" || e.id == "ALREADY_LIKED"){ // Passing the likeLimit as is not an error to manage here.
+									return Promise.reject(e);
+								} else if (e.id == "LIKE_REJECTED"){
+									console.warn("Like rejected by police");
+									//log.userInteraction(e.id, d, {tag: tagName});
+									rejector++;
+									if (rejector > 5) { // Like reject protection system. See the declaration of the var for explanation.
+										numberLiked++;
+										rejector = 0;
+									}
+									return Promise.resolve();
+								} else if (e.response && e.response.status == 404) {
+									console.error("Post not found...");
+									return Promise.resolve();
+								} else if (e.stopped) // Pass the stopper
+									return Promise.reject(e);
+								return Promise.reject({error: "Connection error.", details: (e.details || e), id: "CONNECTION_ERROR_TAG_LIKE", action: "RELOAD"});
+							})
+							.then(() => waiter(ms.seconds(wait.actionLower), ms.seconds(wait.actionUpper)))
 						});
 						
 					})

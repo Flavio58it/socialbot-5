@@ -1,5 +1,5 @@
 import decoder from "imgDecoder/imgDecoder";
-import brain_neurons from "./brain";
+//import brain_neurons from "./brain";
 var synaptic = require("synaptic");
 
 export function imageRecognition () {
