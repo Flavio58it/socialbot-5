@@ -102,7 +102,7 @@ export default function () {
 										return Promise.reject({id: "LIKE_REJECTED"});
 								}))
 								.then(() => actions.likePost(d.id, csrf))
-								.then((data) => {log.userInteraction("LIKE", d, {tag: tagName});return data;})
+								.then((data) => {log.userInteraction("LIKE", d, {tag: tagName}); return data;})
 								.then((data) => {
 									numberLiked++;
 									return data;

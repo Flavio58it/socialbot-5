@@ -3,6 +3,7 @@
 export default {
 	media: {
 		"tag.media.nodes": "posts",
+		"graphql.hashtag.edge_hashtag_to_media.edges[].node": "posts",
 		"tag.media.page_info.end_cursor": "nextPage"
 	},
 	dashboard: {
@@ -15,6 +16,7 @@ export default {
 		"owner.username": "username",
 		"caption": "comment",
 		"viewer_has_liked": "liked",
+		"shortcode": "code",
 		"code": "code",
 		"display_src": "img",
 		"display_url": "img",
