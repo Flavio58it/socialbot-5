@@ -38,7 +38,7 @@ export default [
 	},
 	{
 		path: "/",
-		component: Home
+		component: dev?Home:NotFound
 	},
 
 	// Page not found fallback

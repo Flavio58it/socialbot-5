@@ -4,7 +4,7 @@
   "name": "FollowHunter - Instagram",
   "short_name": "FollowHunter",
   "description": "AI powered bot for maintaining accounts activity.",
-  "version": "0.1",
+  "version": "0.0.1",
   "minimum_chrome_version": "59",
 
   "permissions":[

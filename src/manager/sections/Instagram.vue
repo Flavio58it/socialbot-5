@@ -25,13 +25,13 @@
 								<div class="description">Like the images from your dashboard</div>
 							</b-form-checkbox>
 						</div>
-						<div>
+						<div v-if="dev">
 							<b-form-checkbox v-model="data.settings.followBack">
 								Followback
 								<div class="description">Follow back the people who follows you</div>
 							</b-form-checkbox>
 						</div>
-						<div>
+						<div v-if="dev">
 							<b-form-checkbox v-model="data.settings.unFollowBack">
 								UnFollowback
 								<div class="description">When a user unfollows you will be unfollowed back. (Whitelist applied)</div>
@@ -148,7 +148,7 @@
 								/>
 							</div>
 						</div>
-						<div class="row">
+						<div class="row" v-if="dev">
 							<div class="col-6">
 								<div class="description">
 									AI Setting <b>EXPERIMENTAL</b>
@@ -201,7 +201,7 @@
 									v-model="data.settings.limits.likes.dash"
 								/>
 							</div>
-							<div class="col-4">
+							<div class="col-4" v-if="dev">
 								Explore <helper title="Explore">The section listing the people that you don't follow but you may like</helper>
 								<b-form-input
 									type="number"
@@ -351,6 +351,7 @@
 		data () {
 			return {
 				type: "instagram",
+				dev: process.env.NODE_ENV === 'development',
 				followConditionsMode: false,
 				settings: false
 			}

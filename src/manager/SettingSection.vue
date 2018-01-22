@@ -5,9 +5,9 @@
 			<div class="text-center">Rebooting. Please wait.</div>
 		</div>
 		<div v-else-if="settings">
-			<div class="row">
+			<div class="row statusTab">
 				<div class="col">
-					Running: {{status.running}}
+					<b>Service status:</b> <span>{{status.running?"Running": "Stopped"}}</span>
 				</div>
 			</div>
 			<div class="row">
@@ -43,7 +43,10 @@
 				</Helper>
 			</div>
 			<div class="description">Here you can manage your followers.</div>
-			<!-- <FollowManager :plug="plug"/> -->
+			<div v-if="!followManager" class="text-center">
+				<b-button @click="followManager = !followManager" class="button" variant="primary">Enable Followers manager</b-button>
+			</div>
+			<FollowManager v-else :plug="plug"/>
 		</div>
 		<Loading v-else/>
 	</div>
@@ -60,6 +63,13 @@
 		border: 1px solid #ddd;
 		border-top: 0;
 	}
+
+	.statusTab {
+		background-color: white;
+		padding: $spacer;
+		margin: 10px;
+		border: 1px solid #ddd;
+	}
 </style>
 
 <script>
@@ -75,7 +85,8 @@
 		],
 		data () {
 			return {
-				status: false
+				status: false,
+				followManager: false
 			}
 		},
 		message (action, data) {
