@@ -7,7 +7,7 @@
 					<!--<a href="www.instagram.com" target="_blank"><img :src="user.image" :alt="user.username"></img></a>-->
 				</div>
 				<div :class="[showSettings?'col-8':'col-9', 'title', 'text-center']">
-					<a :href="links.home"><b>FollowHunter</b> control panel</a>
+					<a :href="links.home"><b>SocialBot</b> control panel</a>
 				</div>
 				<div v-if="showSettings" class="col-1 text-right">
 					<a :href="links.settings" target="_blank">

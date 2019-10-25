@@ -1,6 +1,6 @@
 import Dexie from "dexie";
 
-var db = new Dexie("followhunter");
+var db = new Dexie("socialbot");
 
 db.version(1).stores({
 	logs: "++id, plug, action, details, time", // Details should have imgSrc, username, userid etc.
