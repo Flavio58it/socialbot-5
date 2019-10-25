@@ -6,9 +6,9 @@ import Instagram from "./sections/Instagram.vue";
 import Fivehpx from "./sections/Fivehpx.vue";
 
 import Home from "./Home.vue";
-import Trainer from "./Trainer.vue";
+//import Trainer from "./Trainer.vue";
 
-var dev = process.env.NODE_ENV === 'development';
+//var dev = process.env.NODE_ENV === 'development';
 
 export default [
 	{ 
@@ -31,11 +31,12 @@ export default [
 			}
 		]
 	},
-	{
+	// Trainer included in code not needed
+	/*{
 		path: "/trainer",
 		component: dev?Trainer:undefined,
 		redirect:  dev?undefined:"/"
-	},
+	},*/
 	{
 		path: "/",
 		component: dev?Home:NotFound

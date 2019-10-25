@@ -371,7 +371,11 @@
 				return val;
 			},
 			followFilterManager(){
-				if (this.settings.filters.follow.following.number == 0 && this.settings.filters.follow.followers.number == 0 && this.settings.filters.follow.ratio == 0){
+				if (
+					this.settings.filters.follow.following.number == 0 && 
+					this.settings.filters.follow.followers.number == 0 && 
+					this.settings.filters.follow.ratio == 0
+				){
 					this.followConditionsMode = false;
 					return;
 				}

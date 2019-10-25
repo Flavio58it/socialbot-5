@@ -1,10 +1,10 @@
 {
   "manifest_version": 2,
 
-  "name": "FollowHunter - Instagram",
-  "short_name": "FollowHunter",
+  "name": "SocialBot",
+  "short_name": "SocialBot",
   "description": "AI powered bot for maintaining accounts activity.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "minimum_chrome_version": "59",
 
   "permissions":[
@@ -22,13 +22,6 @@
     ],
     "persistent": true
   },
-  "content_scripts":[
-     {
-      "matches": ["*://*.instagram.com/*"],
-      "js": ["/dist/content.js"],
-      "all_frames": false
-    }
-  ],
   "icons": {
       "128": "/assets/img/web_player_remote_logo.png"
   },

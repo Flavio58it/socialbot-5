@@ -2,6 +2,11 @@
 
 > Automatize repetitive actions for gaining followers on Instagram
 
+> Changelogs
+v0.0.2
+* Heavy refactoring and code update
+* Updated all libraries to latest versions + fixed compatibility issues
+
 ## Build Setup
 
 ``` bash

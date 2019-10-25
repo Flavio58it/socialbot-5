@@ -1,4 +1,4 @@
-import Dexie from "Dexie";
+import Dexie from "dexie";
 
 var db = new Dexie("followhunter");
 
