@@ -23,7 +23,7 @@
     "persistent": true
   },
   "icons": {
-      "128": "/assets/img/web_player_remote_logo.png"
+      "128": "/assets/img/socialbot_logo.png"
   },
   "options_page": "/pages/manager.html#/settings/",
   "browser_action": {
