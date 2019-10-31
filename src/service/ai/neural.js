@@ -1,27 +1,24 @@
+import * as cocoSsd from '@tensorflow-models/coco-ssd';
 
-// Functoinality disabled until the AI system will be consistent.
+export async function imageRecognition (src) {
+	if (!src)
+		return Promise.reject({error: "No image src for neural analysis", id: "NEURAL_NO_SRC", action: "RELOAD"});
 
-export function imageRecognition () {
-	var t = this, brain = synaptic.Network.fromJSON(brain_neurons);
+	try {
+	var coco = await cocoSsd.load(),
+		predictions = coco.detect(src);
 
-	t.watch = (src) => {
-		/*if (!src)
-			return Promise.reject({error: "No image src for neural analysis", id: "NEURAL_NO_SRC", action: "RELOAD"});
-		return decoder(src).then((sample) => {
-			var result = brain.activate(sample);
-			console.log("This is what i have seen: ", result);
-			return result;
-		}).catch(() => {
-			console.error("Decoder has failed. Giving dummy data in order to activate fallbacks.");
-			return Promise.resolve([0,0,0,0]);
-		});*/
+	return predictions;
 
-		return Promise.resolve([0,0,0,0])
+	} catch (err) {
+		console.error("Decoder has failed. Giving dummy data in order to activate fallbacks.");
+		return []
 	}
 }
 
+/*
 export function getImagesData (imgArray) {
-	/*var flow = Promise.resolve(), arr = [];
+	var flow = Promise.resolve(), arr = [];
 	imgArray.forEach((img) => {
 		flow = flow.then(() => decoder(img)).then((input) => {
 			arr.push({
@@ -40,7 +37,5 @@ export function getImagesData (imgArray) {
 	})
 
 	return flow.then(() => arr);
-	*/
-
-	return Promise.resolve([])
 }
+*/

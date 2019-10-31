@@ -4,7 +4,6 @@ import settings from "./settings";
 import storage from "storage";
 import db from "./db/db";
 import logger from "./db/logger";
-import {getImagesData} from "./ai/neural";
 
 import robot from "./robot";
 
@@ -85,6 +84,8 @@ Comm.listen("manager", function(action, data) {
 		Comm.sendMessage("backendError", {error});
 });
 
+/*
+// Code used for images moderation. Not used anymore as the system now uses tensorflow js
 Comm.listen("content", function(action, data) {
 	switch (action) {
 		case "imagesResult":
@@ -94,7 +95,7 @@ Comm.listen("content", function(action, data) {
 			});
 		break;
 	}
-});
+});*/
 
 // Start the bot when the browser is started!
 for (var i in plugs) {

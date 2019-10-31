@@ -23,8 +23,10 @@ export default {
 			textFilters: [],
 			isLikeNumber: 0,
 			videos: true,
-			brain: false, // landscape, people, arhitecture
-			brainFallback: true // If image is not recognized will like or not?
+			brain: {
+				included: [], // If the image has these objects will be liked {type: int, min_width: int, score: float}
+				excluded: [] // If the image hasn't these objects will not be liked
+			}
 		},
 		follow: {
 			followers: {

@@ -25,78 +25,65 @@ function police (settings) {
 	dataMapOverride = false,
 	brain = false;
 
-	getSetting("like").then((settings) => {
-		if (settings.options.brain != false) {
-			brain = new imageRecognition(); // Create brain instance
-		}
-	})
+	t.shouldLike = async (data) => {
+		var settings = await getSetting("like"),
+			catsetting = await catsettings();
 
-	t.shouldLike = (data) => {
-		var settings = [getSetting("like"), catsettings()];
-		return Promise.all(settings).then((settings) => {
-			if (!settings[1].enabled)
-				return Promise.reject({stopped: true});
-			console.log("Available data for like policeman: ", settings, data);
-			if (!settings[0].options.videos && data.isVideo)
+		if (!catsetting.enabled)
+			return Promise.reject({stopped: true});
+		console.log("Available data for like policeman: ", settings, data);
+
+		if (!settings.options.videos && data.isVideo)
+			return false;
+		if (settings.options.isLikeNumber && settings.options.isLikeNumber != "0") { // Match by like number
+			var likeNumber = parseInt(settings.options.isLikeNumber);
+			if (settings.options.isLikeNumberInclusive && settings.options.isLikeNumberMoreLess && likeNumber >= data.likes)
 				return false;
-			if (settings[0].options.isLikeNumber && settings[0].options.isLikeNumber != "0") { // Match by like number
-				var likeNumber = parseInt(settings[0].options.isLikeNumber);
-				if (settings[0].options.isLikeNumberInclusive && settings[0].options.isLikeNumberMoreLess && likeNumber >= data.likes)
-					return false;
-				if (settings[0].options.isLikeNumberInclusive && !settings[0].options.isLikeNumberMoreLess && likeNumber <= data.likes)
-					return false;
-				if (!settings[0].options.isLikeNumberInclusive && settings[0].options.isLikeNumberMoreLess && likeNumber <= data.likes)
-					return false;
-				if (!settings[0].options.isLikeNumberInclusive && !settings[0].options.isLikeNumberMoreLess && likeNumber >= data.likes)
-					return false;
-			}
+			if (settings.options.isLikeNumberInclusive && !settings.options.isLikeNumberMoreLess && likeNumber <= data.likes)
+				return false;
+			if (!settings.options.isLikeNumberInclusive && settings.options.isLikeNumberMoreLess && likeNumber <= data.likes)
+				return false;
+			if (!settings.options.isLikeNumberInclusive && !settings.options.isLikeNumberMoreLess && likeNumber >= data.likes)
+				return false;
+		}
 
-			if (settings[0].options.textFilters && settings[0].options.textFilters.length) { // Match by the text in image comment
-				var result = matcher(settings[0].options.textFilters, data.comment);
-				if (result && !settings[0].options.isTextInclusive)
-					return false;
-				if (!result && settings[0].options.isTextInclusive)
-					return false;
-			}
-			
-			if (settings[0].options.brain != false) { // As is the last returns are locked here.
-				return brain.watch(data.imgThumb).then((seen) => {
-					if (seen[1] < 0.5 && seen[2] < 0.5 && seen[3] < 0.5)
-						return settings[0].options.brainFallback; // If the ai dont know what to do
-					if (settings[0].options.brain == "landscape")
-						return seen[1] >= 0.6 && seen[2] <= 0.5 && seen[3] <= 0.5;
-					if (settings[0].options.brain == "people")
-						return seen[2] >= 0.6 && seen[1] <= 0.5 && seen[3] <= 0.5;
-					if (settings[0].options.brain == "arhitecture")
-						return seen[3] >= 0.6 && seen[1] <= 0.5 && seen[2] <= 0.5;
-
-					return true; // Should never
-				});
-			}
-			
-			return true;
-		})
+		if (settings.options.textFilters && settings.options.textFilters.length) { // Match by the text in image comment
+			var result = matcher(settings.options.textFilters, data.comment);
+			if (result && !settings.options.isTextInclusive)
+				return false;
+			if (!result && settings.options.isTextInclusive)
+				return false;
+		}
 		
+		if (settings.options.brain != false) { // As is the last returns are locked here.
+			return imageRecognition(data.imgThumb).then((seen) => {
+				// New Brain implementation
+
+				console.log("Police has seen", seen);
+			});
+		}
+		
+		return true;
 	}
 
-	t.shouldFollow = (data) => {
-		var settings = [getSetting("follow"), catsettings()];
-		return Promise.all(settings).then((settings) => {
-			if (!settings[1].enabled)
-				return Promise.reject({stopped: true});
-			console.log("Available data for the policeman: ", settings, data);
+	t.shouldFollow = async (data) => {
+		var settings = await getSetting("like"),
+			catsetting = await catsettings();
 
-			if (settings[0].followers.number || settings[0].following.number) {
-					return ((settings[0].following.number?(settings[0].following.more?(settings[0].following.number >= data.user.follows):(settings[0].following.number >= data.user.follows)):true) && 
-						   (settings[0].followers.number?(settings[0].followers.more?(settings[0].followers.number >= data.user.followedBy):(settings[0].followers.number >= data.user.followedBy)):true));
-			} else if (settings[0].ratio) {
-				console.log("By ratio");
-				var me = data.data, user = data.user
-				return (settings[0].ratio >= 5)
-			}
+		if (!catsetting.enabled)
+			return Promise.reject({stopped: true});
+		console.log("Available data for the policeman: ", settings, data);
 
-			return true;
-		});
+		if (settings.followers.number || settings.following.number) {
+				return ((settings.following.number?(settings.following.more?(settings.following.number >= data.user.follows):(settings.following.number >= data.user.follows)):true) && 
+					   (settings.followers.number?(settings.followers.more?(settings.followers.number >= data.user.followedBy):(settings.followers.number >= data.user.followedBy)):true));
+		} else if (settings.ratio) {
+			console.log("By ratio");
+			var me = data.data, user = data.user
+			return (settings.ratio >= 5)
+		}
+
+		return true;
 	}
 
 	// Set mapper only for one time
