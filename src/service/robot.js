@@ -1,6 +1,13 @@
 import requests from "./requests";
 import waiter from "waiter";
 
+/**
+ * ROBOT JS
+ * 
+ * Promise based sequential actions executor. 
+ * Uses plug functions for calls and uses timers to perform human-like interactions with servers
+ */
+
 const bot = function(settings, plug, plugName) {
 	var request = false;
 	return plug.init(settings).then((data) => {
@@ -28,8 +35,8 @@ const bot = function(settings, plug, plugName) {
 		})
 		return flow;
 	})
-	// Like your flow images
 	.then(() => {
+		// Likes the dashboards of users
 		return settings.get("likeDash").then((shouldLike) => {
 			if (shouldLike)
 				return Promise.all([
@@ -42,6 +49,7 @@ const bot = function(settings, plug, plugName) {
 	}).then(() => {
 		return plug.actions.followManager(false);
 	}).then(() => {
+		// Like back the users that liked your image.
 		return settings.get("likeBack").then((setting) => {
 			if (!setting.enabled)
 				return Promise.resolve();
@@ -64,29 +72,39 @@ const bot = function(settings, plug, plugName) {
 
 export default function (settings, plug, plugName) {
 	var t = this, 
-	running = false, 
-	inited = false, 
-	events = {}, 
-	rebooting = false, 
-	preRebootStatus = true;
+		running = false, 
+		inited = false, 
+		events = {}, 
+		rebooting = false, 	   // Flag used to track reboot process
+		preRebootStatus = true // Used during reboot in order to force the bot to stop and reload new settings
+	;
 
+	// Boot bot
 	t.start = () => {
 		running = true;
+		
 		events.runstatus&&events.runstatus(t, plugName);
+
+		// Check if bot is flagged as enabled. If not the round is stopped
 		return settings.get("enabled").then((enabled) => {
 			if (!enabled)
 				return Promise.reject({stopped: true});
 		}).then(() => {
 			events.start&&events.start(t, plugName);
 			inited = true;
+			
+			// Start bot function
 			return bot(settings, plug, plugName);
 		}).then(() => {
+			// Round finished. Setting flag as stopped and initializing the timer for the next round.
 			running = false;
 			triggerTimer();
 		}).catch ((e) => {
+			// Error or stopped/rebooting
 			running = false;
 			events.runstatus&&events.runstatus(t, plugName);
 			triggerTimer(); // Restart after some time!
+
 			if (e.stopped) {
 				if (rebooting) {
 					console.info("Rebooting");
@@ -100,14 +118,14 @@ export default function (settings, plug, plugName) {
 				}
 			} else {
 				console.error("Bot error", e);
-				if (e.request && !e.request.status && !e.id) // Create user friendly generic error
-					e = {
-						id: "NETWORK_GENERIC_ERROR",
-						error: e.toString()
-					}
-				events.error&&events.error(t, plugName, e);
+
+				// Create user friendly generic error if we have no idea of what happened
+				if (e.request && !e.request.status && !e.id)
+				events.error&&events.error(t, plugName, {
+					id: "NETWORK_GENERIC_ERROR",
+					error: e.toString()
+				});
 			}
-			//return Promise.reject(e);
 		});
 	}
 
@@ -141,11 +159,20 @@ export default function (settings, plug, plugName) {
 		})
 	}
 
+	/**
+	 * Set various events callbacks
+	 * 
+	 * - error
+	 * - reboot
+	 * - start
+	 * - runstatus
+	 * - stop
+	 */
 	t.addListener = (ev, cbk) => {
 		events[ev] = cbk;
 	}
 
-
+	// Simple timer that waits n ms before restarting server
 	function triggerTimer () {
 		settings.get("waiter").then((wait) => {
 			waiter(wait.roundPause * 1000 * 60).then(() => (!running)?t.start():false); // Converted from minutes

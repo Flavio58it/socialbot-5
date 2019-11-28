@@ -14,8 +14,8 @@ function _updater(details, domain) {
       break;
     }
   }
+
   if (enableFix) {
-    //console.log("Headers fix enabled: ", details)
     details.requestHeaders.push({
     	name: "origin",
     	value: domain
@@ -24,9 +24,11 @@ function _updater(details, domain) {
     	name: "referer",
     	value: domain
     })
-    //console.log("Headers fix result: ", details)
   }
-  return {requestHeaders: details.requestHeaders};
+
+  return {
+    requestHeaders: details.requestHeaders
+  };
 }
 
 export default (function (domain, override) {
@@ -50,4 +52,4 @@ export default (function (domain, override) {
       listening = false;
 		}
 	}
-})
+});

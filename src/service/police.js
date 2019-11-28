@@ -1,13 +1,16 @@
 /**
-* Conditions checker. Decides when to like/unlike/follow or take any actions basing on settings and other conditions.
-* The various conditions must be clear basing on function names.
-**/
+ * POLICE JS
+ * 
+ * Conditions checker. Decides when to like/unlike/follow or take any actions basing on settings and other conditions.
+ * The various conditions must be clear basing on function names.
+ **/
 
 import objectMapper from "object-mapper";
 import {imageRecognition} from "./ai/neural";
 import matcher from "matcher";
 
-const genericMapper = { // The default mapper for the settings.
+// The default mapper for the settings. As the settings object is extended, only the needed data is extracted
+const genericMapper = {
 	follow: {
 		"filters.follow.following": "following",
 		"filters.follow.followers": "followers",
@@ -35,7 +38,8 @@ function police (settings) {
 
 		if (!settings.options.videos && data.isVideo)
 			return false;
-		if (settings.options.isLikeNumber && settings.options.isLikeNumber != "0") { // Match by like number
+		// Match by like number
+		if (settings.options.isLikeNumber && settings.options.isLikeNumber != "0") {
 			var likeNumber = parseInt(settings.options.isLikeNumber);
 			if (settings.options.isLikeNumberInclusive && settings.options.isLikeNumberMoreLess && likeNumber >= data.likes)
 				return false;
@@ -47,7 +51,8 @@ function police (settings) {
 				return false;
 		}
 
-		if (settings.options.textFilters && settings.options.textFilters.length) { // Match by the text in image comment
+		// Match by the text in image comment
+		if (settings.options.textFilters && settings.options.textFilters.length) {
 			var result = matcher(settings.options.textFilters, data.comment);
 			if (result && !settings.options.isTextInclusive)
 				return false;
@@ -93,17 +98,12 @@ function police (settings) {
 
 	// -------- FUNC
 
+	// Use the mapper above to get settings attribute
 	function getSetting (cat) {
 		return catsettings().then((cats) => objectMapper(cats, mapOverride || genericMapper[cat])).then((data) => {
 			mapOverride = false;
 			return data;
 		});
-	}
-
-	function getData (data) {
-		var d = dataMapOverride?objectMapper(data, dataMapOverride):data;
-		dataMapOverride = false;
-		return d;
 	}
 	
 }

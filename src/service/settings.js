@@ -8,6 +8,12 @@ import storage from "storage";
 import instagram from "./plugs/instagram/settings";
 import fivehpx from "./plugs/fivehpx/settings";
 
+/**
+ * SETTINGS JS
+ * 
+ * Initialize plugin that allows the reading of the settings object from storage
+ */
+
 const settings = {
 	instagram,
 	fivehpx,

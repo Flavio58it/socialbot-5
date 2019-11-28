@@ -7,9 +7,11 @@ import logger from "./db/logger";
 
 import robot from "./robot";
 
+// Import all plugins into the bot
 import instagram from "./plugs/instagram/instagram";
 import fivehpx from "./plugs/fivehpx/fivehpx";
 
+// Main plugins object. All the pòlugins must be initialized here in order to have all the data
 var plugs = {
 	instagram: {
 		settings: new settings("instagram"),
@@ -23,6 +25,7 @@ var plugs = {
 	}
 }, error = false;
 
+// Initialize communication between control panel and backend.
 Comm.listen("manager", function(action, data) {
 	switch (action) {
 		case "sendAll":
@@ -84,40 +87,34 @@ Comm.listen("manager", function(action, data) {
 		Comm.sendMessage("backendError", {error});
 });
 
-/*
-// Code used for images moderation. Not used anymore as the system now uses tensorflow js
-Comm.listen("content", function(action, data) {
-	switch (action) {
-		case "imagesResult":
-			getImagesData(data.results).then((arr) => {
-				console.log("Results: ", arr);
-				Comm.sendMessage("moderateImages", {arr, plug: data.plug});
-			});
-		break;
-	}
-});*/
-
 // Start the bot when the browser is started!
 for (var i in plugs) {
 	var plugContainer = plugs[i];
-	if (!plugContainer.bot) {
-		plugContainer.bot = new robot(plugContainer.settings, plugContainer.plug, i);
-		plugContainer.bot.start();
-		plugContainer.bot.addListener("error", (t, name, _error) => {
-			error = {
-				plug: name,
-				data: _error
-			}
-			Comm.sendMessage("backendError", {error});
+	if (plugContainer.bot)
+		continue;
+
+	// Let's dance!
+	plugContainer.bot = new robot(plugContainer.settings, plugContainer.plug, i);
+	plugContainer.bot.start();
+
+	// Send errors to frontend when necessary
+	plugContainer.bot.addListener("error", (t, name, error) => {
+		Comm.sendMessage("backendError", {
+			plug: name,
+			data: _error
 		});
-		plugContainer.bot.addListener("start", (t, name) => {
-			error = false;
-			Comm.sendMessage("backendError", {remove: true, plug: name});
-		});
-		plugContainer.bot.addListener("reboot", (t, name) => {
-			Comm.sendMessage("statusUpdate", {status: t.getStatus(), plug: name});
-		});
-	}
+	});
+
+	// Reset errors on bot boot
+	plugContainer.bot.addListener("start", (t, name) => {
+		error = false;
+		Comm.sendMessage("backendError", {remove: true, plug: name});
+	});
+
+	// Send update to frontend. Ideally at this moment the user is showing a waiting screen during reboot
+	plugContainer.bot.addListener("reboot", (t, name) => {
+		Comm.sendMessage("statusUpdate", {status: t.getStatus(), plug: name});
+	});
 }
 
 function getAllInitInfo() {
