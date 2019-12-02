@@ -12,3 +12,7 @@ const lib = {
 
 	}
 }
+
+export default {
+	
+}

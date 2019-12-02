@@ -19,17 +19,20 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      { pattern: 'test/backend/main.js', included: false },
-      { pattern: 'test/frontend/main.js', included: false }
+      'test/**/*.test.js'
     ],
 
 
     // list of files / patterns to exclude
     exclude: [
+      
     ],
 
     plugins: [
-      require("karma-webpack")
+      require("karma-webpack"),
+      require("karma-mocha"),
+      require("karma-chai"),
+      require('karma-chrome-launcher')
     ],
 
 
@@ -38,8 +41,7 @@ module.exports = function(config) {
     preprocessors: {
       // only specify one entry point
       // and require all tests in there
-      'test/backend/main.js': ['webpack'],
-      'test/frontend/main.js': ['webpack']
+      'test/**/*.test.js': ['webpack']
     },
 
 
@@ -48,7 +50,14 @@ module.exports = function(config) {
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
     reporters: ['progress'],
 
-    webpack: wconf,
+
+    // Minimal webpack configuration in order to recognize services
+    // Must add VUE configuration
+    webpack: {
+      resolve: {
+        modules: wconf.shortcuts
+      }
+    },
 
 
     // web server port
