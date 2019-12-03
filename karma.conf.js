@@ -33,7 +33,8 @@ module.exports = function(config) {
       require("karma-mocha"),
       require("karma-chai"), // https://www.chaijs.com/
       require("karma-sinon-chai"), // https://sinonjs.org/
-      require('karma-chrome-launcher')
+      require('karma-chrome-launcher'),
+      require('karma-mocha-reporter')
     ],
 
 
@@ -45,11 +46,14 @@ module.exports = function(config) {
       'test/**/*.test.js': ['webpack']
     },
 
+    mochaReporter: {
+      output: "autowatch"
+    },
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress'],
+    reporters: ['mocha'], // https://www.npmjs.com/package/karma-mocha-reporter
 
 
     // Minimal webpack configuration in order to recognize services
