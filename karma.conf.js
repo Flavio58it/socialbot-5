@@ -31,7 +31,8 @@ module.exports = function(config) {
     plugins: [
       require("karma-webpack"),
       require("karma-mocha"),
-      require("karma-chai"),
+      require("karma-chai"), // https://www.chaijs.com/
+      require("karma-sinon-chai"), // https://sinonjs.org/
       require('karma-chrome-launcher')
     ],
 
@@ -54,6 +55,7 @@ module.exports = function(config) {
     // Minimal webpack configuration in order to recognize services
     // Must add VUE configuration
     webpack: {
+      mode: "development",
       resolve: {
         modules: wconf.shortcuts
       }
