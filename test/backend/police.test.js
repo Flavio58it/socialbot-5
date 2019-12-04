@@ -3,7 +3,7 @@
 import police from "../../src/service/police"
 import { simulateSetting } from "../utils/settingsManager"
 
-describe('#police', function() {
+describe('#police()', function() {
 
     it('Constructor is object', function() {
         var policeObj = new police();

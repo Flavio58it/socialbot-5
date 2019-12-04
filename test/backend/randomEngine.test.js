@@ -1,6 +1,6 @@
 import randomEngine from "../../src/shared/randEngine";
 
-describe("#RandomEngine", function () {
+describe("#RandomEngine()", function () {
     it("Check without params", function () {
         chai.expect(randomEngine()).to.be.a("array")
         chai.expect(randomEngine()).to.have.lengthOf(0);

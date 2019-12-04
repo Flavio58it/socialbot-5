@@ -48,6 +48,8 @@
     "random-js": "^2.1.0",
     "sass-loader": "^8.0.0",
     "sass-resources-loader": "^2.0.1",
+    "sinon": "^7.5.0",
+    "sinon-chai": "^3.3.0",
     "string-template": "^1.0.0",
     "string-templates": "^1.0.6",
     "style-loader": "^1.0.1",
