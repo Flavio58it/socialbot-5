@@ -1,8 +1,8 @@
 {
-  "name": "FollowHunter",
+  "name": "SocialBot",
   "description": "Automatize repetitive actions for gaining followers on Instagram",
-  "version": "0.1.0",
-  "author": "Seba <diablo1050@gmail.com>",
+  "version": "2.0.0",
+  "author": "Seba",
   "private": true,
   "scripts": {
     "dev": "cross-env NODE_ENV=development webpack --watch",

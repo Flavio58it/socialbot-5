@@ -1,23 +1,38 @@
 # FollowHunter
 
-> Automatize repetitive actions for gaining followers on Instagram
+**Chrome Extension that allows to perform repetitive actions for gaining followers on social networks**
 
-> Changelogs
-v0.0.2
-* Heavy refactoring and code update
-* Updated all libraries to latest versions + fixed compatibility issues
+## Supported social networks
+
+* Instagram
+* ___500px - in progress___
+* ___Flickr - in progress___
+
+## Main features
+
+* Like hashtag
+* Like people that likes you
+* Like dashboards
+* Completely personalized settings in dedicated control panel
+
+## Changelogs
+* v2.0
+    * Heavy refactoring and code update
+    * Updated all libraries to latest versions + fixed compatibility issues
+    * Added testing libraries and tests to all main functionalities
 
 ## Build Setup
 
 ``` bash
-# install dependencies
+# Install dependencies
 npm install
 
-# serve with hot reload at localhost:8080
+# Run development with automatic recompilation of extension
 npm run dev
 
-# build for production with minification
+# Build for production with minification
 npm run build
-```
 
-For detailed explanation on how things work, consult the [docs for vue-loader](http://vuejs.github.io/vue-loader).
+# Perform tests to all main service and frontend modules
+npm test
+```
