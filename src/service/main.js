@@ -101,7 +101,7 @@ for (var i in plugs) {
 	plugContainer.bot.addListener("error", (t, name, error) => {
 		Comm.sendMessage("backendError", {
 			plug: name,
-			data: _error
+			data: error
 		});
 	});
 

@@ -95,14 +95,16 @@ export default function (settings, plug, plugName) {
 			
 			// Start bot function
 			return bot(settings, plug, plugName);
-		}).then(() => {
+		}).then((result) => {
 			// Round finished. Setting flag as stopped and initializing the timer for the next round.
+			events.stop&&events.stop(t, plugName);
+
 			running = false;
 			triggerTimer();
 		}).catch ((e) => {
 			// Error or stopped/rebooting
 			running = false;
-			events.runstatus&&events.runstatus(t, plugName);
+			events.runstatus&&events.runstatus(t, plugName, e);
 			triggerTimer(); // Restart after some time!
 
 			if (e.stopped) {

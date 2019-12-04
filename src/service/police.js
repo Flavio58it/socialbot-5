@@ -60,7 +60,7 @@ function police (settings) {
 				return false;
 		}
 		
-		if (settings.options.brain != false) { // As is the last returns are locked here.
+		if (settings.options.brain === true) { // As is the last returns are locked here.
 			return imageRecognition(data.imgThumb).then((seen) => {
 				// New Brain implementation
 
@@ -72,7 +72,7 @@ function police (settings) {
 	}
 
 	t.shouldFollow = async (data) => {
-		var settings = await getSetting("like"),
+		var settings = await getSetting("follow"),
 			catsetting = await catsettings();
 
 		if (!catsetting.enabled)

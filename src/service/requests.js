@@ -37,6 +37,7 @@ export default (function (domain, override) {
   console.info("Request overrider enabled on: ", domain, "on", override);
 
 	return {
+    // Listen to all requests and override the ones in the domain
 		listen () {
       if (!listening)
   			chrome.webRequest.onBeforeSendHeaders.addListener((details) => _updater(details, requestHeader), {
@@ -45,7 +46,8 @@ export default (function (domain, override) {
   			    "blocking", "requestHeaders"
   			]);
       listening = true;
-		},
+    },
+    // Disable the above listening callback
 		unlisten () {
       console.log("Unlistened")
 			chrome.webRequest.onBeforeSendHeaders.removeListener((details) => _updater(details, requestHeader));
