@@ -12,6 +12,7 @@
   ],
 **/
 
+/*
 if (process.env.NODE_ENV === 'development') {
 	var images = false, arr = [];
 	if (data.plug == "instagram")
@@ -26,3 +27,4 @@ if (process.env.NODE_ENV === 'development') {
 		
 	}
 }
+*/

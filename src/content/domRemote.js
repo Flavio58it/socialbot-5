@@ -14,7 +14,5 @@ function createScript(fun) {
 }
 
 export default function() {
-	createScript(function(window, document){
-		
-	});
+	// createScript(function(window, document){});
 }
