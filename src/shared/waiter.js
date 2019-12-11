@@ -1,5 +1,5 @@
 // Wait a random amount of time to simulate user interaction
-import Random from "random-js";
+import {Random} from "random-js";
 
 const _p = (cbk) => new Promise(cbk);
 

@@ -1,6 +1,9 @@
-var path = require('path');
-var webpack = require('webpack');
-var OptimizeJsPlugin = require("optimize-js-plugin");
+const path = require('path'),
+    webpack = require('webpack'),
+    OptimizeJsPlugin = require("optimize-js-plugin"),
+    UglifyJsPlugin = require('uglifyjs-webpack-plugin'),
+    TerserPlugin = require('terser-webpack-plugin'),
+    VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 var shortcuts = [
   path.resolve('./src/shared'),
@@ -67,28 +70,7 @@ function page_mode(input, output){
           rules: [
             {
               test: /\.vue$/,
-              loader: 'vue-loader',
-              options: {
-                loaders: {
-                  // Since sass-loader (weirdly) has SCSS as its default parse mode, we map
-                  // the "scss" and "sass" values for the lang attribute to the right configs here.
-                  // other preprocessors should work out of the box, no loader config like this necessary.
-                  'scss': [
-                    'vue-style-loader',
-                    'css-loader',
-                    'sass-loader',
-                    {
-                      //Load the main variables into the sass files.
-                      loader: 'sass-resources-loader',
-                      options: {
-                        resources: path.resolve(__dirname, 'src/shared/assets/style/_variables.scss')
-                      }
-                    }
-                  ],
-                  'sass': 'vue-style-loader!css-loader!sass-loader?indentedSyntax'
-                }
-                // other vue-loader options go here
-              }
+              loader: 'vue-loader'
             },
             {
               test: /\.js$/,
@@ -100,6 +82,21 @@ function page_mode(input, output){
               use: [
                 { loader: "style-loader" },
                 { loader: "css-loader" }
+              ]
+            },
+            {
+              test: /\.scss$/,
+              use: [
+                'vue-style-loader',
+                'css-loader',
+                'sass-loader',
+                {
+                  //Load the main variables into the sass files.
+                  loader: 'sass-resources-loader',
+                  options: {
+                    resources: path.resolve(__dirname, 'src/shared/assets/style/_variables.scss')
+                  }
+                }
               ]
             }
             // File loader is not needed as the chrome extension does not have cache.
@@ -125,9 +122,14 @@ function page_mode(input, output){
         performance: {
           hints: false
         },
+        plugins:[
+          new VueLoaderPlugin()
+        ]
        // devtool: '#eval-source-map'
       }
 }
+
+module.exports.shortcuts = shortcuts;
 
 if (process.env.NODE_ENV === 'production') {
   module.exports.devtool = '#source-map'
@@ -140,21 +142,15 @@ if (process.env.NODE_ENV === 'production') {
           NODE_ENV: '"production"'
         }
       }),
-      new webpack.optimize.UglifyJsPlugin({
-        sourceMap: true,
-        mangle: true,
-        compress: {
-          warnings: false,
-          sequences: true,
-          dead_code: true,
-          conditionals: true,
-          booleans: true,
-          unused: true,
-          if_return: true,
-          join_vars: true,
-          drop_console: true
+      // Fix the Unexpected token: keyword «const»
+      // https://stackoverflow.com/questions/47439067/uglifyjs-throws-unexpected-token-keyword-const-with-node-modules
+      new TerserPlugin({
+        parallel: true,
+        terserOptions: {
+          ecma: 6,
         }
       }),
+      new UglifyJsPlugin(),
       new OptimizeJsPlugin({
           sourceMap: false
       }),
