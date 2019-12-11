@@ -4,7 +4,8 @@ import {Random} from "random-js";
 const _p = (cbk) => new Promise(cbk);
 
 function randomizer (from, to) {
-	return Random.integer(from || 3000, to || 30000)(Random.engines.nativeMath)
+	var randomEngine = new Random()
+	return randomEngine.integer(from || 3000, to || 30000)
 }
 
 export default function (from, to) {

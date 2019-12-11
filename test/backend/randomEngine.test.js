@@ -22,8 +22,8 @@ describe("#RandomEngine()", function () {
         chai.expect(() => randomEngine(5, 5, 2)).to.throw("Random array engine cannot work out this.")
     });
 
-    it("If too low max and min for size number fallback to size of 1", function () {
-        chai.expect(randomEngine(4, 1, 2)).to.have.lengthOf(1);
+    it("If too low max and min for size number fallback to maximum available size", function () {
+        chai.expect(randomEngine(4, 1, 2)).to.have.lengthOf(2);
     });
 
     it("Check that the random value is correctly created", function () {

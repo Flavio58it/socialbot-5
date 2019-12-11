@@ -79,6 +79,9 @@ export default function (settings, plug, plugName) {
 		preRebootStatus = true // Used during reboot in order to force the bot to stop and reload new settings
 	;
 
+	if (!settings || !plug)
+		return new error("Missing params");
+
 	// Boot bot
 	t.start = () => {
 		running = true;

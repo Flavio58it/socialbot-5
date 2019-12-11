@@ -60,13 +60,14 @@ const lib = {
 	likeUserPosts: function (username, csrf, limit, checker, log) {
 		return lib.getUserData(username).then((userData) => {
 			var len = userData.posts.list.length;
-			if (!len)
+			if (len === 0)
 				return Promise.resolve();
+				
 			var flow = Promise.resolve(),
-				r = randomArray(limit, 1, (len < limit + 1)? (limit + 1) : len);
+				randNumbers = randomArray(limit, 0, len - 1);
 
 			userData.posts.list.forEach((details, i) => {
-				if (r.indexOf(i) != -1) { // If the post index is in array proceed
+				if (randNumbers && randNumbers.indexOf(i) != -1) { // If the post index is in array proceed
 					flow = flow.then(() => decodeObject(format(urls.get.post, details.code)).then((post) => { // Check the post and see if has already been liked
 						post = objectMapper(post, mappers.postData);
 						if (!post.liked)

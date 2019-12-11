@@ -1,5 +1,26 @@
 import actions from "../../../../src/service/plugs/instagram/actions";
 
+// Unique user data as is cached
+var userdata = {
+    user: {
+        username: "tester",
+        full_name: "Tester",
+        media: {
+            nodes: [
+                {
+                    id: 105,
+                    likes: {
+                        count: 10
+                    },
+                    code: 100,
+                    thumbnail_src: "image",
+                    is_video: false
+                }
+            ]
+        }
+    }
+}
+
 describe("@actions", function () {
 
     var xhr = false
@@ -50,18 +71,10 @@ describe("@actions", function () {
         setTimeout(function () {
             requests[0].respond(200, 
                 { "Content-Type": "application/json" },
-                JSON.stringify({
-                    user: {
-                        username: "tester",
-                        full_name: "Tester",
-                        media: {
-                            nodes: []
-                        }
-                    }
-                })
+                JSON.stringify(userdata)
             );
 
-            // As is cached this should not happen!
+            // As is cached this should not happen! If happens broken data is provided in order to throw an error
             if (requests[1])
                 requests[1].respond(200, 
                     { "Content-Type": "application/json" },
@@ -100,56 +113,141 @@ describe("@actions", function () {
         return promis;
     });
 
-    it("Like user posts", function () {
-        var promis = actions.likeUserPosts("tester", 1, 4, false, {}).then(() => {
-            chai.expect(requests).to.have.lengthOf(3);
-        });
-
-        setTimeout(function () {
-            requests[0].respond(200, 
-                { "Content-Type": "application/json" },
-                JSON.stringify({
-                    user: {
-                        username: "tester",
-                        full_name: "Tester",
-                        media: {
-                            nodes: [
-                                {
-                                    id: 105,
-                                    likes: {
-                                        count: 10
-                                    },
-                                    code: 100,
-                                    thumbnail_src: "image",
-                                    is_video: false
+    describe("Likeback functionality", function () {
+        it("When one new post, should like", function () {
+            // These are above oin order to have 
+            // Run timeouts for posts liking
+            setTimeout(function () {
+                clock.runAll()
+            }, 40);
+            var clock = sinon.useFakeTimers(),
+                server = sinon.createFakeServer({
+                    respondImmediately: true
+                });
+                
+                server.respondWith(/\/p\/\d/, function (xhr, id) {
+                    xhr.respond(200, 
+                        { "Content-Type": "application/json" },
+                        JSON.stringify({
+                            graphql: {
+                                shortcode_media: {
+                                    viewer_has_liked: false
                                 }
-                            ]
-                        }
-                    }
-                })   
-            );
-            // Get post details
-            if (requests[1])
-                requests[1].respond(200, 
-                    { "Content-Type": "application/json" },
-                    JSON.stringify({
-                        graphql: {
-                            shortcode_media: {
-                                viewer_has_liked: 10
                             }
-                        }
-                    })   
-                );
-            // Like user
-            if (requests[2])
-                requests[2].respond(200, 
-                    { "Content-Type": "application/json" },
-                    JSON.stringify({})   
-                );
+                        })
+                    )
+                })
+    
+                server.respondWith(/\/web\/likes\/.+\/like\//, function (xhr, id) {
+                    xhr.respond(200, 
+                        { "Content-Type": "application/json" },
+                        JSON.stringify({})
+                    )
+                })
+    
+            var fakedLogger = sinon.fake.resolves()
+            
+            // This test depends on "Get user data with cache" test. It uses cached user setted here. 
+            // If the cache test fails, it will also here.
+            var promis = actions.likeUserPosts("tester", "1", "4", false, {userInteraction: fakedLogger}).then(() => {
+                chai.expect(server.requests.length).to.equal(2)
+                chai.expect(fakedLogger.callCount).to.equal(1)
 
-            console.log(requests.length)
-        }, 0)
+                clock.restore()
+            });
+    
+            clock.runAll();
+    
+            return promis;
+        })
 
-        return promis;
+
+        it("Should like 2 posts", function () {
+            // These are above oin order to have 
+            // Run timeouts for posts liking
+            setTimeout(function () {
+                clock.runAll()
+            }, 40);
+            setTimeout(function () {
+                clock.runAll()
+            }, 80);
+            var clock = sinon.useFakeTimers(),
+                server = sinon.createFakeServer({
+                    respondImmediately: true
+                });
+
+                // User server response with 2 images
+                server.respondWith(/\/testerone\//, function (xhr, id) {
+                    xhr.respond(200, 
+                        { "Content-Type": "application/json" },
+                        JSON.stringify({
+                            user: {
+                                username: "testerone",
+                                user_name: "Testerone",
+                                media: {
+                                    nodes: [
+                                        {
+                                            id: 105,
+                                            likes: {
+                                                count: 10
+                                            },
+                                            code: 100,
+                                            thumbnail_src: "image",
+                                            is_video: false
+                                        },
+                                        {
+                                            id: 106,
+                                            likes: {
+                                                count: 12
+                                            },
+                                            code: 101,
+                                            thumbnail_src: "image",
+                                            is_video: false
+                                        }
+                                    ]
+                                }
+                            }
+                        })
+                    )
+                })
+                
+                // Check if user has already liked the image
+                server.respondWith(/\/p\/\d+/, function (xhr, id) {
+                    xhr.respond(200, 
+                        { "Content-Type": "application/json" },
+                        JSON.stringify({
+                            graphql: {
+                                shortcode_media: {
+                                    viewer_has_liked: false
+                                }
+                            }
+                        })
+                    )
+                })
+                
+                // Like image
+                server.respondWith(/\/web\/likes\/.+\/like\//, function (xhr, id) {
+                    xhr.respond(200, 
+                        { "Content-Type": "application/json" },
+                        JSON.stringify({})
+                    )
+                })
+    
+            var fakedLogger = sinon.fake.resolves()
+            
+            // This test depends on "Get user data with cache" test. It uses cached user setted here. 
+            // If the cache test fails, it will also here.
+            var promis = actions.likeUserPosts("testerone", "1", "4", false, {userInteraction: fakedLogger}).then(() => {
+                chai.expect(server.requests.length).to.equal(5)
+                chai.expect(fakedLogger.callCount).to.equal(2)
+
+                clock.restore()
+            });
+    
+            clock.runAll();
+    
+            return promis;
+        })
+        
     })
 })
