@@ -1,7 +1,6 @@
 const path = require('path'),
     webpack = require('webpack'),
     OptimizeJsPlugin = require("optimize-js-plugin"),
-    UglifyJsPlugin = require('uglifyjs-webpack-plugin'),
     TerserPlugin = require('terser-webpack-plugin'),
     VueLoaderPlugin = require('vue-loader/lib/plugin');
 
@@ -150,7 +149,6 @@ if (process.env.NODE_ENV === 'production') {
           ecma: 6,
         }
       }),
-      new UglifyJsPlugin(),
       new OptimizeJsPlugin({
           sourceMap: false
       }),
