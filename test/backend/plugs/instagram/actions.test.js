@@ -38,23 +38,21 @@ describe("@actions", function () {
 
 
     it("Get user data with cache", function () {
-        var promis = [];
+        var promis = actions.getUserData("tester").then((data) => {
+            chai.expect(data).to.have.property("username")
 
-        promis.push(actions.getUserData("tester").then((data) => {
-            chai.expect(data.user).to.have.key("username")
-        }));
-
-        // Test cache
-        promis.push(actions.getUserData("tester").then((data) => {
-            chai.expect(data.user).to.have.key("username")
-        }));
+            // Test cache
+            return actions.getUserData("tester").then((cached) => {
+                chai.expect(cached).to.have.property("username")
+            });
+        });
 
         setTimeout(function () {
             requests[0].respond(200, 
                 { "Content-Type": "application/json" },
                 JSON.stringify({
                     user: {
-                        username: "Tester",
+                        username: "tester",
                         full_name: "Tester",
                         media: {
                             nodes: []
@@ -73,7 +71,7 @@ describe("@actions", function () {
                 );
         }, 0)
 
-        return Promise.all(promis);
+        return promis;
     });
 
     it("Get notifications", function () {
@@ -103,7 +101,7 @@ describe("@actions", function () {
     });
 
     it("Like user posts", function () {
-        var promis = actions.likeUserPosts("Tester", 1, 4, false, {}).then(() => {
+        var promis = actions.likeUserPosts("tester", 1, 4, false, {}).then(() => {
             chai.expect(requests).to.have.lengthOf(3);
         });
 
@@ -112,7 +110,7 @@ describe("@actions", function () {
                 { "Content-Type": "application/json" },
                 JSON.stringify({
                     user: {
-                        username: "Tester",
+                        username: "tester",
                         full_name: "Tester",
                         media: {
                             nodes: [
