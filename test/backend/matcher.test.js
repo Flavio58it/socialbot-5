@@ -19,14 +19,32 @@ describe("#matcher", function () {
         chai.expect(result).to.equal(true)
     });
 
-    it ("Hash", function () {
-        var result = matcher("#test", "This is a testing test");
+    it ("Hash at end", function () {
+        var result = matcher("#test", "This is a testing #test");
 
         chai.expect(result).to.equal(true)
     });
 
+    it ("Hash in middle", function () {
+        var result = matcher("#test", "This is a testing #test with test");
+
+        chai.expect(result).to.equal(true)
+    });
+
+    it ("No hash", function () {
+        var result = matcher("#test", "This is a testing test with test");
+
+        chai.expect(result).to.equal(false)
+    });
+
     it ("User", function () {
         var result = matcher("@test", "This is a testing test @test");
+
+        chai.expect(result).to.equal(true)
+    });
+
+    it ("No user", function () {
+        var result = matcher("@test", "This is a testing test test tester");
 
         chai.expect(result).to.equal(true)
     });

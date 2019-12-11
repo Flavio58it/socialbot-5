@@ -9,15 +9,15 @@ function splitText(input) {
 	return input;
 }
 
-export default function (match, inputText) { // 
+export default function (match, inputText) {
 	var match = splitText(match), result = false;
 
-	if (!inputText || !match)
+	if (inputText === undefined || match === undefined)
 		return false;
 
 	match.forEach((t) => {
-		if (t.indexOf("#") == 0 || t.indexOf("@") == 0)
-			result = inputText.indexOf(t + " ") > -1
+		if (t.indexOf("#") === 0 || t.indexOf("@") === 0)
+			result = inputText.indexOf(t + " ") > -1 || inputText.search(new RegExp(t + "$", "g")) > -1
 		else if(/^\/.+\/$/.test(t))
 			result = new RegExp(t.replace(/^\/(.*)\/$/, "$1"), "g").test(inputText)
 		else if (inputText.indexOf(t) > -1)
