@@ -46,6 +46,6 @@ describe("#matcher", function () {
     it ("No user", function () {
         var result = matcher("@test", "This is a testing test test tester");
 
-        chai.expect(result).to.equal(true)
+        chai.expect(result).to.equal(false)
     });
 })
