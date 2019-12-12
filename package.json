@@ -45,6 +45,7 @@
     "node-sass": "^4.13.0",
     "object-mapper": "^6.0.1",
     "optimize-js-plugin": "0.0.4",
+    "puppeteer": "^2.0.0",
     "random-js": "^2.1.0",
     "sass-loader": "^8.0.0",
     "sass-resources-loader": "^2.0.1",
