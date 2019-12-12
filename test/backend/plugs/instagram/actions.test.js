@@ -113,7 +113,7 @@ describe("@actions", function () {
         return promis;
     });
 
-    describe("Likeback functionality", function () {
+    context("Likeback functionality", function () {
         it("When one new post, should like", function () {
             // These are above oin order to have 
             // Run timeouts for posts liking

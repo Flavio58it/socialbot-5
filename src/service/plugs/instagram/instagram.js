@@ -37,6 +37,9 @@ export default function () {
 			settings = settingsData
 			checker = new police(settingsData); // Init the main checker.
 			// Check if user is logged in and get the tokens
+			if (!settingsData)
+				return Promise.reject({error: "NO_SETTINGS"})
+
 			return decodeObject(urls.home, true, {
 				cbk: {
 					onData: (data) => queryIdParser(data).then((queryd) => {
@@ -76,6 +79,7 @@ export default function () {
 								"after": pointer
 							})):
 						format((urls.get.tag), tagName);
+
 
 					return decodeObject(nextQuery)
 					.then((data) => {
@@ -140,12 +144,14 @@ export default function () {
 							if (e.id == "ALREADY_LIKED") {
 								console.warn("Already liked. Aborting...");
 								return Promise.resolve({
+									stoppedBy: e.id,
 									data,
 									liked: numberLiked
 								});
 							} else if (e.id == "LIKE_LIMIT_REACHED") {
 								console.warn("Like limit reached...");
 								return Promise.resolve({
+									stoppedBy: e.id,
 									data,
 									liked: numberLiked
 								})
@@ -214,12 +220,14 @@ export default function () {
 							if (e.alreadyLiked) {
 								console.warn("Already liked. Aborting...");
 								return Promise.resolve({
+									stoppedBy: "ALREADY_LIKED",
 									data,
 									liked: numberLiked
 								});
 							} else if (e.likeLimitReached) {
 								console.warn("Like limit reached...");
 								return Promise.resolve({
+									stoppedBy: "LIKE_LIMIT_REACHED",
 									data,
 									liked: numberLiked
 								})
