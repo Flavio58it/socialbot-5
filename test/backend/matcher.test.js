@@ -19,6 +19,12 @@ describe("#matcher", function () {
         chai.expect(result).to.equal(true)
     });
 
+    it ("Uppercase string", function () {
+        var result = matcher("test|testing", "This is a TESTING TEST");
+
+        chai.expect(result).to.equal(true)
+    });
+
     it ("Hash at end", function () {
         var result = matcher("#test", "This is a testing #test");
 

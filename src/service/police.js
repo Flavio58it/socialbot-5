@@ -34,30 +34,29 @@ function police (settings) {
 
 		if (!catsetting.enabled)
 			return Promise.reject({stopped: true});
-		console.log("Available data for like policeman: ", settings, data);
 
 		if (!settings.options.videos && data.isVideo)
 			return false;
 		// Match by like number
-		if (settings.options.isLikeNumber && settings.options.isLikeNumber != "0") {
-			var likeNumber = parseInt(settings.options.isLikeNumber);
-			if (settings.options.isLikeNumberInclusive && settings.options.isLikeNumberMoreLess && likeNumber >= data.likes)
+		if (settings.options.isLikeNumber && settings.options.isLikeNumber !== "0") {
+			var likeNumber = parseInt(settings.options.isLikeNumber),
+				inclusive = settings.options.isLikeNumberInclusive,
+				moreLess = settings.options.isLikeNumberMoreLess,
+				likes = data.likes;
+
+			if (moreLess && likes >= likeNumber && !inclusive)
 				return false;
-			if (settings.options.isLikeNumberInclusive && !settings.options.isLikeNumberMoreLess && likeNumber <= data.likes)
-				return false;
-			if (!settings.options.isLikeNumberInclusive && settings.options.isLikeNumberMoreLess && likeNumber <= data.likes)
-				return false;
-			if (!settings.options.isLikeNumberInclusive && !settings.options.isLikeNumberMoreLess && likeNumber >= data.likes)
-				return false;
+			else if (moreLess && likes < likeNumber && inclusive)
+				return false			
 		}
 
 		// Match by the text in image comment
 		if (settings.options.textFilters && settings.options.textFilters.length) {
-			var result = matcher(settings.options.textFilters, data.comment);
-			if (result && !settings.options.isTextInclusive)
-				return false;
-			if (!result && settings.options.isTextInclusive)
-				return false;
+			var result = matcher(settings.options.textFilters, data.comment),
+				inclusive = settings.options.isTextInclusive;
+
+			if (!result || !inclusive)
+				return false
 		}
 		
 		if (settings.options.brain === true) { // As is the last returns are locked here.
@@ -77,11 +76,23 @@ function police (settings) {
 
 		if (!catsetting.enabled)
 			return Promise.reject({stopped: true});
-		console.log("Available data for the policeman: ", settings, data);
 
-		if (settings.followers.number || settings.following.number) {
-				return ((settings.following.number?(settings.following.more?(settings.following.number >= data.user.follows):(settings.following.number >= data.user.follows)):true) && 
-					   (settings.followers.number?(settings.followers.more?(settings.followers.number >= data.user.followedBy):(settings.followers.number >= data.user.followedBy)):true));
+		var followers = settings.followers,
+			following = settings.following;
+
+		if (followers.number || following.number) {
+			var followedBy = data.user.followedBy,
+				follows = data.user.follows;
+
+			if (followers.number !== 0 && followers.number >= follows && followers.more)
+				return false
+			else if (followers.number !== 0 && followers.number <= follows && !followers.more)
+				return false
+			else if (following.number !== 0 && following.number <= followedBy && !following.more)
+				return false
+			else if (following.number !== 0 && following.number > followedBy && following.more)
+				return false
+				
 		} else if (settings.ratio) {
 			console.log("By ratio");
 			var me = data.data, user = data.user

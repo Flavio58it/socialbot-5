@@ -5,7 +5,10 @@ import instagram from "../../../src/service/plugs/instagram/instagram";
 
 describe("#robot()", function () {
     before(function () {
-        window.chrome.webRequest = webRequest
+        window.chrome = {}
+        chrome = {
+            webRequest: webRequest
+        }
     });
 
     it("Init without params", function () {

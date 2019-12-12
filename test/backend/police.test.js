@@ -67,7 +67,7 @@ describe('#police()', function() {
                     likes: {
                         isLikeNumber: 100, // Simulate 100 treshold for likes
                         isLikeNumberInclusive: true, // True if the like should be done, false if not
-                        isLikeNumbersMoreLess: true // True if the like number should be more than or less than
+                        isLikeNumberMoreLess: true // True if the like number should be more than or less than
                     }
                 }
             }));
@@ -87,7 +87,7 @@ describe('#police()', function() {
                     likes: {
                         isLikeNumber: 80,
                         isLikeNumberInclusive: true,
-                        isLikeNumbersMoreLess: true
+                        isLikeNumberMoreLess: true
                     }
                 }
             }));
@@ -106,7 +106,7 @@ describe('#police()', function() {
                     likes: {
                         isLikeNumber: 80,
                         isLikeNumberInclusive: false,
-                        isLikeNumbersMoreLess: true
+                        isLikeNumberMoreLess: true
                     }
                 }
             }));
@@ -125,7 +125,7 @@ describe('#police()', function() {
                     likes: {
                         isLikeNumber: 100,
                         isLikeNumberInclusive: true,
-                        isLikeNumbersMoreLess: false
+                        isLikeNumberMoreLess: false
                     }
                 }
             }));
@@ -133,7 +133,7 @@ describe('#police()', function() {
             return policeObj.shouldLike({
                 likes: 90 
             }).then((result) => {
-                chai.expect(result).to.equal(false);
+                chai.expect(result).to.equal(true);
             });
         });
     
@@ -144,7 +144,7 @@ describe('#police()', function() {
                     likes: {
                         isLikeNumber: 100,
                         isLikeNumberInclusive: true,
-                        isLikeNumbersMoreLess: false
+                        isLikeNumberMoreLess: false
                     }
                 }
             }));
@@ -278,34 +278,6 @@ describe('#police()', function() {
                     followedBy: 10
                 }
             }).then((result) => {
-                chai.expect(result).to.equal(false);
-            })
-        });
-
-        it("Follow as followers are less than in settings and more is false", function () {
-            var policeObj = new police(simulateSetting({
-                enabled: true, 
-                filters: {
-                    follow: {
-                        followers: {
-                            number: 15,
-                            more: false
-                        },
-                        following: {
-                            number: 0,
-                            more: false
-                        },
-                        ratio: 0
-                    }
-                }
-            }));
-
-            return policeObj.shouldFollow({
-                user: {
-                    follows: 10,
-                    followedBy: 10
-                }
-            }).then((result) => {
                 chai.expect(result).to.equal(true);
             })
         });
@@ -338,7 +310,63 @@ describe('#police()', function() {
             })
         });
 
-        it("Follow as following is less than in settings and more is true", function () {
+        it("No follow as following is less than in settings and more is true", function () {
+            var policeObj = new police(simulateSetting({
+                enabled: true, 
+                filters: {
+                    follow: {
+                        followers: {
+                            number: 0,
+                            more: false
+                        },
+                        following: {
+                            number: 11,
+                            more: true
+                        },
+                        ratio: 0
+                    }
+                }
+            }));
+
+            return policeObj.shouldFollow({
+                user: {
+                    follows: 10,
+                    followedBy: 10
+                }
+            }).then((result) => {
+                chai.expect(result).to.equal(false);
+            })
+        });
+
+        it("No follow as following is less than in settings and more is true", function () {
+            var policeObj = new police(simulateSetting({
+                enabled: true, 
+                filters: {
+                    follow: {
+                        followers: {
+                            number: 0,
+                            more: false
+                        },
+                        following: {
+                            number: 11,
+                            more: true
+                        },
+                        ratio: 0
+                    }
+                }
+            }));
+
+            return policeObj.shouldFollow({
+                user: {
+                    follows: 10,
+                    followedBy: 10
+                }
+            }).then((result) => {
+                chai.expect(result).to.equal(false);
+            })
+        });
+
+        it("Follow as following is more than in settings and more is true", function () {
             var policeObj = new police(simulateSetting({
                 enabled: true, 
                 filters: {
@@ -365,5 +393,118 @@ describe('#police()', function() {
                 chai.expect(result).to.equal(true);
             })
         });
+
+        it("Follow as following is more than in settings and more is false", function () {
+            var policeObj = new police(simulateSetting({
+                enabled: true, 
+                filters: {
+                    follow: {
+                        followers: {
+                            number: 0,
+                            more: false
+                        },
+                        following: {
+                            number: 16,
+                            more: false
+                        },
+                        ratio: 0
+                    }
+                }
+            }));
+
+            return policeObj.shouldFollow({
+                user: {
+                    follows: 10,
+                    followedBy: 10
+                }
+            }).then((result) => {
+                chai.expect(result).to.equal(true);
+            })
+        });
+
+        it("Follow as followers/following is more and both true", function () {
+            var policeObj = new police(simulateSetting({
+                enabled: true, 
+                filters: {
+                    follow: {
+                        followers: {
+                            number: 8,
+                            more: true
+                        },
+                        following: {
+                            number: 6,
+                            more: true
+                        },
+                        ratio: 0
+                    }
+                }
+            }));
+
+            return policeObj.shouldFollow({
+                user: {
+                    follows: 10,
+                    followedBy: 10
+                }
+            }).then((result) => {
+                chai.expect(result).to.equal(true);
+            })
+        });
+
+        it("Follow as followers is less and true", function () {
+            var policeObj = new police(simulateSetting({
+                enabled: true, 
+                filters: {
+                    follow: {
+                        followers: {
+                            number: 8,
+                            more: true
+                        },
+                        following: {
+                            number: 0,
+                            more: true
+                        },
+                        ratio: 0
+                    }
+                }
+            }));
+
+            return policeObj.shouldFollow({
+                user: {
+                    follows: 10,
+                    followedBy: 10
+                }
+            }).then((result) => {
+                chai.expect(result).to.equal(true);
+            })
+        });
+
+        it("Follow as followers is more and more is false", function () {
+            var policeObj = new police(simulateSetting({
+                enabled: true, 
+                filters: {
+                    follow: {
+                        followers: {
+                            number: 15,
+                            more: false
+                        },
+                        following: {
+                            number: 0,
+                            more: true
+                        },
+                        ratio: 0
+                    }
+                }
+            }));
+
+            return policeObj.shouldFollow({
+                user: {
+                    follows: 10,
+                    followedBy: 10
+                }
+            }).then((result) => {
+                chai.expect(result).to.equal(true);
+            })
+        });
+        
     });
 });

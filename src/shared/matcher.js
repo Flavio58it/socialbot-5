@@ -1,7 +1,9 @@
 /**
-* This module allows to match multiple text patterns in the same string
-*
-**/
+ * MATCHER
+ * 
+ * This module allows to match multiple non case sensitive text patterns in the same string
+ * 
+ * */
 
 function splitText(input) {
 	if (typeof input == "string")
@@ -15,12 +17,15 @@ export default function (match, inputText) {
 	if (inputText === undefined || match === undefined)
 		return false;
 
-	match.forEach((t) => {
-		if (t.indexOf("#") === 0 || t.indexOf("@") === 0)
-			result = inputText.indexOf(t + " ") > -1 || inputText.search(new RegExp(t + "$", "g")) > -1
-		else if(/^\/.+\/$/.test(t))
-			result = new RegExp(t.replace(/^\/(.*)\/$/, "$1"), "g").test(inputText)
-		else if (inputText.indexOf(t) > -1)
+	// Remove case sensitivity
+	inputText = inputText.toLowerCase()
+
+	match.forEach((string) => {
+		string = string.toLowerCase()
+
+		if(/^\/.+\/$/.test(string))
+			result = new RegExp(string.replace(/^\/(.*)\/$/, "$1"), "g").test(inputText)
+		else if (inputText.indexOf(string) > -1)
 			result = true;
 	})
 
