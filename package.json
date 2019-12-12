@@ -6,8 +6,9 @@
   "private": true,
   "scripts": {
     "dev": "cross-env NODE_ENV=development webpack --watch  --mode=development",
+    "qa": "karma start",
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules  --mode=production",
-    "test": "karma start"
+    "test": "karma start --single-run"
   },
   "dependencies": {
     "@tensorflow-models/coco-ssd": "^2.0.0",
