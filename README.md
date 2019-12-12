@@ -1,4 +1,4 @@
-# FollowHunter
+# SocialBot
 
 **Chrome Extension that allows to perform repetitive actions for gaining followers on social networks**
 
