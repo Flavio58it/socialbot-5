@@ -115,13 +115,7 @@ describe("@actions", function () {
 
     context("Likeback functionality", function () {
         it("When one new post, should like", function () {
-            // These are above oin order to have 
-            // Run timeouts for posts liking
-            setTimeout(function () {
-                clock.runAll()
-            }, 40);
-            var clock = sinon.useFakeTimers(),
-                server = sinon.createFakeServer({
+            var server = sinon.createFakeServer({
                     respondImmediately: true
                 });
                 
@@ -152,11 +146,7 @@ describe("@actions", function () {
             var promis = actions.likeUserPosts("tester", "1", "4", false, {userInteraction: fakedLogger}).then(() => {
                 chai.expect(server.requests.length).to.equal(2)
                 chai.expect(fakedLogger.callCount).to.equal(1)
-
-                clock.restore()
             });
-    
-            clock.runAll();
     
             return promis;
         })
@@ -165,14 +155,7 @@ describe("@actions", function () {
         it("Should like 2 posts", function () {
             // These are above oin order to have 
             // Run timeouts for posts liking
-            setTimeout(function () {
-                clock.runAll()
-            }, 40);
-            setTimeout(function () {
-                clock.runAll()
-            }, 80);
-            var clock = sinon.useFakeTimers(),
-                server = sinon.createFakeServer({
+            var server = sinon.createFakeServer({
                     respondImmediately: true
                 });
 
@@ -240,11 +223,7 @@ describe("@actions", function () {
             var promis = actions.likeUserPosts("testerone", "1", "4", false, {userInteraction: fakedLogger}).then(() => {
                 chai.expect(server.requests.length).to.equal(5)
                 chai.expect(fakedLogger.callCount).to.equal(2)
-
-                clock.restore()
             });
-    
-            clock.runAll();
     
             return promis;
         })

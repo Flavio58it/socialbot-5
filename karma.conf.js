@@ -64,6 +64,9 @@ module.exports = function(config) {
     // Must add VUE configuration
     webpack: {
       mode: "development",
+      optimization: {
+        nodeEnv: "test"
+      },
       resolve: {
         modules: wconf.shortcuts
       }

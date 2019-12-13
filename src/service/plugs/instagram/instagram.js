@@ -51,6 +51,8 @@ export default function () {
 				console.log("Init info: ", data)
 				csrf = data.config.csrf_token;
 				user = data.config.viewer;
+
+				console.log("Chewbacca");
 				return {
 						connectionOk: true,
 						logged: (data && !data.entry_data.LandingPage),

@@ -3,13 +3,25 @@ import { simulateSetting } from "../../utils/settingsManager";
 import { webRequest } from "../../utils/chrome";
 import instagram from "../../../src/service/plugs/instagram/instagram";
 
+import { createServer } from "../../utils/servers";
+
 describe("#robot()", function () {
+    var server = false;
+
     before(function () {
         window.chrome = {}
         chrome = {
             webRequest: webRequest
         }
+
+        server = createServer([
+            "homepage_logged"
+        ])
     });
+
+    afterEach(function () {
+        server = false;
+    })
 
     it("Init without params", function () {
         chai.expect(() => new robot()).to.throw()
@@ -28,13 +40,11 @@ describe("#robot()", function () {
             bot.addListener("stop", function (t, name) {
                 s();
             });
-            bot.start()
+            bot.start(true)
         });
     })
 
     it("Bot round - Check if all operations calls are performed based on all enabled settings", function () {    
-        var clock = sinon.useFakeTimers();
-
         // Functions that represent all the operations performable by the bot (robot)
         var likeDashboard = sinon.fake();
         var followManager = sinon.fake();
@@ -66,8 +76,6 @@ describe("#robot()", function () {
 
         return new Promise((s, f) => {
             bot.addListener("stop", function (t, name) {
-                clock.restore();
-                
                 try{
                     chai.assert(likeDashboard.calledOnce, "likeDashboard")
                     chai.assert(followManager.calledOnce, "followManager")
@@ -79,7 +87,7 @@ describe("#robot()", function () {
 
                 s();
             });
-            bot.start()
+            bot.start(true)
         });
     });
 
@@ -132,7 +140,7 @@ describe("#robot()", function () {
 
                 s();
             });
-            bot.start()
+            bot.start(true)
         });
     })
 
@@ -151,7 +159,7 @@ describe("#robot()", function () {
                     s();
                 }
             });
-            bot.start()
+            bot.start(true)
         });
     })
 });

@@ -1,29 +1,15 @@
 import instagram from "../../../../src/service/plugs/instagram/instagram";
 import { simulateSetting } from "../../../utils/settingsManager";
 
-import urls from "../../../../src/service/plugs/instagram/urls";
+import { createServer } from "../../../utils/servers";
 
 describe("@instagram", function () {
     var server = false
 
     beforeEach(function () {
-        server = sinon.createFakeServer({
-            respondImmediately: true
-        });
-
-        server.respond(urls.home, function (xhr) {
-            xhr.respond(
-                200, 
-                { "Content-Type": "text/html" },
-                `
-                    <html>
-                        <body>
-                            <script>window._sharedData = {"config": {"csrf_token": "TEST"}, "entry_data": {"LandingPage": false}}</script>
-                        </body>
-                    </html>
-                `
-            )
-        })
+        server = createServer([
+            "homepage_logged"
+        ])
     });
 
     afterEach(function () {
@@ -53,7 +39,7 @@ describe("@instagram", function () {
 
     context("likeTagImages()", function () {
         it("Like by tag, should perform calls to server and respond ", function () {
-            var instance = new instagram()
+            var instance = new instagram();
 
             server.respond(/\/explore\/tags\/testtag\//, function (xhr) {
                 xhr.respond(200, 
@@ -84,6 +70,20 @@ describe("@instagram", function () {
                     })
                 )
             })
+
+            server.respond(/\/p\/\d*\//, function (xhr) {
+                xhr.respond(200,
+                    { "Content-Type": "application/json" },
+                    // graphql.shortcode_media.viewer_has_liked
+                    JSON.stringify({
+                        graphql: {
+                            shortcode_media: {
+                                viewer_has_liked: false
+                            }
+                        }
+                    })
+                );
+            });
 
             return instance.init(simulateSetting())
                 .then(() => instance.actions.likeTagImages("testtag", 1000, 4)) // Tag, millisec wait, limit

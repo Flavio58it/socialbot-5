@@ -12,6 +12,7 @@ const bot = function(settings, plug, plugName) {
 	var request = false;
 	return plug.init(settings).then((data) => {
 		console.info("Logged in: ", data.logged);
+
 		if (!data.logged)
 			return Promise.reject({id: "LOGGED_OUT", error: "Login failure. Please go to the homepage and login.", action: "PLUG_HOME"})
 		request = new requests(data.domain.match, data.domain.res).listen(); // See the requests module for the explanation
@@ -83,7 +84,11 @@ export default function (settings, plug, plugName) {
 		return new error("Missing params");
 
 	// Boot bot
-	t.start = () => {
+	/**
+	 * Params:
+	 * * singleRun {boolean} - Run the bot only once, does not loop
+	 */
+	t.start = (singleRun) => {
 		running = true;
 		
 		events.runstatus&&events.runstatus(t, plugName);
@@ -103,12 +108,14 @@ export default function (settings, plug, plugName) {
 			events.stop&&events.stop(t, plugName);
 
 			running = false;
-			triggerTimer();
+			if (!singleRun)
+				triggerTimer();
 		}).catch ((e) => {
 			// Error or stopped/rebooting
 			running = false;
 			events.runstatus&&events.runstatus(t, plugName, e);
-			triggerTimer(); // Restart after some time!
+			if (!singleRun)
+				triggerTimer(); // Restart after some time!
 
 			if (e.stopped) {
 				if (rebooting) {
@@ -180,7 +187,7 @@ export default function (settings, plug, plugName) {
 	// Simple timer that waits n ms before restarting server
 	function triggerTimer () {
 		settings.get("waiter").then((wait) => {
-			waiter(wait.roundPause * 1000 * 60).then(() => (!running)?t.start():false); // Converted from minutes
+			waiter(wait.roundPause * 1000 * 60).then(() => (!running)&&t.start()); // Converted from minutes
 		});
 	}
 
