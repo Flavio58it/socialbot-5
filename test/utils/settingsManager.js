@@ -9,7 +9,7 @@ import instagramSettings from "../../src/service/plugs/instagram/settings";
  */
 
 export function simulateSetting (object) {
-    var newObj = Object.assign(instagramSettings, object);
+    var newObj = {...instagramSettings, ...object};
 
     //console.log("Simulating setting: ", newObj);
 

@@ -52,7 +52,6 @@ export default function () {
 				csrf = data.config.csrf_token;
 				user = data.config.viewer;
 
-				console.log("Chewbacca");
 				return {
 						connectionOk: true,
 						logged: (data && !data.entry_data.LandingPage),
@@ -95,6 +94,7 @@ export default function () {
 									// If the user or the bot has already liked the post the like process is aborted, as the previous posts has already been viewed.
 									if (numberLiked >= limit)
 										return Promise.reject({id: "LIKE_LIMIT_REACHED"});
+
 									return decodeObject(format(urls.get.post, d.code)).then((data) => {
 										data = objectMapper(data, mappers.postData)
 										if (data.liked) {

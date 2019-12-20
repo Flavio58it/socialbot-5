@@ -5,6 +5,10 @@ import urls from "../../src/service/plugs/instagram/urls";
  * 
  * Example: 
  * 
+ * server = createServer([
+ *           "homepage_logged",
+ *           "like_post"
+ *       ])
  */
 
 const routes = {
@@ -18,6 +22,13 @@ const routes = {
                 </body>
             </html>
         `
+    },
+    "like_post": {
+        url: /\/web\/likes\/\d+\/like\//,
+        type: "json",
+        data: JSON.stringify({
+            success: true
+        })
     }
 }
 
@@ -27,9 +38,12 @@ const responseTypes = {
     "json": "application/json"
 }
 
+var callbacks = {}
+
 export function createServer (routesToInclude) {
     var server = sinon.createFakeServer({
-        respondImmediately: true
+        // respondImmediately: true
+        autoRespond: true
     });
 
     routesToInclude.forEach((route) => {
@@ -37,7 +51,9 @@ export function createServer (routesToInclude) {
             routeObj = routes[route];
 
         server.respond(routeObj.url, function (xhr) {
-            console.log("[SERVER] Requesting ", routeObj.url)
+            console.log("[SERVER] Requesting ", xhr.url)
+            if (callbacks[routeName])
+                callbacks[routeName](xhr, routeObj.url, routeObj.data);
             xhr.respond(
                 200, 
                 { "Content-Type": responseTypes[routeObj.type] },
@@ -45,6 +61,11 @@ export function createServer (routesToInclude) {
             )
         })
     })
+
+    // Add attachCallback functionality to sinon fake server. This allows to set an arbitrary callback to each of servers in order to increment counters and check that the route has been correctly called
+    server.attachCallback = function (serverName, callback) {
+        callbacks[serverName] = callback;
+    }
 
     return server;
 }
