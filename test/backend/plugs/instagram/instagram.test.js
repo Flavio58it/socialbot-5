@@ -1,5 +1,6 @@
 import instagram from "../../../../src/service/plugs/instagram/instagram";
 import urls from "../../../../src/service/plugs/instagram/urls";
+import db from "../../../../src/service/db/db";
 
 import { simulateSetting } from "../../../utils/settingsManager";
 import { createServer } from "../../../utils/servers";
@@ -45,13 +46,14 @@ function createImagesObject(numberOfImages, viewed) {
 }
 
 describe("@instagram", function () {
-    var server = false
+    var server = false;
 
     beforeEach(function () {
         server = createServer([
             "homepage_logged",
             "like_post"
         ])
+        return db.logs.clear()
     });
 
     afterEach(function () {
@@ -109,6 +111,9 @@ describe("@instagram", function () {
                 .then((error) => {
                     chai.expect(error).to.be.undefined
                     chai.expect(server.requests.length).to.equal(4)
+                }).then(() => db.logs.toArray()).then((database) => {
+                    chai.expect(database).to.have.lengthOf(1, "One like in database")
+                    chai.expect(database[0]).to.have.property("action", "USER_LIKE")
                 })
         });
 
@@ -140,6 +145,8 @@ describe("@instagram", function () {
                 .then((error) => {
                     chai.expect(error.stoppedBy).to.equal("ALREADY_LIKED", "Ensure that the bot was stopped by the correct error")
                     chai.expect(server.requests.length).to.equal(3, "One less request as like is not performed")
+                }).then(() => db.logs.toArray()).then((database) => {
+                    chai.expect(database).to.have.lengthOf(0, "No likes in database")
                 })
         });
 
@@ -178,6 +185,9 @@ describe("@instagram", function () {
                     chai.expect(liked).to.equal(4, "Should like 4 photos as is default in settings")
                     chai.expect(error.stoppedBy).to.equal("LIKE_LIMIT_REACHED", "Ensure that the bot was stopped by the correct error")
                     chai.expect(server.requests.length).to.equal(10, "Check that the calls correspond")
+                }).then(() => db.logs.toArray()).then((database) => {
+                    chai.expect(database).to.have.lengthOf(4, "Liked 4 photos")
+                    chai.expect(database[0]).to.have.property("action", "USER_LIKE")
                 })
         });
 
@@ -223,6 +233,8 @@ describe("@instagram", function () {
                 .then((error) => {
                     chai.expect(liked).to.equal(false, "Should not like anything");
                     //chai.expect(server.requests.length).to.equal(3, "Like not performed")
+                }).then(() => db.logs.toArray()).then((database) => {
+                    chai.expect(database).to.have.lengthOf(0, "No likes in database")
                 })
         });
 
@@ -273,6 +285,9 @@ describe("@instagram", function () {
                 .then(() => instance.actions.likeTagImages("testtag", 1000, 4)) // Tag, millisec wait, limit
                 .then((error) => {
                     chai.expect(liked).to.equal(2, "Should like one image from first and one from the second page")
+                }).then(() => db.logs.toArray()).then((database) => {
+                    chai.expect(database).to.have.lengthOf(2, "Two likes in database")
+                    chai.expect(database[0]).to.have.property("action", "USER_LIKE")
                 })
         });
         
@@ -303,13 +318,15 @@ describe("@instagram", function () {
                 }, function (error) {
                     chai.expect(error).to.have.property("action", "RELOAD")
                     chai.expect(error).to.have.property("id", "CONNECTION_ERROR_TAG_LIKE")
+                }).then(() => db.logs.toArray()).then((database) => {
+                    chai.expect(database).to.have.lengthOf(0, "No likes as has crashed")
                 })
         })
     })
 
     context("likeDashboard()", function () {
         it("Should like 1 image as is the only present in dashboard", function (){
-            var liked = 0, home = false
+            var liked = 0, home = false, actionLog = false;
 
             server.attachCallback("like_post", function (xhr, url, data) {
                 liked++;
@@ -341,10 +358,13 @@ describe("@instagram", function () {
                     chai.expect(error).to.equal(undefined)
                     chai.expect(liked).to.equal(1, "Liked one image")
                     chai.expect(home).to.equal(true)
+                }).then(() => db.logs.toArray()).then((database) => {
+                    chai.expect(database).to.have.lengthOf(1, "One like log should be present in database")
+                    chai.expect(database[0]).to.have.property("action", "USER_LIKE")
                 })
         });
 
-        it("Should like 1 image as is the only present in dashboard", function (){
+        it("Should not like anything as is already liked", function (){
             var liked = 0, home = false
 
             server.attachCallback("like_post", function (xhr, url, data) {
@@ -384,6 +404,8 @@ describe("@instagram", function () {
                     chai.expect(error).to.have.property("stoppedBy", "ALREADY_LIKED")
                     chai.expect(liked).to.equal(0, "Already liked")
                     chai.expect(home).to.equal(true)
+                }).then(() => db.logs.toArray()).then((database) => {
+                    chai.expect(database).to.have.lengthOf(0, "Nothing in database")
                 })
         });
 
@@ -420,10 +442,13 @@ describe("@instagram", function () {
                     chai.expect(error).to.have.property("stoppedBy", "LIKE_LIMIT_REACHED")
                     chai.expect(liked).to.equal(4, "Liked four images")
                     chai.expect(home).to.equal(true)
+                }).then(() => db.logs.toArray()).then((database) => {
+                    chai.expect(database).to.have.lengthOf(4, "4 likes in database")
+                    chai.expect(database[0]).to.have.property("action", "USER_LIKE")
                 })
         });
     
-        it("LIke filter, disallow all", function () {
+        it("Like filter, disallow all", function () {
             var liked = 0, home = false
 
             server.attachCallback("like_post", function (xhr, url, data) {
@@ -463,6 +488,8 @@ describe("@instagram", function () {
                 .then((error) => {
                     chai.expect(liked).to.equal(0, "No likes as is filtered")
                     chai.expect(home).to.equal(true)
+                }).then(() => db.logs.toArray()).then((database) => {
+                    chai.expect(database).to.have.lengthOf(0, "Nothing in database")
                 })
         });
     });
