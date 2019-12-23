@@ -12,8 +12,8 @@ export default {
 	}, // Like back images when a user is liking yours
 	waiter: {
 		actionLower: 10, // Wait between one action and another (min) (seconds)
-		actionUpper: 30, //(max)
-		roundPause: 5 // Time between one round and another. In minutes
+		actionUpper: 60, //(max)
+		roundPause: 7 // Time between one round and another. In minutes
 	},
 	filters: { // Various filters for liking/following
 		likes: { // When like a post
@@ -42,9 +42,9 @@ export default {
 	},
 	limits: {
 		likes: {
-			tag: 20,	// Max likes per tag
-			dash: 20,	// Max likes to your dashboard
-			explorer: 20 // Max likes per session for explorers tab/section
+			tag: 15,	// Max likes per tag
+			dash: 15,	// Max likes to your dashboard
+			explorer: 15 // Max likes per session for explorers tab/section
 		}
 	},
 	follow: {
