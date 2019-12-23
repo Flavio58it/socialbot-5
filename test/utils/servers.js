@@ -52,12 +52,18 @@ export function createServer (routesToInclude) {
 
         server.respond(routeObj.url, function (xhr) {
             console.log("[SERVER] Requesting ", xhr.url)
-            if (callbacks[routeName])
-                callbacks[routeName](xhr, routeObj.url, routeObj.data);
+            var response = routeObj.data;
+
+            if (callbacks[routeName]) {
+                var overridedResponse = callbacks[routeName](xhr, routeObj.url, routeObj.data);
+                if (overridedResponse)
+                    response = overridedResponse
+            }
+
             xhr.respond(
                 200, 
                 { "Content-Type": responseTypes[routeObj.type] },
-                routeObj.data
+                response
             )
         })
     })

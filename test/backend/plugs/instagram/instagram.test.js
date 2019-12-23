@@ -1,10 +1,11 @@
 import instagram from "../../../../src/service/plugs/instagram/instagram";
+import urls from "../../../../src/service/plugs/instagram/urls";
 
 import { simulateSetting } from "../../../utils/settingsManager";
 import { createServer } from "../../../utils/servers";
 
 // Creates the main images object found in account
-function createImagesObject(numberOfImages) {
+function createImagesObject(numberOfImages, viewed) {
     var object = {
         tag: {
             media: {
@@ -22,6 +23,13 @@ function createImagesObject(numberOfImages) {
         caption: "This is a test",
         shortcode: "W1234",
         code: "1234",
+        node: {
+            id: 123456780,
+            viewer_has_liked: viewed || false,
+            likes: {
+                count: 1
+            }
+        },
         display_src: "/i/testimagesrc",
         thumbnail_src: "/thumb/testimagesrc",
         likes: {
@@ -298,4 +306,164 @@ describe("@instagram", function () {
                 })
         })
     })
+
+    context("likeDashboard()", function () {
+        it("Should like 1 image as is the only present in dashboard", function (){
+            var liked = 0, home = false
+
+            server.attachCallback("like_post", function (xhr, url, data) {
+                liked++;
+            });
+
+            server.respond(urls.home + "/?__a=1", function (xhr) {
+                home = true;
+                var obj = {
+                    graphql: {
+                        user: {
+                            edge_web_feed_timeline: {
+                                edges: createImagesObject(1).tag.media.nodes // Use already present system
+                            }
+                        }
+                    }
+                }
+
+                xhr.respond(200,
+                    { "Content-Type": "application/json" },
+                    JSON.stringify(obj)
+                );
+            })
+
+            var instance = new instagram();
+
+            return instance.init(simulateSetting())
+                .then(() => instance.actions.likeDashboard(1000, 4)) // Millisec wait, limit
+                .then((error) => {
+                    chai.expect(error).to.equal(undefined)
+                    chai.expect(liked).to.equal(1, "Liked one image")
+                    chai.expect(home).to.equal(true)
+                })
+        });
+
+        it("Should like 1 image as is the only present in dashboard", function (){
+            var liked = 0, home = false
+
+            server.attachCallback("like_post", function (xhr, url, data) {
+                liked++;
+            });
+
+            server.respond(urls.home + "/?__a=1", function (xhr) {
+                home = true;
+                var obj = {
+                    graphql: {
+                        user: {
+                            edge_web_feed_timeline: {
+                                edges: [
+                                    {
+                                        node: {
+                                            id: 123456780,
+                                            viewer_has_liked: true
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+
+                xhr.respond(200,
+                    { "Content-Type": "application/json" },
+                    JSON.stringify(obj)
+                );
+            })
+
+            var instance = new instagram();
+
+            return instance.init(simulateSetting())
+                .then(() => instance.actions.likeDashboard(1000, 4)) // Millisec wait, limit
+                .then((error) => {
+                    chai.expect(error).to.have.property("stoppedBy", "ALREADY_LIKED")
+                    chai.expect(liked).to.equal(0, "Already liked")
+                    chai.expect(home).to.equal(true)
+                })
+        });
+
+        it("Should be limited to 4 likes", function (){
+            var liked = 0, home = false
+
+            server.attachCallback("like_post", function (xhr, url, data) {
+                liked++;
+            });
+
+            server.respond(urls.home + "/?__a=1", function (xhr) {
+                home = true;
+                var obj = {
+                    graphql: {
+                        user: {
+                            edge_web_feed_timeline: {
+                                edges: createImagesObject(10).tag.media.nodes // Use already present system
+                            }
+                        }
+                    }
+                }
+
+                xhr.respond(200,
+                    { "Content-Type": "application/json" },
+                    JSON.stringify(obj)
+                );
+            })
+
+            var instance = new instagram();
+
+            return instance.init(simulateSetting())
+                .then(() => instance.actions.likeDashboard(1000, 4)) // Millisec wait, limit
+                .then((error) => {
+                    chai.expect(error).to.have.property("stoppedBy", "LIKE_LIMIT_REACHED")
+                    chai.expect(liked).to.equal(4, "Liked four images")
+                    chai.expect(home).to.equal(true)
+                })
+        });
+    
+        it("LIke filter, disallow all", function () {
+            var liked = 0, home = false
+
+            server.attachCallback("like_post", function (xhr, url, data) {
+                liked++;
+            });
+
+            server.respond(urls.home + "/?__a=1", function (xhr) {
+                home = true;
+                var obj = {
+                    graphql: {
+                        user: {
+                            edge_web_feed_timeline: {
+                                edges: createImagesObject(3).tag.media.nodes // Use already present system
+                            }
+                        }
+                    }
+                }
+
+                xhr.respond(200,
+                    { "Content-Type": "application/json" },
+                    JSON.stringify(obj)
+                );
+            })
+
+            var instance = new instagram();
+
+            return instance.init(simulateSetting({
+                filters: {
+                    likes: {
+                        isLikeNumber: 2,
+                        isLikeNumberInclusive: true,
+                        isLikeNumberMoreLess: true
+                    }
+                }
+            }))
+                .then(() => instance.actions.likeDashboard(1000, 4)) // Millisec wait, limit
+                .then((error) => {
+                    chai.expect(liked).to.equal(0, "No likes as is filtered")
+                    chai.expect(home).to.equal(true)
+                })
+        });
+    });
 })
