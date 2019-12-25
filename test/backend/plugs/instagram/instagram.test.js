@@ -3,40 +3,12 @@ import urls from "../../../../src/service/plugs/instagram/urls";
 import db from "../../../../src/service/db/db";
 
 import { simulateSetting } from "../../../utils/settingsManager";
-import { createServer } from "../../../utils/servers";
+import { createServer } from "./servers";
+import { imageStructure, singleImage, user, rawHomePageStructure } from "./fakeData";
 
 // Creates the main images object found in account
 function createImagesObject(numberOfImages, viewed) {
-    var object = {
-        tag: {
-            media: {
-                nodes: [
-                    
-                ]
-            }
-        }
-    }, images = {
-        id: 123456780,
-        owner: {
-            id: 1324,
-            username: "tester"
-        },
-        caption: "This is a test",
-        shortcode: "W1234",
-        code: "1234",
-        node: {
-            id: 123456780,
-            viewer_has_liked: viewed || false,
-            likes: {
-                count: 1
-            }
-        },
-        display_src: "/i/testimagesrc",
-        thumbnail_src: "/thumb/testimagesrc",
-        likes: {
-            count: 1
-        }
-    };
+    var object = imageStructure(), images = singleImage(viewed);
 
     for (let i = 0; i < numberOfImages; i++) {
         object.tag.media.nodes.push(images);
@@ -53,7 +25,7 @@ describe("@instagram", function () {
             "homepage_logged",
             "like_post"
         ])
-        return db.logs.clear()
+        return db.logs.clear().then(() => db.users.clear())
     });
 
     afterEach(function () {
@@ -492,5 +464,134 @@ describe("@instagram", function () {
                     chai.expect(database).to.have.lengthOf(0, "Nothing in database")
                 })
         });
+    });
+
+    context("followManager()", function () {
+        it("Followback, unFollowBack and onlyFetch disabled, should update followed by users", function () {
+            var instance = new instagram();
+
+            server.attachCallback("homepage_logged", function () {
+                return rawHomePageStructure({
+                    config: {
+                        viewer: user().user
+                    }
+                })
+            })
+
+            server.respondWith(/\/graphql\/query\//, function (xhr) {
+                xhr.respond(200, { "Content-Type": "application/json" }, JSON.stringify({
+                    data: {
+                        user: {
+                            edge_followed_by: {
+                                edges: [
+                                    {
+                                        node: user().user
+                                    }
+                                ],
+                                page_info: {}
+                            }
+                        }
+                    }
+                }));
+            })
+
+            return instance.init(simulateSetting({
+                followBack: false,
+                unFollowBack: false
+            }))
+            .then(() => instance.actions.followManager(false)).then((users) => {
+                chai.expect(users).to.be.lengthOf(1) // User is returden to caller
+                return db.users.toArray();
+            }).then((data) => {
+                chai.expect(data).to.be.lengthOf(1, "User is inserted in database")
+            })
+        });
+
+        it("Should update follow", function () {
+            var instance = new instagram();
+
+            server.attachCallback("homepage_logged", function () {
+                return rawHomePageStructure({
+                    config: {
+                        viewer: user().user
+                    }
+                })
+            })
+
+            server.respondWith(/\/graphql\/query\//, function (xhr) {
+                xhr.respond(200, { "Content-Type": "application/json" }, JSON.stringify({
+                    data: {
+                        user: {
+                            edge_follow: {
+                                edges: [
+                                    {
+                                        node: user().user
+                                    }
+                                ],
+                                page_info: {}
+                            }
+                        }
+                    }
+                }));
+            })
+
+            return instance.init(simulateSetting({
+                followBack: false,
+                unFollowBack: false
+            }))
+            .then(() => instance.actions.followManager(false)).then((users) => {
+                chai.expect(users).to.be.lengthOf(1, "All users are returned") // User is returden to caller
+                return db.users.toArray();
+            }).then((data) => {
+                chai.expect(data).to.be.lengthOf(1, "User is inserted in database")
+            })
+        });
+
+        it("Should find next page users", function () {
+            var instance = new instagram(), endCursor = "END_CURSR";
+
+            server.attachCallback("homepage_logged", function () {
+                return rawHomePageStructure({
+                    config: {
+                        viewer: user().user
+                    }
+                })
+            })
+
+            server.respondWith(/\/graphql\/query\//, function (xhr) {
+                xhr.respond(200, { "Content-Type": "application/json" }, JSON.stringify({
+                    data: {
+                        user: {
+                            edge_follow: {
+                                edges: [
+                                    {
+                                        node: user().user
+                                    }
+                                ],
+                                page_info: {
+                                    has_next_page: true,
+                                    end_cursor: endCursor
+                                }
+                            }
+                        }
+                    }
+                }));
+                if (!endCursor && xhr.url.indexOf("3129") > -1) // Check if the query contains the cursor at the second call. Filtered calls by part of query id
+                    chai.expect(xhr.url).to.contain("END_CURSR")
+                endCursor = false
+            })
+
+            return instance.init(simulateSetting({
+                followBack: false,
+                unFollowBack: false
+            }))
+            .then(() => instance.actions.followManager(false)).then((users) => {
+                chai.expect(users).to.be.lengthOf(2, "All users are returned, one per page") // User is returden to caller
+                chai.expect(server.requests.length).to.equal(4, "Check if all calls are performed")
+                return db.users.toArray();
+            }).then((data) => {
+                chai.expect(data).to.be.lengthOf(2, "Users are inserted in database")
+            })
+        })
     });
 })

@@ -1,25 +1,8 @@
 import actions from "../../../../src/service/plugs/instagram/actions";
+import { user } from "./fakeData";
 
 // Unique user data as is cached
-var userdata = {
-    user: {
-        username: "tester",
-        full_name: "Tester",
-        media: {
-            nodes: [
-                {
-                    id: 105,
-                    likes: {
-                        count: 10
-                    },
-                    code: 100,
-                    thumbnail_src: "image",
-                    is_video: false
-                }
-            ]
-        }
-    }
-}
+var userdata = user()
 
 describe("@actions", function () {
 

@@ -266,8 +266,6 @@ export default function () {
 					settings.get("unFollowBack")
 				])
 
-				//return Promise.resolve();
-
 				return Promise.all([
 					actions.getUsersBatch(query_id.followers, user.id),
 					actions.getUsersBatch(query_id.following, user.id)

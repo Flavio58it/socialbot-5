@@ -1,4 +1,6 @@
-import urls from "../../src/service/plugs/instagram/urls";
+import urls from "../../../../src/service/plugs/instagram/urls";
+
+import { rawHomePageStructure } from "./fakeData";
 
 /**
  * Function that allows rapid multiple inclusion of server sources trough fakeServer implementation
@@ -15,19 +17,51 @@ const routes = {
     "homepage_logged": {
         url: urls.home,
         type: "html",
-        data: `
-            <html>
-                <body>
-                    <script>window._sharedData = {"config": {"csrf_token": "TEST"}, "entry_data": {"LandingPage": false}}</script>
-                </body>
-            </html>
-        `
+        data: rawHomePageStructure()
     },
     "like_post": {
         url: /\/web\/likes\/\d+\/like\//,
         type: "json",
         data: JSON.stringify({
             success: true
+        })
+    },
+    "user_data": {
+        url: /\/testerman\/$/,
+        type: "json",
+        data: JSON.stringify({
+            user: {
+                username: "tester",
+                full_name: "Tester",
+                media: {
+                    nodes: [
+                        {
+                            id: 105,
+                            likes: {
+                                count: 10
+                            },
+                            code: 100,
+                            thumbnail_src: "image",
+                            is_video: false
+                        }
+                    ]
+                }
+            }
+        })
+    },
+    "notifications_list": {
+        url: "",
+        type: "json",
+        data: JSON.stringify({
+            graphql: {
+                user: {
+                    activity_feed: {
+                        edge_web_activity_feed: {
+                            count: 1
+                        }
+                    }
+                }
+            }
         })
     }
 }

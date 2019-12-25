@@ -1,9 +1,9 @@
 import robot from "../../../src/service/robot";
 import { simulateSetting } from "../../utils/settingsManager";
 import { webRequest } from "../../utils/chrome";
-import instagram from "../../../src/service/plugs/instagram/instagram";
 
-import { createServer } from "../../utils/servers";
+// **** Using instagram backend plugs for robot testing ****
+import { createServer } from "../plugs/instagram/servers";
 
 describe("#robot()", function () {
     var server = false;
