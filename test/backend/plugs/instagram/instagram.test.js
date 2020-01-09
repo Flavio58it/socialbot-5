@@ -23,12 +23,16 @@ describe("@instagram", function () {
     beforeEach(function () {
         server = createServer([
             "homepage_logged",
-            "like_post"
-        ])
+            "like_post",
+            "notifications_list"
+        ]);
+
+        // Reset database
         return db.logs.clear().then(() => db.users.clear())
     });
 
     afterEach(function () {
+        // Shut off server
         server = false;
     })
 
@@ -467,7 +471,7 @@ describe("@instagram", function () {
     });
 
     context("followManager()", function () {
-        it("Followback, unFollowBack and onlyFetch disabled, should update followed by users", function () {
+        it("Followback, unFollowBack and onlyFetch disabled, should only update 'followed by' users", function () {
             var instance = new instagram();
 
             server.attachCallback("homepage_logged", function () {
@@ -593,5 +597,387 @@ describe("@instagram", function () {
                 chai.expect(data).to.be.lengthOf(2, "Users are inserted in database")
             })
         })
+    
+        it("Should fail gracefully as user in database is corrupted", function () {
+            var instance = new instagram();
+
+            server.attachCallback("homepage_logged", function () {
+                return rawHomePageStructure({
+                    config: {
+                        viewer: user().user
+                    }
+                })
+            })
+
+            server.respondWith(/\/graphql\/query\//, function (xhr) {
+                xhr.respond(200, { "Content-Type": "application/json" }, JSON.stringify({
+                    data: {
+                        user: {
+                            edge_follow: {
+                                edges: [
+                                    {
+                                        node: user().user
+                                    }
+                                ],
+                                page_info: {
+                                    has_next_page: true,
+                                    end_cursor: false
+                                }
+                            }
+                        }
+                    }
+                }));
+            })
+
+            return db.users.add({userid: undefined}).then(() => instance.init(simulateSetting()))
+            .then(() => instance.actions.followManager(false)).then(() => {
+                chai.assert.Throw("Should not be successful")
+            }).catch((error) => {
+                chai.expect(error).to.have.property("id", "DB_USER_CORRUPTED")
+
+                return db.users.toArray();
+            }).then((data) => {
+                chai.expect(data).to.be.lengthOf(1, "Old corrupted user present")
+            })
+        });
+
+        it("Should do nothing, the user exists", function () {
+            var instance = new instagram();
+
+            server.attachCallback("homepage_logged", function () {
+                return rawHomePageStructure({
+                    config: {
+                        viewer: user().user
+                    }
+                })
+            })
+
+            server.respondWith(/\/graphql\/query\//, function (xhr) {
+                xhr.respond(200, { "Content-Type": "application/json" }, JSON.stringify({
+                    data: {
+                        user: {
+                            edge_follow: {
+                                edges: [
+                                    {
+                                        node: user().user
+                                    }
+                                ],
+                                page_info: {
+                                    has_next_page: true,
+                                    end_cursor: false
+                                }
+                            }
+                        }
+                    }
+                }));
+            })
+
+            var dbUser = user().user;
+
+            return db.users.add({plug: "instagram", userid: dbUser.id, username: dbUser.username}).then(() => instance.init(simulateSetting()))
+            .then(() => instance.actions.followManager(false)).then((data) => {
+                chai.expect(data).to.be.lengthOf(1, "User remains to 1")
+
+                return db.users.toArray();
+            }).then((data) => {
+                chai.expect(data).to.be.lengthOf(1, "User remains to 1")
+            })
+        });
+
+        it("Should do nothing but the name in database is updated", function () {
+            var instance = new instagram();
+
+            server.attachCallback("homepage_logged", function () {
+                return rawHomePageStructure({
+                    config: {
+                        viewer: user().user
+                    }
+                })
+            })
+
+            server.respondWith(/\/graphql\/query\//, function (xhr) {
+                xhr.respond(200, { "Content-Type": "application/json" }, JSON.stringify({
+                    data: {
+                        user: {
+                            edge_follow: {
+                                edges: [
+                                    {
+                                        node: user().user
+                                    }
+                                ],
+                                page_info: {
+                                    has_next_page: true,
+                                    end_cursor: false
+                                }
+                            }
+                        }
+                    }
+                }));
+            })
+
+            var dbUser = user().user;
+
+            return db.users.add({plug: "instagram", userid: dbUser.id, username: "Chewbacca"}).then(() => instance.init(simulateSetting()))
+            .then(() => instance.actions.followManager(false)).then((data) => {
+                chai.expect(data).to.be.lengthOf(1, "User remains to 1")
+
+                return db.users.toArray();
+            }).then((data) => {
+                chai.expect(data).to.be.lengthOf(1, "User remains to 1")
+                chai.expect(data[0]).to.have.property("username", "Chewbacca")
+            })
+        });
+    
+        it("Should change status of user to likeBacked", function () {
+            var instance = new instagram();
+
+            server.attachCallback("homepage_logged", function () {
+                return rawHomePageStructure({
+                    config: {
+                        viewer: user().user
+                    }
+                })
+            })
+
+            server.respondWith(/\/graphql\/query\//, function (xhr) {
+                xhr.respond(200, { "Content-Type": "application/json" }, JSON.stringify({
+                    data: {
+                        user: {
+                            edge_follow: {
+                                edges: [
+                                    {
+                                        node: user().user
+                                    }
+                                ],
+                                page_info: {
+                                    has_next_page: true,
+                                    end_cursor: false
+                                }
+                            }
+                        }
+                    }
+                }));
+            })
+
+            var dbUser = user().user;
+
+            return db.users.add({plug: "instagram", userid: dbUser.id, username: "Chewbacca"}).then(() => instance.init(simulateSetting()))
+            .then(() => instance.actions.followManager(false)).then((data) => {
+                chai.expect(data).to.be.lengthOf(1, "User remains to 1")
+
+                return db.users.toArray();
+            }).then((data) => {
+                chai.expect(data).to.be.lengthOf(1, "User remains to 1")
+                chai.expect(data[0]).to.have.property("username", "Chewbacca")
+            })
+        });
+
+        it("Should edit already present user in database and follow it", function () {
+            var instance = new instagram();
+
+            server.attachCallback("homepage_logged", function () {
+                return rawHomePageStructure({
+                    config: {
+                        viewer: user().user
+                    }
+                })
+            })
+
+            server.respondWith(/\/tester\/\?__a=1/, function (xhr) {
+                xhr.respond(200, { "Content-Type": "application/json" }, JSON.stringify({}))
+            })
+
+            server.respondWith(/\/graphql\/query\//, function (xhr) {
+                xhr.respond(200, { "Content-Type": "application/json" }, JSON.stringify({
+                    data: {
+                        user: {
+                            edge_follow: {
+                                edges: [
+                                    {
+                                        node: user().user
+                                    }
+                                ],
+                                page_info: {
+                                    has_next_page: true,
+                                    end_cursor: false
+                                }
+                            }
+                        }
+                    }
+                }));
+            });
+
+            var dbUser = user().user;
+
+            return db.users.add({plug: "instagram", userid: dbUser.id, username: "tester", toFollow: 2}).then(() => instance.init(simulateSetting()))
+            .then(() => instance.actions.followManager(false)).then((data) => {
+                chai.expect(data).to.be.lengthOf(1, "User remains 1")
+
+                return db.users.toArray();
+            }).then((data) => {
+                chai.expect(data).to.be.lengthOf(1, "User in db remains 1")
+                return db.users.toArray()
+            }).then((data) => {
+                chai.expect(data).to.be.lengthOf(1, "One action performed")
+                chai.expect(data[0]).to.have.nested.property("details.autoFollowed", true, "The user was autoFollowed")
+            })
+        });
+    });
+
+    context("likeBack()", function () {
+        it("Should likeBack one user image", function () {
+            var instance = new instagram(),
+                required = {
+                    liked: 0,
+                    user: false,
+                    homepage: false
+                };
+
+            server.attachCallback("homepage_logged", function () {
+                required.homepage = true;
+                return rawHomePageStructure()
+            })
+
+            server.attachCallback("like_post", function (xhr, url, data) {
+                required.liked++;
+            });
+
+            server.respondWith(/\/testman\/\?__a=1/, function (xhr) {
+                required.user = true;
+                xhr.respond(200, { "Content-Type": "application/json" }, JSON.stringify(user("testman")));
+            });
+
+            server.respondWith(/\/p\/\d*\//, function (xhr) {
+                chai.expect(xhr.url).to.contain("/100/", "Image code is correctly required");
+                xhr.respond(200, { "Content-Type": "application/json" }, JSON.stringify({
+                    graphql: {
+                        shortcode_media: {
+                            viewer_has_liked: false
+                        }
+                    }
+                }));
+            });
+
+            return instance.init(simulateSetting()).then((data) => instance.actions.likeBack()).then((result) => {
+                chai.expect(result).to.be.undefined
+                chai.expect(required.user).to.equal(true, "User has been required")
+                chai.expect(required.homepage).to.equal(true, "Homepage has been required")
+                chai.expect(required.liked).to.equal(1, "An image has been liked")
+            })
+        });
+
+        it("Should not likeBack as the image has already ben liked", function () {
+            var instance = new instagram(),
+                required = {
+                    liked: 0,
+                    homepage: false
+                };
+
+            server.attachCallback("homepage_logged", function () {
+                required.homepage = true;
+                return rawHomePageStructure()
+            })
+
+            server.attachCallback("like_post", function (xhr, url, data) {
+                required.liked++;
+            });
+
+            server.respondWith(/\/p\/\d*\//, function (xhr) {
+                chai.expect(xhr.url).to.contain("/100/", "Image code is correctly required");
+                xhr.respond(200, { "Content-Type": "application/json" }, JSON.stringify({
+                    graphql: {
+                        shortcode_media: {
+                            viewer_has_liked: true
+                        }
+                    }
+                }));
+            });
+
+            return instance.init(simulateSetting()).then((data) => instance.actions.likeBack()).then((result) => {
+                chai.expect(result).to.be.undefined
+                chai.expect(required.homepage).to.equal(true, "Homepage has been required")
+                chai.expect(required.liked).to.equal(0, "Image already liked")
+                return db.users.toArray()
+            }).then((data) => {
+                chai.expect(data).to.be.lengthOf(1)
+                chai.expect(data[0]).to.have.property("userid", 998, "The user has been inserted in database")
+            })
+        });
+
+        it("Should not likeBack as the user has already been liked recently", function () {
+            var instance = new instagram(),
+                required = {
+                    liked: 0,
+                    homepage: false
+                };
+
+            server.attachCallback("homepage_logged", function () {
+                required.homepage = true;
+                return rawHomePageStructure()
+            })
+
+            server.attachCallback("like_post", function (xhr, url, data) {
+                required.liked++;
+            });
+
+            server.respondWith(/\/p\/\d*\//, function (xhr) {
+                chai.expect(xhr.url).to.contain("/100/", "Image code is correctly required");
+                xhr.respond(200, { "Content-Type": "application/json" }, JSON.stringify({
+                    graphql: {
+                        shortcode_media: {
+                            viewer_has_liked: false
+                        }
+                    }
+                }));
+            });
+
+            return db.users.add({plug: "instagram", userid: 998, lastInteraction: new Date().getTime()}).then(() => instance.init(simulateSetting()))
+                .then((data) => instance.actions.likeBack()).then((result) => {
+                    chai.expect(result).to.be.undefined
+                    chai.expect(required.homepage).to.equal(true, "Homepage has been required")
+                    chai.expect(required.liked).to.equal(0, "User already liked")
+                })
+        });
+
+        it("Should likeBack with user already in database. Update of lastInteraction", function () {
+            var instance = new instagram(),
+                required = {
+                    liked: 0,
+                    homepage: false
+                };
+
+            server.attachCallback("homepage_logged", function () {
+                required.homepage = true;
+                return rawHomePageStructure()
+            })
+
+            server.attachCallback("like_post", function (xhr, url, data) {
+                required.liked++;
+            });
+
+            server.respondWith(/\/p\/\d*\//, function (xhr) {
+                chai.expect(xhr.url).to.contain("/100/", "Image code is correctly required");
+                xhr.respond(200, { "Content-Type": "application/json" }, JSON.stringify({
+                    graphql: {
+                        shortcode_media: {
+                            viewer_has_liked: false
+                        }
+                    }
+                }));
+            });
+
+            return db.users.add({plug: "instagram", userid: 998, lastInteraction: 99999999}).then(() => instance.init(simulateSetting()))
+                .then((data) => instance.actions.likeBack()).then((result) => {
+                    chai.expect(result).to.be.undefined
+                    chai.expect(required.homepage).to.equal(true, "Homepage has been required")
+                    chai.expect(required.liked).to.equal(1, "User already liked")
+                    return db.users.toArray()
+                }).then((data) => {
+                    chai.expect(data).to.be.lengthOf(1)
+                    chai.expect(data[0]).to.have.property("userid", 998, "The user has been inserted in database")
+                    chai.expect(data[0]).to.not.have.property("lastInteraction", 99999999, "Updates lastInteraction")
+                    chai.expect(data[0]).to.have.property("lastInteraction")
+                })
+        });
     });
 })

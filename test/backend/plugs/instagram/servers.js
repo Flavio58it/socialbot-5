@@ -1,6 +1,6 @@
 import urls from "../../../../src/service/plugs/instagram/urls";
 
-import { rawHomePageStructure } from "./fakeData";
+import { rawHomePageStructure, user } from "./fakeData";
 
 /**
  * Function that allows rapid multiple inclusion of server sources trough fakeServer implementation
@@ -27,37 +27,31 @@ const routes = {
         })
     },
     "user_data": {
-        url: /\/testerman\/$/,
+        url: /\/(tester)|(testerman)\/$/, // Two main users for testing
         type: "json",
-        data: JSON.stringify({
-            user: {
-                username: "tester",
-                full_name: "Tester",
-                media: {
-                    nodes: [
-                        {
-                            id: 105,
-                            likes: {
-                                count: 10
-                            },
-                            code: 100,
-                            thumbnail_src: "image",
-                            is_video: false
-                        }
-                    ]
-                }
-            }
-        })
+        data: JSON.stringify(user())
     },
-    "notifications_list": {
-        url: "",
+    "notifications_list": { // Not yet useable. How to maintain it generic?
+        url: /\/accounts\/activity\/\?__a=1/,
         type: "json",
         data: JSON.stringify({
             graphql: {
                 user: {
                     activity_feed: {
                         edge_web_activity_feed: {
-                            count: 1
+                            count: 1,
+                            edges: [
+                                {
+                                    node: {
+                                        type: 1,
+                                        user: {
+                                            id: 998,
+                                            username: "testman",
+                                            code: 1111
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
