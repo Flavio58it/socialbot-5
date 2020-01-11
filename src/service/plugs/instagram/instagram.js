@@ -1,7 +1,6 @@
 import format from "string-template";
 import urlParams from "url-params";
 import waiter from "waiter";
-import axios from "axios";
 import logger from "../../db/logger";
 import ms from "milliseconds";
 import db from "../../db/db";
@@ -33,137 +32,129 @@ export default function () {
 		settings = false;
 
 	return {
-		init (settingsData) {
+		async init (settingsData) {
 			settings = settingsData
 			checker = new police(settingsData); // Init the main checker.
 			// Check if user is logged in and get the tokens
 			if (!settingsData)
 				return Promise.reject({error: "NO_SETTINGS"})
 
-			return decodeObject(urls.home, true, {
+			var homeData = await decodeObject(urls.home, true, {
 				cbk: {
 					onData: (data) => queryIdParser(data).then((queryd) => {
 						query_id = queryd;
 					})
 				}
-			}).then((data) => {
-				// Getting data from homepage, using the fallback method. The original json is much lighter and misses basic info as csrf_token.
-				console.log("Init info: ", data)
-				csrf = data.config.csrf_token;
-				user = data.config.viewer;
-
-				return {
-						connectionOk: true,
-						logged: (data && !data.entry_data.LandingPage),
-						domain: {
-							match: urls.home
-						}
-				}
 			})
+
+			// Getting data from homepage, using the fallback method. The original json is much lighter and misses basic info as csrf_token.
+
+			console.log("Init info: ", homeData)
+			csrf = homeData.config.csrf_token;
+			user = homeData.config.viewer;
+
+			return {
+					connectionOk: true,
+					logged: (homeData && !homeData.entry_data.LandingPage),
+					domain: {
+						match: urls.home
+					}
+			}
 		},
 		actions: {
-			likeTagImages (tagName, wait, limit) { // Like the images by tag
+			async likeTagImages (tagName, wait, limit) { // Like the images by tag
 				if (!csrf)
-					return Promise.reject({error: "Init failed"});
+					return await Promise.reject({error: "Init failed"});
 
 				var numberLiked = 0,
 					rejector = 0; // When a like is rejected this increases. When too much rejections happens, the numberLikes must increase in order to prevent hangs of the system (too strict filters)
 
-				function like (pointer) {
-					var nextQuery = pointer?
-						urlParams.add(
-							urlParams.add(
-								format((urls.get.tag), tagName), "query_id", query_id.like), 
-							"pointer", JSON.stringify({
+				async function like (pointer) {
+					var nextQuery = format((urls.get.tag), tagName);
+
+					if (pointer) {
+						let base = urlParams.add(format((urls.get.tag), tagName), "query_id", query_id.like),
+							params = JSON.stringify({
 								"tag_name": tagName,
 								"first": numberLiked,
 								"after": pointer
-							})):
-						format((urls.get.tag), tagName);
+							});
+						nextQuery = urlParams.add(base, "pointer", params);
+					}
+					
+					var pageData = await decodeObject(nextQuery),
+						source = objectMapper(pageData, mappers.media);
 
+					try {
+						for (let i = 0; i < source.posts.length; i++) {
+							let d = source.posts[i];
+							d = objectMapper(d, mappers.postLike);
 
-					return decodeObject(nextQuery)
-					.then((data) => {
-						var ops = Promise.resolve(), source = objectMapper(data, mappers.media);
+							// If the user or the bot has already liked the post the like process is aborted, as the previous posts has already been viewed.
+							if (numberLiked >= limit)
+								return {
+									stoppedBy: "LIKE_LIMIT_REACHED",
+									data: pageData,
+									liked: numberLiked
+								}
 
-						source.posts.forEach((d) => {
-							    //console.log("Post data: ", d);
-							    d = objectMapper(d, mappers.postLike);
+							let postData = await decodeObject(format(urls.get.post, d.code))
 
-								ops = ops.then(() => {
-									// If the user or the bot has already liked the post the like process is aborted, as the previous posts has already been viewed.
-									if (numberLiked >= limit)
-										return Promise.reject({id: "LIKE_LIMIT_REACHED"});
+							postData = objectMapper(postData, mappers.postData)
 
-									return decodeObject(format(urls.get.post, d.code)).then((data) => {
-										data = objectMapper(data, mappers.postData)
-										if (data.liked) {
-											return Promise.reject({id: "ALREADY_LIKED"})
-										}
-										return waiter(1000, 5000).then(() => data);
-									});
-								})
-								.then(() => checker.shouldLike(d).then((res) => {
-									if  (!res)
-										return Promise.reject({id: "LIKE_REJECTED"});
-								}))
-								.then(() => actions.likePost(d.id, csrf))
-								.then((data) => {log.userInteraction("LIKE", d, {tag: tagName}); return data;})
-								.then((data) => {
+							// If the post has already been liked it means that 1)The bot has already liked this image 2) The human has already seen and liked the image.
+							// Stopping the round here
+							if (postData.liked)
+								return {
+									stoppedBy: "ALREADY_LIKED",
+									data: pageData,
+									liked: numberLiked
+								}
+							
+							await waiter(1000, 5000)
+
+							let likeCheckResult = await checker.shouldLike(d)
+							if  (!likeCheckResult) {
+								console.warn("Like rejected by police");
+								//log.userInteraction(e.id, d, {tag: tagName});
+								rejector++;
+								if (rejector > 5) { // Like reject protection system. See the declaration of the var for explanation.
 									numberLiked++;
-									return data;
-								}).catch((e) => {
-									if (e.id == "LIKE_LIMIT_REACHED" || e.id == "ALREADY_LIKED"){ // Passing the likeLimit as is not an error to manage here.
-										return Promise.reject(e);
-									} else if (e.id == "LIKE_REJECTED"){
-										console.warn("Like rejected by police");
-										//log.userInteraction(e.id, d, {tag: tagName});
-										rejector++;
-										if (rejector > 5) { // Like reject protection system. See the declaration of the var for explanation.
-											numberLiked++;
-											rejector = 0;
-										}
-										return Promise.resolve();
-									} else if (e.response && e.response.status == 404) {
-										console.error("Post not found...");
-										return Promise.resolve();
-									} else if (e.stopped) // Pass the stopper
-										return Promise.reject(e);
-									return Promise.reject({error: "Connection error.", details: (e.details || e), id: "CONNECTION_ERROR_TAG_LIKE", action: "RELOAD"});
-								})
-								.then(() => waiter(ms.seconds(wait.actionLower), ms.seconds(wait.actionUpper)))
-						})
+									rejector = 0;
+								}
+								//"LIKE_REJECTED"
+								// TODO: Maybe add a log for rejecting
+								continue;
+							}
+							try {
+								let likeResult = await actions.likePost(d.id, csrf);
+							} catch (e) { 
+								if (e.response && e.response.status == 404) {
+									console.error("Post not found...");
+									continue;
+								}
+								await Promise.reject(e)
+							}
 
-						return ops.then((prevData) => {
-							//Here should recall like function with pointer
-							if (source.nextPage) {
-								console.log("Next page");
-								return like(source.nextPage)
-							} else {
-								return Promise.resolve(prevData);
-							}
-						}).catch((e) => {
-							if (e.id == "ALREADY_LIKED") {
-								console.warn("Already liked. Aborting...");
-								return Promise.resolve({
-									stoppedBy: e.id,
-									data,
-									liked: numberLiked
-								});
-							} else if (e.id == "LIKE_LIMIT_REACHED") {
-								console.warn("Like limit reached...");
-								return Promise.resolve({
-									stoppedBy: e.id,
-									data,
-									liked: numberLiked
-								})
-							}
-							return Promise.reject(e);
-						});
-					});
+							await log.userInteraction("LIKE", d, {tag: tagName});
+
+							numberLiked++;
+						}
+					} catch (e) {
+						// When something goes wrong is the connection that is unstable. THis will prompt the user to restart or check connection.
+						console.log("---------------------------------------\nERROROROROOROROROOROROROROROOR\n----------------------------", e)
+						return await Promise.reject({error: "Connection error.", details: (e.details || e), id: "CONNECTION_ERROR_TAG_LIKE", action: "RELOAD"})
+					}
+
+					if (source.nextPage) {
+						console.log("Next page");
+						return await like(source.nextPage)
+					} else {
+						return await Promise.resolve();
+					}
 				}
 
-				return like();
+				return await like();
 			},
 			/**
 			* ----- Like the dashboard posts
