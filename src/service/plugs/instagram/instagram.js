@@ -173,7 +173,7 @@ export default function () {
 							
 							post = objectMapper(post, mappers.post);
 	
-								if (numberLiked >= limit)
+							if (numberLiked >= limit)
 								return {
 									stoppedBy: "LIKE_LIMIT_REACHED",
 									data: post,
@@ -188,13 +188,13 @@ export default function () {
 	
 							let likeCheckResult = await checker.shouldLike(post)
 							if  (!likeCheckResult) {
-										console.warn("Like rejected by police");
+								console.warn("Like rejected by police");
 								//log.userInteraction(e.id, d, {tag: tagName});
-										rejector++;
-										if (rejector > 5) { // Like reject protection system. See the declaration of the var for explanation.
-											numberLiked++;
-											rejector = 0;
-										}
+								rejector++;
+								if (rejector > 5) { // Like reject protection system. See the declaration of the var for explanation.
+									numberLiked++;
+									rejector = 0;
+								}
 								//"LIKE_REJECTED"
 								// TODO: Maybe add a log for rejecting
 								continue;
@@ -203,20 +203,20 @@ export default function () {
 	
 							log.userInteraction("LIKE", post);
 	
-									numberLiked++;
-
+							numberLiked++;
+	
 							await waiter(ms.seconds(wait.actionLower), ms.seconds(wait.actionUpper))
 						}
 					} catch (e) {
 						return await Promise.reject({error: "Connection error.", details: (e.details || e), id: "CONNECTION_ERROR_DASH_LIKE", action: "RELOAD"})
 					}
 					
-							if (source.nextPage) {
-								console.log("Next page");
-								return like(source.nextPage)
-							} else {
+					if (source.nextPage) {
+						console.log("Next page");
+						return like(source.nextPage)
+					} else {
 						return Promise.resolve();
-							}
+					}
 				}
 
 
@@ -234,135 +234,132 @@ export default function () {
 			* --- Get the user list and check if is following you. Optionally unfollow or followBack
 			* the params are followBack and unFollowback features
 			**/
-			followManager (onlyFetch) {
-				console.log("Getting followers of ", user);
+			async followManager (onlyFetch) {
+				console.log("Getting followers of ", user, csrf);
 
 				if (!user)
-					return Promise.reject({error: "User error, try to restart", id: "USER_DATA_NOT_FOUND", action: "RELOAD"})
+					return await Promise.reject({error: "User error, try to restart", id: "USER_DATA_NOT_FOUND", action: "RELOAD"})
 
-				var settingsData = Promise.all([
-					settings.get("followBack"),
-					settings.get("unFollowBack")
-				])
+				var settingsData = {
+					followBack: await settings.get("followBack"),
+					unFollowBack: await settings.get("unFollowBack")
+				},
+				accountUsers = {
+					followers: await actions.getUsersBatch(query_id.followers, user.id),
+					following: await actions.getUsersBatch(query_id.following, user.id)
+				};
 
-				return Promise.all([
-					actions.getUsersBatch(query_id.followers, user.id),
-					actions.getUsersBatch(query_id.following, user.id)
-				]).then((res) => { // Here we have the followers and the following. Let's differentiate!
-					var users = [], indexer = [];
-					console.log("All users", res);
+				var users = [], indexer = [], isFirstTime = false;
 
-					res[0].forEach((t) => {
-						users.push({
-							id: t.node.id,
-							profile_url: getUrl(format(urls.get.user, t.node.username), true),
-							username: t.node.username,
-							fullname: t.node.full_name,
-							img: t.node.profile_pic_url,
-							status: "follower",
-							follows_me: true
-						});
-						indexer.push(t.node.id);
+				accountUsers.followers.forEach((t) => {
+					users.push({
+						id: t.node.id,
+						profile_url: getUrl(format(urls.get.user, t.node.username), true),
+						username: t.node.username,
+						fullname: t.node.full_name,
+						img: t.node.profile_pic_url,
+						status: "follower",
+						follows_me: true
 					});
+					indexer.push(t.node.id);
+				});
 
-					res[1].forEach((t) => {
-						var index = indexer.indexOf(t.node.id);
-						if (index > -1) { // Check if the user has been already picked
-							users[index].status = "followback";
-							return;
-						}
-						users.push({
-							id: t.node.id,
-							profile_url: getUrl(format(urls.get.user, t.node.username), true),
-							username: t.node.username,
-							fullname: t.node.full_name,
-							img: t.node.profile_pic_url,
-							status: "following",
-							follows_me: false
-						});
+				accountUsers.following.forEach((t) => {
+					var index = indexer.indexOf(t.node.id);
+					if (index > -1) { // Check if the user has been already picked
+						users[index].status = "followback";
+						return;
+					}
+					users.push({
+						id: t.node.id,
+						profile_url: getUrl(format(urls.get.user, t.node.username), true),
+						username: t.node.username,
+						fullname: t.node.full_name,
+						img: t.node.profile_pic_url,
+						status: "following",
+						follows_me: false
 					});
+				});
 
-					console.log("Result: ", users);
+				var arr = await db.users.toArray()
 
-					return users;
-				}).then((users) => {
-					return settingsData.then(settings => ({settings, users}))
-				}).then((data) => {
-					var isFirstTime = false;
-					return db.users.toArray().then((arr) => {
-						var cache = {}, //Cache users by id in order to avoid nested foreach
-							now = new Date().getTime(), 
-							flow = [],
-							usersCorrupted = false; 
-						arr.forEach((user) => {
-							if (!user.userid)
-								usersCorrupted = true;
-							cache[user.userid] = user;
-						})
-						if (usersCorrupted) // Missing one or more ids from cache. This is critically wrong. Should wipe all database off when this happens (or recover from username)
-							return Promise.reject({error: "The user database is corrupted.", id: "DB_USER_CORRUPTED", action: "RESET_DB"})
-						if (arr.length == 0)
-							isFirstTime = true;
+				var cache = {}, //Cache users by id in order to avoid nested foreach
+					now = new Date().getTime(), 
+					usersCorrupted = false; 
 
-						data.users.forEach(function(us) { // Cycle each user. Check if is present in the database. if not present and the db is not empty, the user is a new one.
-							// us = users picked now from server / user = users picked from database
-							// settings[0] = followBack, settings[1] = unFollowBack
-							var user = cache[us.id];
-							if (user && user.toFollow != 2) {
-								user.found = true; // The user has been found so has not unfollowed
-								us.whitelisted = user.whitelisted;
-								// TODO: Update in real time the details to the db in order to have all info updated somehow [partially done]
-								db.users.where("[plug+userid]").equals(["instagram", us.id]).modify({
-									username: user.username,
-									"details.img": user.img
-								})
-							} else { // User not found and is present in the users array so is a new follower! (party) (except if isFirstTime or likeBack)
-								var toFollow = !((!data.settings[0]) || isFirstTime), 
-									manageDb = Promise.resolve().then(() => {
-										if (user){ // When the user is in database but has already been added by likeBack
-											return db.users.where("[plug+userid]").equals(["instagram", us.id]).modify({
-												toFollow
-											});
-											us.whitelisted = user.whitelisted; // TODO: Not sure if needed
-										} else{ // Here normal addition.
-											return db.users.add(
-												actions.newDbUser(us, now, toFollow)
-											);
-										}
-									})
-
-								flow.push(manageDb.then(() => { // Followback!
-									if ((isFirstTime || !data.settings[0]) && !onlyFetch) // Not followbacking all the people the first time
-										return Promise.resolve();
-									return actions.followUser(us.id, checker).then((result) => {
-										if (result)
-											return log.userInteraction("FOLLOWBACK", {
-												img: us.img,
-												userId: us.id,
-												username: us.username
-											}).then(db.users.where("[plug+userid]").equals(["instagram", us.id]).modify({ // Specify that has been auto_followed
-												"details.autoFollowed": true,
-												lastInteraction: now // If has been followed no interaction will occur for some time (TODO: May rethink this.)
-											}));
-									});
-								}))
-							}
-						});
-
-						return Promise.all(flow).then(() => { // Check the cached users and unfollow the ones that are not present and are not whitelisted!
-							if ((isFirstTime || !data.settings[1]) && !onlyFetch)
-								return Promise.resolve();
-							console.log("Unfollowing");
-
-							for (var u in cache) {
-								var user = cache[u];
-								if (!user.found && !user.whitelisted)
-									actions.unfollowUser(user.id);
-							}
-						}).then(() => arr);
-					})
-					.then(() => data.users);
+				arr.forEach((user) => {
+					if (!user.userid)
+						usersCorrupted = true;
+					cache[user.userid] = user;
 				})
+
+				if (usersCorrupted) // Missing one or more ids from cache. This is critically wrong. Should wipe all database off when this happens (or recover from username)
+					return await Promise.reject({
+						error: "The user database is corrupted.", 
+						id: "DB_USER_CORRUPTED", 
+						action: "RESET_DB"
+					})	
+				
+				if (arr.length == 0)
+					isFirstTime = true;
+
+				for (let i = 0; i < users.length; i++) {
+					let us = users[i];
+
+					// us = users picked now from server / user = users picked from database
+					let user = cache[us.id];
+					if (user && user.toFollow != 2) {
+						user.found = true; // The user has been found so has not unfollowed
+						us.whitelisted = user.whitelisted;
+						// TODO: Update in real time the details to the db in order to have all info updated somehow [partially done]
+						await db.users.where("[plug+userid]").equals(["instagram", us.id]).modify({
+							username: user.username,
+							"details.img": user.img
+						})
+					} else { // User not found and is present in the users array so is a new follower! (party) (except if isFirstTime or likeBack)
+						let toFollow = !((!settingsData.followBack) || isFirstTime);
+
+						if (user){ // When the user is in database but has already been added by likeBack
+							await db.users.where("[plug+userid]").equals(["instagram", us.id]).modify({
+								toFollow
+							});
+							us.whitelisted = user.whitelisted; // TODO: Not sure if needed
+						} else{ // Here normal addition.
+							await db.users.add(
+								await actions.newDbUser(us, now, toFollow)
+							);
+						}
+
+						if ((isFirstTime || !settingsData.followBack) && !onlyFetch) // Not followbacking all the people the first time
+							continue;
+							
+						let followResult = await actions.followUser(us.id, checker)
+						
+						if (followResult) {
+							await log.userInteraction("FOLLOWBACK", {
+								img: us.img,
+								userId: us.id,
+								username: us.username
+							});
+							await db.users.where("[plug+userid]").equals(["instagram", us.id]).modify({ // Specify that has been auto_followed
+								"details.autoFollowed": true,
+								lastInteraction: now // If has been followed no interaction will occur for some time (TODO: May rethink this.)
+							})
+						}
+					}
+				}
+
+				if ((isFirstTime || !settingsData.followBack) && !onlyFetch)
+					return users;
+				/*
+				for (var u in cache) {
+					var user = cache[u];
+					if (!user.found && !user.whitelisted)
+						await actions.unfollowUser(user.id);
+				}
+				*/
+				
+				return users;
 			},
 			/**
 			* Like the users that like your photos
