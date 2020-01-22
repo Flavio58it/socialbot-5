@@ -136,13 +136,12 @@ export default function () {
 								await Promise.reject(e)
 							}
 
-							await log.userInteraction("LIKE", d, {tag: tagName});
+							log.userInteraction("LIKE", d, {tag: tagName});
 
 							numberLiked++;
 						}
 					} catch (e) {
 						// When something goes wrong is the connection that is unstable. THis will prompt the user to restart or check connection.
-						console.log("---------------------------------------\nERROROROROOROROROOROROROROROOR\n----------------------------", e)
 						return await Promise.reject({error: "Connection error.", details: (e.details || e), id: "CONNECTION_ERROR_TAG_LIKE", action: "RELOAD"})
 					}
 
@@ -161,78 +160,67 @@ export default function () {
 			*
 			**/
 
-			likeDashboard (wait, limit) {
+			async likeDashboard (wait, limit) {
 				var numberLiked = 0, rejector = 0;
 
-				function like(pointer) {
-					return decodeObject(urls.home).then((data) => {
-						//console.log("DashboardLike: ", data);
-						var source = objectMapper(data, mappers.dashboard), flow = Promise.resolve();
-						source.posts.forEach((post) => {
+				async function like(pointer) {
+					var homeData = await decodeObject(urls.home),
+						source = objectMapper(homeData, mappers.dashboard);
+
+					try {
+						for (let i = 0; i < source.posts.length; i++) {
+							let post = source.posts[i];
+							
 							post = objectMapper(post, mappers.post);
-							flow = flow.then(() => {
+	
 								if (numberLiked >= limit)
-									return Promise.reject({likeLimitReached: true});
-								if (post.liked){
-									return Promise.reject({alreadyLiked: true})
+								return {
+									stoppedBy: "LIKE_LIMIT_REACHED",
+									data: post,
+									liked: numberLiked
 								}
-								return checker.shouldLike(post).then((res) => { // Before was d... not exists!
-									if  (!res)
-										return Promise.reject({id: "LIKE_REJECTED"});
-								}).then(() => actions.likePost(post.id, csrf))
-								.then((d) => {log.userInteraction("LIKE", post);return d;})
-								.then((d) => {
-									numberLiked++;
-									return d;
-								}).catch((e) => {
-									if (e.id == "LIKE_REJECTED"){
+							if (post.liked)
+								return {
+									stoppedBy: "ALREADY_LIKED",
+									data: post,
+									liked: numberLiked
+								}
+	
+							let likeCheckResult = await checker.shouldLike(post)
+							if  (!likeCheckResult) {
 										console.warn("Like rejected by police");
+								//log.userInteraction(e.id, d, {tag: tagName});
 										rejector++;
 										if (rejector > 5) { // Like reject protection system. See the declaration of the var for explanation.
 											numberLiked++;
 											rejector = 0;
 										}
-										return Promise.resolve();
-									} else if (e.stopped) // Pass the stopper
-										return Promise.reject(e);
+								//"LIKE_REJECTED"
+								// TODO: Maybe add a log for rejecting
+								continue;
+							}
+							let likeResult = await actions.likePost(post.id, csrf);
+	
+							log.userInteraction("LIKE", post);
+	
 									numberLiked++;
-									return Promise.reject(e);
-								})
-								.then(() => waiter(ms.seconds(wait.actionLower), ms.seconds(wait.actionUpper)));
-							})
-						})
 
-						return flow.then((prevData) => {
+							await waiter(ms.seconds(wait.actionLower), ms.seconds(wait.actionUpper))
+						}
+					} catch (e) {
+						return await Promise.reject({error: "Connection error.", details: (e.details || e), id: "CONNECTION_ERROR_DASH_LIKE", action: "RELOAD"})
+					}
+					
 							if (source.nextPage) {
 								console.log("Next page");
 								return like(source.nextPage)
 							} else {
-								return Promise.resolve(prevData);
+						return Promise.resolve();
 							}
-						}).catch((e) => {
-							if (e.alreadyLiked) {
-								console.warn("Already liked. Aborting...");
-								return Promise.resolve({
-									stoppedBy: "ALREADY_LIKED",
-									data,
-									liked: numberLiked
-								});
-							} else if (e.likeLimitReached) {
-								console.warn("Like limit reached...");
-								return Promise.resolve({
-									stoppedBy: "LIKE_LIMIT_REACHED",
-									data,
-									liked: numberLiked
-								})
-							} else if (e.stopped) // Pass the stopper
-								return Promise.reject(e);
-							return Promise.reject(e);
-						})
-					})
 				}
 
 
-				return like();
+				return await like();
 			},
 			/**
 			* ----- Like the explore (magnifying glass) posts
