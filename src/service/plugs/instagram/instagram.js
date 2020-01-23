@@ -364,45 +364,47 @@ export default function () {
 			/**
 			* Like the users that like your photos
 			**/
-			likeBack () {
+			async likeBack () {
 				console.log("Starting likeBack");
-				return Promise.all([
-					actions.getNotifications(),
-					settings.get("likeBack")
-				]).then((data) => { // The default user data does not contains the posts.
-					var notifications = data[0], settings = data[1];
-					console.log("Getting notifications: ", notifications);
-					var flow = Promise.resolve(), now = new Date().getTime(), likebacked = 0;
-					notifications.list.forEach((t) => {
-						if (t.type != 1)
-							return;
-						var query = db.users.where("[plug+userid]").equals(["instagram", t.id]);
 
-						flow = flow.then(() => query.toArray()).then((qres) => {
-							if ((qres.length && (!qres[0].lastInteraction || (qres[0].lastInteraction  <= now - ms.days(settings.ignoreTime)))) || !qres.length) {
-								if (likebacked >= settings.maxUsersLike)
-									return Promise.resolve()
-								likebacked ++;
-								return actions.likeUserPosts(t.username, csrf, settings.likes, checker, log).then(() => {
-									return query.modify({
-										lastInteraction: now
-									})
-								}).then((res) => {
-									if (!res) {
-										return actions.getUserData(t.username).then((data) => {
-											return  db.users.add(actions.newDbUser(t, now, 2))
-										});
-									}
-									return Promise.resolve();
-								}).then(() => waiter(1000, 10000))
-							} else {
-								console.log("The user has been ignored.");
-								return Promise.resolve();
-							}
-						});
-					})
-					return flow;
-				})
+				var notifications = await actions.getNotifications(),
+					likeBackSettings = await settings.get("likeBack"),
+					now = new Date().getTime(), 
+					likebacked = 0;
+
+				console.log("Getting notifications: ", notifications);
+
+				for (let i = 0; i < notifications.list.length; i++) {
+					let t = notifications.list[i];
+
+					if (t.type != 1)
+						continue;
+					
+					let query = await db.users.where("[plug+userid]").equals(["instagram", t.id]),
+						qres = await query.toArray();
+
+					if ((qres.length && (!qres[0].lastInteraction || (qres[0].lastInteraction  <= now - ms.days(likeBackSettings.ignoreTime)))) || !qres.length) {
+						if (likebacked >= likeBackSettings.maxUsersLike)
+							continue;
+						likebacked ++;
+
+						await actions.likeUserPosts(t.username, csrf, likeBackSettings.likes, checker, log);
+
+						let res = await query.modify({
+							lastInteraction: now
+						})
+
+						if (!res) {
+							let userData = await actions.getUserData(t.username)
+							await db.users.add(actions.newDbUser(t, now, 2))
+						}
+						await waiter(1000, 10000)
+					} else {
+						console.log("The user has been ignored.");
+						continue;
+					}
+				}
+					
 			}
 		}
 	}
