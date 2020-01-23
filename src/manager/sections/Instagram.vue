@@ -13,7 +13,7 @@
 								<div class="description">Enable the bot</div>
 							</b-form-checkbox>
 						</div>
-						<div f-if="false">
+						<div v-if="false">
 							<b-form-checkbox v-model="data.settings.notifications">
 								Notifications
 								<div class="description">Show notifications on desktop</div>
