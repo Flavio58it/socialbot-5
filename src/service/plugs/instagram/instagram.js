@@ -352,6 +352,8 @@ export default function () {
 				if ((isFirstTime || !settingsData.followBack) && !onlyFetch)
 					return users;
 				/*
+				// Not used as unfollowUser still not supported
+				
 				for (var u in cache) {
 					var user = cache[u];
 					if (!user.found && !user.whitelisted)

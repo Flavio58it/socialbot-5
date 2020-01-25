@@ -12,31 +12,23 @@ export function getUrl(url, overrideJson){
 	return ((!/^https?:/.test(url))?urls.home:"") + ((useJsonEncoding && !overrideJson)?urlParams.add(url, urls.json.name, urls.json.val):url);
 }
 
-export function decodeObject (url, overrideDecoder, settings) {
+export async function decodeObject (url, overrideDecoder, settings) {
 	var settings = settings || {cbk:{}};
 	if (!useJsonEncoding || overrideDecoder === true) {
 		// This is emergency fallback if the json method will not work anymore. Is dirty but is working.
 		// parse page html and return the object of the page
 		var el = document.createElement("html");
 
-		return axios(getUrl(url, true))
-		.then((response) => {
-			return response.data;
-		})
-		.then((data) => {
-			el.innerHTML = data;
-			return el;
-		})
-		.then((el) => {
-			if (settings.cbk.onData)
-				return Promise.resolve(settings.cbk.onData(el)).then(() => el);
-			else
-				return Promise.resolve(el);
-		})
-		.then((el) => {
-			var data = document.evaluate("//script[contains(., 'window._sharedData')]", el).iterateNext().innerHTML;	
-			return JSON.parse(data.replace(/^.+=\s\{(.+$)/, "{$1").replace(/\};$/, "}"));
-		})
+		var page = await axios(getUrl(url, true));
+		page = page.data;
+
+		el.innerHTML = page;
+
+		if (settings.cbk.onData)
+			await Promise.resolve(settings.cbk.onData(el))
+		
+		var data = document.evaluate("//script[contains(., 'window._sharedData')]", el).iterateNext().innerHTML;	
+		return JSON.parse(data.replace(/^.+=\s\{(.+$)/, "{$1").replace(/\};$/, "}"));
 	} else {
 		return axios(getUrl(url, settings.overrideJson)).then((data) => data.data)
 	}
