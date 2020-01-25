@@ -39,7 +39,8 @@ export default function () {
 			if (!settingsData)
 				return Promise.reject({error: "NO_SETTINGS"})
 
-			var homeData = await decodeObject(urls.home, true, {
+			var homeData = await decodeObject(urls.home, {
+				overrideDecoder: true,
 				cbk: {
 					onData: (data) => queryIdParser(data).then((queryd) => {
 						query_id = queryd;

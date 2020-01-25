@@ -12,9 +12,15 @@ export function getUrl(url, overrideJson){
 	return ((!/^https?:/.test(url))?urls.home:"") + ((useJsonEncoding && !overrideJson)?urlParams.add(url, urls.json.name, urls.json.val):url);
 }
 
-export async function decodeObject (url, overrideDecoder, settings) {
-	var settings = settings || {cbk:{}};
-	if (!useJsonEncoding || overrideDecoder === true) {
+export async function decodeObject (url, settings) {
+	var settings = {
+		cbk: {}, 
+		overrideJson: false,
+		overrideDecoder: false,
+		...settings
+	};
+	
+	if (!useJsonEncoding || settings.overrideDecoder === true) {
 		// This is emergency fallback if the json method will not work anymore. Is dirty but is working.
 		// parse page html and return the object of the page
 		var el = document.createElement("html");

@@ -26,8 +26,9 @@ const lib = {
 		};
 		if (pointer)
 			data.after = pointer;
-		return decodeObject(urlParams.add(format(urls.get.query, query), "variables", JSON.stringify(data)), false, {overrideJson: true})
-		.then(data => data.data.user)
+		return decodeObject(urlParams.add(format(urls.get.query, query), "variables", JSON.stringify(data)), {
+			overrideJson: true
+		}).then(data => data.data.user)
 		.then((data) => {
 			var fdata = data.edge_followed_by?data.edge_followed_by:data.edge_follow;
 			list.push(...fdata.edges);
