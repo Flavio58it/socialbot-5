@@ -1,8 +1,5 @@
 .DS_Store
 node_modules/
 dist/
-synaptic.js
-AI.js
-AI.json
 npm-debug.log
 yarn-error.log
