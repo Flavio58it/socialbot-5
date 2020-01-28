@@ -45,6 +45,11 @@ export default {
 			tag: 15,	// Max likes per tag
 			dash: 15,	// Max likes to your dashboard
 			explorer: 15 // Max likes per session for explorers tab/section
+		},
+		rate: {  // Limit actions done by the bot in such time interval
+			perHour: 0,
+			perDay: 0,
+			perMonth: 0
 		}
 	},
 	follow: {

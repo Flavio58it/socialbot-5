@@ -11,10 +11,10 @@
 				</div>
 			</div>
 			<div class="row">
-				<div class="col">
+				<div class="col-8">
 					<slot :settings="settings" name="left"/>
 				</div>
-				<div class="col">
+				<div class="col-4">
 					<b>Tags follower</b>
 					<div class="description">These tags will be periodically checked and the new posts will be liked</div>
 					<hr/>

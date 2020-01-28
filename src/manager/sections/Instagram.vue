@@ -48,7 +48,7 @@
 							</b-form-checkbox>
 						</div>
 					</b-tab>
-					<b-tab title="Timings">
+					<b-tab title="Timings & rates">
 						<div>
 							<b>Like timer</b>
 							<div class="description">The upper and lower limit for the like timer</div>
@@ -87,6 +87,34 @@
 								<b-form-input
 									type="number"
 									v-model="data.settings.waiter.roundPause"
+								/>
+							</div>
+						</div>
+						<hr/>
+						<div>
+							<b>Like Rates</b>
+							<div class="description">Limit hourly, daily and monthly rates in order to avoid instagram bans</div>
+						</div>
+						<div class="row">
+							<div class="col-4">
+								Hourly
+								<b-form-input
+									type="number"
+									v-model="data.settings.limits.rate.perHour"
+								/>
+							</div>
+							<div class="col-4">
+								Daily
+								<b-form-input
+									type="number"
+									v-model="data.settings.limits.rate.perDay"
+								/>
+							</div>
+							<div class="col-4">
+								Monthly
+								<b-form-input
+									type="number"
+									v-model="data.settings.limits.rate.perMonth"
 								/>
 							</div>
 						</div>
