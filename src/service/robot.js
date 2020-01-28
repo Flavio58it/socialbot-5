@@ -63,6 +63,9 @@ const bot = async function (settings, plug, plugName) {
 
 		if (request)
 			request.unlisten();
+		
+		if (e.stopped)
+			return;
 
 		return await Promise.reject(e)
 	}
@@ -85,57 +88,66 @@ export default function (settings, plug, plugName) {
 	 * Params:
 	 * * singleRun {boolean} - Run the bot only once, does not loop
 	 */
-	t.start = (singleRun) => {
+	t.start = async (singleRun) => {
 		running = true;
 		
-		events.runstatus&&events.runstatus(t, plugName);
+		try {
+			if (events.runstatus)
+				await Promise.resolve(events.runstatus(t, plugName));
 
-		// Check if bot is flagged as enabled. If not the round is stopped
-		return settings.get("enabled").then((enabled) => {
-			if (!enabled)
-				return Promise.reject({stopped: true});
-		}).then(() => {
-			events.start&&events.start(t, plugName);
-			inited = true;
+			var botEnabled = await settings.get("enabled")
+
+			if (!botEnabled)
+				await Promise.reject({stopped: true})
 			
-			// Start bot function
-			return bot(settings, plug, plugName);
-		}).then((result) => {
-			// Round finished. Setting flag as stopped and initializing the timer for the next round.
-			events.stop&&events.stop(t, plugName);
+			if (events.start)
+				await Promise.resolve(events.start(t, plugName));
+
+			inited = true;
+
+			var botResult = await bot(settings, plug, plugName);
+
+			if (events.stop)
+				await Promise.resolve(events.stop(t, plugName))
 
 			running = false;
+
 			if (!singleRun)
 				triggerTimer();
-		}).catch ((e) => {
-			// Error or stopped/rebooting
+		} catch (e) {
 			running = false;
-			events.runstatus&&events.runstatus(t, plugName, e);
+
+			if (events.runstatus)
+				await Promise.resolve(events.runstatus(t, plugName, e));
+
+			if (e.stopped || e.details.stopped) {
+				if (rebooting) {
+					console.info("[robot] Rebooting");
+					rebooting = false;
+					await settings.set("enabled", preRebootStatus);
+					t.start()
+					await Promise.resolve(events.reboot(t, plugName));
+					preRebootStatus = true;
+				} else {
+					console.warn("[robot] Stopped");
+					events.stop&&events.stop(t, plugName);
+				}
+
+				return;
+			}
+
 			if (!singleRun)
 				triggerTimer(); // Restart after some time!
 
-			if (e.stopped) {
-				if (rebooting) {
-					console.info("Rebooting");
-					rebooting = false;
-					settings.set("enabled", preRebootStatus).then(() => t.start());
-					events.reboot&&events.reboot(t, plugName);
-					preRebootStatus = true;
-				} else {
-					console.warn("[robot] Bot stopped");
-					events.stop&&events.stop(t, plugName);
-				}
-			} else {
-				console.error("Bot error", e);
+			console.error("[robot] Bot error", e);
 
-				// Create user friendly generic error if we have no idea of what happened
-				if (e.request && !e.request.status && !e.id)
-					events.error&&events.error(t, plugName, {
-						id: "NETWORK_GENERIC_ERROR",
-						error: e.toString()
-					});
-			}
-		});
+			// Create user friendly generic error if we have no idea of what happened
+			if (e.request && !e.request.status && !e.id)
+				events.error&&events.error(t, plugName, {
+					id: "NETWORK_GENERIC_ERROR",
+					error: e.toString()
+				});
+		}
 	}
 
 	t.getStatus = () => {
@@ -145,27 +157,28 @@ export default function (settings, plug, plugName) {
 		};
 	}
 
-	t.reboot = () => {
-		console.log("Reboot command. Running:", running)
-		if (running)
-			settings.get("enabled").then((enabled) => {
-				preRebootStatus = enabled;
-			})
-			.then(() => settings.set("enabled", false))
-			.then(() => {
-				rebooting = true;
-			});
-		else
-			t.start();
+	t.reboot = async () => {
+		console.log("[robot] Reboot command. Running:", running);
+		if (running) {
+			var enabled = await settings.get("enabled")
+			preRebootStatus = enabled;
+			await settings.set("enabled", false)
+			rebooting = true;
+		} else {
+			return t.start();
+		}
 	}
 
-	t.getPlug = () => {
+	// Get plug. Init it if necessary
+	t.getPlug = async () => {
 		if (inited)
-			return Promise.resolve(plug);
-		return plug.init(settings).then((data) => {
-			inited = true;
 			return plug;
-		})
+
+		var initedPlug = await plug.init(settings);
+
+		inited = true;
+
+		return plug
 	}
 
 	/**
@@ -182,10 +195,11 @@ export default function (settings, plug, plugName) {
 	}
 
 	// Simple timer that waits n ms before restarting server
-	function triggerTimer () {
-		settings.get("waiter").then((wait) => {
-			waiter(wait.roundPause * 1000 * 60).then(() => (!running)&&t.start()); // Converted from minutes
-		});
+	async function triggerTimer () {
+		var waitTime = await settings.get("waiter")
+		await waiter(wait.roundPause * 1000 * 60);
+
+		(!running)&&t.start();
 	}
 
 }

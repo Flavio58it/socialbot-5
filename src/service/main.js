@@ -108,11 +108,18 @@ for (var i in plugs) {
 	// Reset errors on bot boot
 	plugContainer.bot.addListener("start", (t, name) => {
 		error = false;
+
 		Comm.sendMessage("backendError", {remove: true, plug: name});
+		// Update settings status
+		Comm.sendMessage("statusUpdate", {status: t.getStatus(), plug: name});
 	});
 
 	// Send update to frontend. Ideally at this moment the user is showing a waiting screen during reboot
 	plugContainer.bot.addListener("reboot", (t, name) => {
+		Comm.sendMessage("statusUpdate", {status: t.getStatus(), plug: name});
+	});
+
+	plugContainer.bot.addListener("stop", (t, name) => {
 		Comm.sendMessage("statusUpdate", {status: t.getStatus(), plug: name});
 	});
 }
