@@ -16,7 +16,7 @@
 			</div>
 			<hr/>
 			<div v-if="value.length">
-				<div v-for="(option, i) in value">
+				<div v-for="(option, i) in value" :key="i">
 					<div v-if="editIndex !== false && editIndex == i" class="row">
 						<div class="col-2 text-center">
 							<b-badge :variant="variantCreator(option).badge">{{variantCreator(option).text}}</b-badge>

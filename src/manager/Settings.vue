@@ -23,7 +23,7 @@
 		</div>
 		<div class="container">
 			<div class="row text-center">
-				<div v-for="(cat, key) in cats" :class="['col', 'cat', (key==$route.name)?'selected':'']" @click="navigate(key)">
+				<div v-for="(cat, key) in cats" :key="key" :class="['col', 'cat', (key==$route.name)?'selected':'']" @click="navigate(key)">
 					{{cat.text}}
 				</div>
 			</div>

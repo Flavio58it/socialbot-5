@@ -32,6 +32,8 @@
 					<p>With this tool you can see the overall situation of the your account.</p>
 					<p>You can filter by name and the user situation towards you and then perform actions</p>
 
+					<p>FollowManager is disabled by default as needs a lot of resources to operate. In order to have filtering and stats controls available the system will load all your followers. This may take <b>a lot</b> of time, depending of your number of followers.</p>
+
 					<hr/>
 					<b>Badges:</b>
 					<div>

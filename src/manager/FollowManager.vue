@@ -9,10 +9,10 @@
 				/>
 			</div>
 			<div class="input-group col-7">
-				<b-form-checkbox v-model="filters.state" value="following">Follower</b-form-checkbox>
-				<b-form-checkbox v-model="filters.state" value="followback">Followback</b-form-checkbox>
-				<b-form-checkbox v-model="filters.state" value="nofollowing">Not following</b-form-checkbox>
-				<b-form-checkbox v-model="filters.state" value="whitelisted">Whitelisted</b-form-checkbox>
+				<b-form-checkbox v-model="filters.state" value="following">&nbsp;Follower&nbsp;</b-form-checkbox>
+				<b-form-checkbox v-model="filters.state" value="followback">&nbsp;Followback&nbsp;</b-form-checkbox>
+				<b-form-checkbox v-model="filters.state" value="nofollowing">&nbsp;Not following&nbsp;</b-form-checkbox>
+				<b-form-checkbox v-model="filters.state" value="whitelisted">&nbsp;Whitelisted&nbsp;</b-form-checkbox>
 			</div>
 			<div class="col-1 text-right">
 				<a v-if="clUsers.elements > 50" href = "#" @click.prevent="toggleExpand" title="Toggle expand">
@@ -21,7 +21,7 @@
 			</div>
 		</div>
 		<div :class="['row', 'list', expanded?'expanded':'']" :style="expanded" @mouseenter="stopScroll(true)" @mouseleave="stopScroll(false)">
-			<div v-for="user in clUsers.list" class="user col-6 row">
+			<div v-for="(user, i) in clUsers.list" class="user col-6 row" :key="i">
 				<div class="col-3">
 					<a>
 						<img :src="user.img"/>
@@ -54,10 +54,10 @@
 		</div>
 		<div class="row">
 			<div v-if="users.length" class="col">
-				Showing 1-{{showAll?clUsers.elements:'50'}} of {{clUsers.elements}}
+				Showing {{show + 1}}-{{(show===true)?clUsers.elements:(show + 50)}} of {{clUsers.elements}}
 			</div>
 			<div v-if="clUsers.elements > 50"  class="controlLinks text-right col">
-				<a href="#" @click.prevent="showAll = !showAll">Show all</a>
+				<a href="#" @click.prevent="showAllUsers">Show all</a>
 			</div>
 		</div>
 	</div>
@@ -84,6 +84,7 @@
 	}
 
 	.list {
+		overflow: hidden;
 		max-height: 425px;
 		overflow-y: auto;
 		background-color: white;
@@ -113,7 +114,7 @@
 		props: ["plug"],
 		data () {
 			return {
-				showAll: false,
+				show: 0,
 				expanded: false,
 				users: [],
 				filters: {
@@ -151,6 +152,12 @@
 						window.scrollTo(0,document.body.scrollHeight);
 					})
 				}
+			},
+			showAllUsers () {
+				if (this.show === 0)
+					this.show = true;
+				else if (this.show === true)
+					this.show = 0
 			}
 		},
 		computed: {
@@ -181,7 +188,7 @@
 
 				return {
 					elements: arr.length,
-					list: this.showAll?arr:arr.splice(0, 50)
+					list: this.show === true?arr:arr.splice(this.show, 50)
 				};
 			}
 		},
