@@ -4,7 +4,7 @@
   "name": "SocialBot",
   "short_name": "SocialBot",
   "description": "AI powered bot for maintaining accounts activity.",
-  "version": "0.0.2",
+  "version": "2.0.0",
   "minimum_chrome_version": "59",
 
   "permissions":[

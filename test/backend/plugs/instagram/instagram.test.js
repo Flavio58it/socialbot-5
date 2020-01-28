@@ -853,7 +853,9 @@ describe("@instagram", function () {
 
             var dbUser = user().user;
 
-            return db.users.add({plug: "instagram", userid: dbUser.id, username: "tester", toFollow: 2}).then(() => instance.init(simulateSetting()))
+            return db.users.add({plug: "instagram", userid: dbUser.id, username: "tester", toFollow: 2}).then(() => instance.init(simulateSetting({
+                followBack: true
+            })))
             .then(() => instance.actions.followManager(false)).then((data) => {
                 chai.expect(data).to.be.lengthOf(1, "User remains 1")
 

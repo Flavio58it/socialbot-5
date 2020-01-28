@@ -2,8 +2,8 @@ export default {
 	enabled: true, // Robot enabled
 	notifications: false, // Show notification when is present
 	likeDash: true, // Like the images from your dashboard
-	followBack: true, // Follow back when a user starts following you
-	unFollowBack: true, // Unfollow the people that unfollows you (managed by whitelist)
+	followBack: false, // Follow back when a user starts following you
+	unFollowBack: false, // Unfollow the people that unfollows you (managed by whitelist)
 	likeBack: {
 		enabled: true,
 		likes: 4, // How much photos to like
@@ -11,9 +11,9 @@ export default {
 		maxUsersLike: 10 // Maximum users to like per session
 	}, // Like back images when a user is liking yours
 	waiter: {
-		actionLower: 10, // Wait between one action and another (min) (seconds)
-		actionUpper: 60, //(max)
-		roundPause: 7 // Time between one round and another. In minutes
+		actionLower: 20, // Wait between one action and another (min) (seconds)
+		actionUpper: 100, //(max)
+		roundPause: 10 // Time between one round and another. In minutes
 	},
 	filters: { // Various filters for liking/following
 		likes: { // When like a post
