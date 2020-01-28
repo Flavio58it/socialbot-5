@@ -58,7 +58,10 @@ export function singleImage (viewed) {
     }
 }
 
-export function rawHomePageStructure (overrideObject) {
+// Two operative modes. When the input is an array, all single items are treated as script
+// Whenis an object is counted as an extension of default user object present in homepage.
+
+export function rawHomePageStructure (extraData) {
     var defaultObj = {
         "config": {
             "csrf_token": "TEST"
@@ -66,12 +69,20 @@ export function rawHomePageStructure (overrideObject) {
         "entry_data": {
             "LandingPage": false
         }
-    }
+    },
+    usedScripts = [];
 
+    if (Array.isArray(extraData)) {
+        usedScripts.push(extraData)
+        usedScripts.push(`window._sharedData = ${JSON.stringify(defaultObj)}`)
+    } else {
+        usedScripts.push(`window._sharedData = ${JSON.stringify({...defaultObj, ...extraData})}`)
+    }
+        
     return `
         <html>
             <body>
-                <script>window._sharedData = ${JSON.stringify({...defaultObj, ...overrideObject})}</script>
+                ${usedScripts.map((value) => `<script>${value}</script>`)}
             </body>
         </html>
     `

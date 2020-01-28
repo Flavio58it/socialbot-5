@@ -8,7 +8,7 @@ import Fivehpx from "./sections/Fivehpx.vue";
 import Home from "./Home.vue";
 //import Trainer from "./Trainer.vue";
 
-//var dev = process.env.NODE_ENV === 'development';
+var dev = process.env.NODE_ENV === 'development';
 
 export default [
 	{ 

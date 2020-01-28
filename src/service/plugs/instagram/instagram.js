@@ -168,6 +168,21 @@ export default function () {
 					var homeData = await decodeObject(urls.home),
 						source = objectMapper(homeData, mappers.dashboard);
 
+					// Case when the direct ajax call to service has failed.
+					// The data will be picked directly from homepage
+					if (!source || !source.posts) {
+						console.log("[likeDashboard] Normal fetch failed, fallback enabled")
+
+						homeData = await decodeObject(urls.home, {
+							overrideSelector: "additionalDataLoaded('feed'",
+							overrideDecoder: true,
+							overrideCallback: (data) => data.replace(/^.+\('feed',.{0,1}\{([\s\S]+)\}\)\;$/, "{$1}")
+						});
+						source = objectMapper({
+							graphql: homeData // Doing this as the new object given from the homepage is wrapped differently, missing the graphql key
+						}, mappers.dashboard);
+					}
+
 					try {
 						for (let i = 0; i < source.posts.length; i++) {
 							let post = source.posts[i];
@@ -189,7 +204,7 @@ export default function () {
 	
 							let likeCheckResult = await checker.shouldLike(post)
 							if  (!likeCheckResult) {
-								console.warn("Like rejected by police");
+								console.warn("[likeDashboard] Like rejected by police");
 								//log.userInteraction(e.id, d, {tag: tagName});
 								rejector++;
 								if (rejector > 5) { // Like reject protection system. See the declaration of the var for explanation.
@@ -213,7 +228,7 @@ export default function () {
 					}
 					
 					if (source.nextPage) {
-						console.log("Next page");
+						console.log("[likeDashboard] Next page");
 						return like(source.nextPage)
 					} else {
 						return Promise.resolve();

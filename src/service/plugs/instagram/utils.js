@@ -3,26 +3,31 @@ import urlParams from "url-params";
 
 import urls from "./urls";
 
-// Used in decodeObject. Go to the function and watch the comments.
-const useJsonEncoding = true;
-
 export function getUrl(url, overrideJson){
 	if (/^chrome-extension:/.test(url))
 		url = url.replace(/^.+\/\/.[^\/]+(.+)/, "$1");
-	return ((!/^https?:/.test(url))?urls.home:"") + ((useJsonEncoding && !overrideJson)?urlParams.add(url, urls.json.name, urls.json.val):url);
+	return ((!/^https?:/.test(url))?urls.home:"") + (!overrideJson?urlParams.add(url, urls.json.name, urls.json.val):url);
 }
 
-export async function decodeObject (url, settings) {
-	var settings = {
+export async function decodeObject (url, extraSettings) {
+	const settings = {
 		cbk: {}, 
 		overrideJson: false,
 		overrideDecoder: false,
-		...settings
+		overrideSelector: "window._sharedData",
+		overrideCallback: (data) => data.replace(/^.+=\s\{(.+$)/, "{$1").replace(/\};$/, "}"),
+		...extraSettings
 	};
+
+	/**
+	 * Instagram has two methods for providing data to browser:
+	 * 
+	 * * Ajax call to service, returns json. This is nominally triggered by adding '?__a=1'. It works only in certain cases
+	 * * in-page object, returns html of page with in-dom script.
+	 * 
+	 */
 	
-	if (!useJsonEncoding || settings.overrideDecoder === true) {
-		// This is emergency fallback if the json method will not work anymore. Is dirty but is working.
-		// parse page html and return the object of the page
+	if (settings.overrideDecoder === true) {
 		var el = document.createElement("html");
 
 		var page = await axios(getUrl(url, true));
@@ -33,8 +38,10 @@ export async function decodeObject (url, settings) {
 		if (settings.cbk.onData)
 			await Promise.resolve(settings.cbk.onData(el))
 		
-		var data = document.evaluate("//script[contains(., 'window._sharedData')]", el).iterateNext().innerHTML;	
-		return JSON.parse(data.replace(/^.+=\s\{(.+$)/, "{$1").replace(/\};$/, "}"));
+		var data = document.evaluate(`//script[contains(., "${settings.overrideSelector}")]`, el).iterateNext().innerHTML;	
+
+		// Replaced JSON.parse with looser model as some objects returned from instagramfunction params are not valid jsons but real objects
+		return Function(`"use strict";return ${settings.overrideCallback(data)}`)();
 	} else {
 		return axios(getUrl(url, settings.overrideJson)).then((data) => data.data)
 	}

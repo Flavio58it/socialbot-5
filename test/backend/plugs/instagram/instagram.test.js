@@ -340,6 +340,50 @@ describe("@instagram", function () {
                 })
         });
 
+        it("Should like 1 image as is the only present in dashboard. New instagram mode", function (){
+            var liked = 0, home = false;
+
+            server.attachCallback("like_post", function (xhr, url, data) {
+                liked++;
+            });
+
+            // Json response is now broken in instagram. Here it simulate the empty object that is returned when this call is tried
+            server.respond(urls.home + "/?__a=1", function (xhr) {
+                var obj = {}
+
+                xhr.respond(200,
+                    { "Content-Type": "application/json" },
+                    JSON.stringify(obj)
+                );
+            })
+
+            // The fallback consists to the default homepage to be called
+            server.attachCallback("homepage_logged", function (xhr) {
+                home = true; // Check that the edited homepage has been called
+                return rawHomePageStructure([
+                    `window.__additionalDataLoaded('feed', {
+                        user: {
+                            edge_web_feed_timeline: {
+                                edges: ${JSON.stringify(createImagesObject(1).tag.media.nodes)}
+                            }
+                        }});`
+                ])
+            })
+
+            var instance = new instagram();
+
+            return instance.init(simulateSetting())
+                .then(() => instance.actions.likeDashboard(1000, 4)) // Millisec wait, limit
+                .then((error) => {
+                    chai.expect(error).to.equal(undefined)
+                    chai.expect(liked).to.equal(1, "Liked one image")
+                    chai.expect(home).to.equal(true)
+                }).then(() => db.logs.toArray()).then((database) => {
+                    chai.expect(database).to.have.lengthOf(1, "One like log should be present in database")
+                    chai.expect(database[0]).to.have.property("action", "USER_LIKE")
+                })
+        });
+
         it("Should not like anything as is already liked", function (){
             var liked = 0, home = false
 
