@@ -8,67 +8,64 @@ import waiter from "waiter";
  * Uses plug functions for calls and uses timers to perform human-like interactions with servers
  */
 
-const bot = function(settings, plug, plugName) {
-	var request = false;
-	return plug.init(settings).then((data) => {
-		console.info("Logged in: ", data.logged);
+const bot = async function (settings, plug, plugName) {
+	var plugData = await plug.init(settings);
 
-		if (!data.logged)
-			return Promise.reject({id: "LOGGED_OUT", error: "Login failure. Please go to the homepage and login.", action: "PLUG_HOME"})
-		request = new requests(data.domain.match, data.domain.res).listen(); // See the requests module for the explanation
-		return settings.get("follow").then((follow) => follow.tags)
-	}).then((data) => {
-		// LIke all the tag images
-		var flow = Promise.resolve();
-		data.forEach((tagName) => {
-			flow = flow.then(() => {
-				return Promise.all([
-					settings.get("waiter"),
-					settings.get("limits")
-				]).then((settings) => {
-					return plug.actions.likeTagImages(
-						tagName, 
-						settings[0],
-						settings[1].likes.tag
-					)
-				})
-			})
-		})
-		return flow;
-	})
-	.then(() => {
-		// Likes the dashboards of users
-		return settings.get("likeDash").then((shouldLike) => {
-			if (shouldLike)
-				return Promise.all([
-					settings.get("waiter"),
-					settings.get("limits")
-				]).then ((settings) => plug.actions.likeDashboard(settings[0], settings[1].likes.dash));
-			else
-				return Promise.resolve();
-		})
-	}).then(() => {
-		return plug.actions.followManager(false);
-	}).then(() => {
-		// Like back the users that liked your image.
-		return settings.get("likeBack").then((setting) => {
-			if (!setting.enabled)
-				return Promise.resolve();
-			return plug.actions.likeBack();
-		})
-	})
+	console.info("[robot] Logged in: ", plugData.logged);
 
+	if (!plugData.logged)
+		return Promise.reject({id: "LOGGED_OUT", error: "Login failure. Please go to the homepage and login.", action: "PLUG_HOME"})
+	
+	var request = new requests(plugData.domain.match, plugData.domain.res).listen(); // Modify requests to instagram server
 
-	// When all is finished ---
-	.then (() => {
-		console.info("Round finished");
+	try {
+		// 1st phase: likeTagImages
+		// Bot will get the list of tags from settings and like a predefined number of photos from them
+		var tags = await settings.get("follow");
+		tags = tags.tags
+
+		var waiter = await settings.get("waiter"),
+			limits = await settings.get("limits")
+
+		for (let i = 0; i < tags.length; i++) {
+			let tagName = tags[i]
+
+			await plug.actions.likeTagImages(
+				tagName, 
+				waiter,
+				limits.likes.tag
+			)
+		}
+
+		// 2nd phase: likeDashboard
+		// Bot will like the user dashboard
+		var shouldLikeDash = await settings.get("likeDash")
+		if (shouldLikeDash && plug.actions.likeDashboard)
+			await plug.actions.likeDashboard(waiter, limits.likes.dash)
+
+		// 3rd phase: followManager
+		// Manage followers of the user
+
+		await plug.actions.followManager(false)
+
+		// 4th phase: likeBack
+		// Like images of users that liked yours
+		var shouldLikeBack = await settings.get("likeBack");
+
+		if (shouldLikeBack.enabled && plug.actions.likeBack)
+			await plug.actions.likeBack()
+		
+		console.info("[robot] Round finished");
 		if (request)
 			request.unlisten();
-	}).catch((e) => {
+	} catch (e) {
+		// In case of errors disable requests editor
+
 		if (request)
 			request.unlisten();
-		return Promise.reject(e);
-	})
+
+		return await Promise.reject(e)
+	}
 }
 
 export default function (settings, plug, plugName) {
@@ -125,7 +122,7 @@ export default function (settings, plug, plugName) {
 					events.reboot&&events.reboot(t, plugName);
 					preRebootStatus = true;
 				} else {
-					console.warn("Bot stopped");
+					console.warn("[robot] Bot stopped");
 					events.stop&&events.stop(t, plugName);
 				}
 			} else {
@@ -133,10 +130,10 @@ export default function (settings, plug, plugName) {
 
 				// Create user friendly generic error if we have no idea of what happened
 				if (e.request && !e.request.status && !e.id)
-				events.error&&events.error(t, plugName, {
-					id: "NETWORK_GENERIC_ERROR",
-					error: e.toString()
-				});
+					events.error&&events.error(t, plugName, {
+						id: "NETWORK_GENERIC_ERROR",
+						error: e.toString()
+					});
 			}
 		});
 	}
