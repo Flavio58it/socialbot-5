@@ -121,6 +121,10 @@ const lib = {
 		console.log("UnfollowUserAction")
 		return Promise.resolve(true);
 	},
+	searchUsers: async function (userName) {
+		var result = await axios(getUrl(format(urls.get.searchUsers, userName, "0.9"), true));
+		return objectMapper(result.data, mappers.users);
+	},
 	newDbUser: function(us, now, toFollow) {
 		return {
 			plug: "instagram",
@@ -136,7 +140,7 @@ const lib = {
 		}
 	},
 	cleanDB: function (){ // Clean database from old users. Async mode! Don't even try to make it syncronous!
-
+		
 	}
 }
 

@@ -56,6 +56,12 @@ export default {
 		"user.media.nodes[].code": "posts.list[].code",
 		"user.media.nodes[].is_video": "posts.list[].video"
 	},
+	users: {
+		"users[].user.username": "[].username",
+		"users[].user.full_name": "[].fullName",
+		"users[].user.id": "[].id",
+		"users[].user.profile_pic_url": "[].img",
+	},
 	notifications: {
 		"graphql.user.activity_feed.edge_web_activity_feed.count": "num",
 		"graphql.user.activity_feed.edge_web_activity_feed.edges[].node.type": "list[].type",

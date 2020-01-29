@@ -40,7 +40,6 @@ describe("@actions", function () {
         return promis;
     });
 
-
     it("Get user data with cache", function () {
         var promis = actions.getUserData("tester").then((data) => {
             chai.expect(data).to.have.property("username")
@@ -99,28 +98,28 @@ describe("@actions", function () {
     context("Likeback functionality", function () {
         it("When one new post, should like", function () {
             var server = sinon.createFakeServer({
-                    respondImmediately: true
-                });
-                
-                server.respondWith(/\/p\/\d/, function (xhr, id) {
-                    xhr.respond(200, 
-                        { "Content-Type": "application/json" },
-                        JSON.stringify({
-                            graphql: {
-                                shortcode_media: {
-                                    viewer_has_liked: false
-                                }
+                respondImmediately: true
+            });
+            
+            server.respondWith(/\/p\/\d/, function (xhr, id) {
+                xhr.respond(200, 
+                    { "Content-Type": "application/json" },
+                    JSON.stringify({
+                        graphql: {
+                            shortcode_media: {
+                                viewer_has_liked: false
                             }
-                        })
-                    )
-                })
-    
-                server.respondWith(/\/web\/likes\/.+\/like\//, function (xhr, id) {
-                    xhr.respond(200, 
-                        { "Content-Type": "application/json" },
-                        JSON.stringify({})
-                    )
-                })
+                        }
+                    })
+                )
+            })
+
+            server.respondWith(/\/web\/likes\/.+\/like\//, function (xhr, id) {
+                xhr.respond(200, 
+                    { "Content-Type": "application/json" },
+                    JSON.stringify({})
+                )
+            })
     
             var fakedLogger = sinon.fake.resolves()
             
@@ -212,4 +211,37 @@ describe("@actions", function () {
         })
         
     })
+
+    context("searchUsers()", function() {
+        it("Search for one user", function () {
+            var server = sinon.createFakeServer({
+                respondImmediately: true
+            });
+
+            server.respondWith(/\/web\/search\/topsearch\//, function (xhr) {
+                xhr.respond(200, 
+                    { "Content-Type": "application/json" },
+                    JSON.stringify({
+                        users: [
+                            {
+                                position: 1,
+                                "user": {
+                                    "pk": "1111111111",
+                                    "username": "tester",
+                                    "full_name": "tester",
+                                    "profile_pic_url": "TESTIMG",
+                                }
+                            }
+                        ]
+                    })
+                )
+            });
+
+            return actions.searchUsers("tester").then((result) => {
+                chai.expect(result).to.be.lengthOf(1)
+                chai.expect(result[0]).to.have.property("username", "tester")
+                chai.expect(result[0]).to.have.property("fullName", "tester")
+            })
+        });
+    });
 })
