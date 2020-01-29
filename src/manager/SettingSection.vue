@@ -3,16 +3,12 @@
 		<div v-if="status.rebooting">
 			<Loading/>
 			<div class="text-center">Rebooting. Please wait.</div>
+			<div v-if="waiting.showMessage" class="text-center waitMessage"><b>Waiting for timers to expire...</b></div>
 		</div>
 		<div v-else-if="settings">
-			<div class="row statusTab">
-				<div class="col">
-					<b>Service status:</b> <span>{{status.running?"Running": "Stopped"}}</span>
-				</div>
-			</div>
 			<div class="row">
 				<div class="col-8">
-					<slot :settings="settings" name="left"/>
+					<slot :settings="settings" name="left" :running="status.running"/>
 				</div>
 				<div class="col-4">
 					<b>Tags follower</b>
@@ -72,6 +68,10 @@
 		margin: 10px;
 		border: 1px solid #ddd;
 	}
+
+	.waitMessage {
+		padding: 10px;
+	}
 </style>
 
 <script>
@@ -88,7 +88,11 @@
 		data () {
 			return {
 				status: false,
-				followManager: false
+				followManager: false,
+				waiting: {
+					id: false,
+					showMessage: false
+				}
 			}
 		},
 		message (action, data) {
@@ -108,6 +112,22 @@
 				this.$emit("loaded");
 			} else if (action == "statusUpdate")
 				this.status = data.status;
+		},
+		watch: {
+			"status.rebooting": function (status) {
+				var t = this;
+				if (status === true) {
+					t.waiting.id = setTimeout(function () {
+						t.waiting.showMessage = true;
+					}, 5000)
+				} else {
+					if (t.waiting.id) {
+						clearTimeout(t.waiting.id)
+						t.waiting.id = false;
+					}
+					t.waiting.showMessage = false;
+				}
+			}
 		},
 		methods: {
 			save () {

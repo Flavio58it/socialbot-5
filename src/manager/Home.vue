@@ -2,15 +2,10 @@
 	<div class="container">
 		<div class="row">
 			<div class="col mainInfos">
-				<div class="row infos">
-					Main infos such as bot status and stats 1
-				</div>
-				<div class="row infos">
-					Main infos such as bot status and stats 2
-				</div>
+				
 			</div>
 			<div class="col logs">
-				<log-scraper loggerid = "home"/>
+				<!--<log-scraper loggerid = "home"/>-->
 			</div>
 		</div>
 	</div>
@@ -33,11 +28,11 @@
 </style>
 
 <script>
-	import LogScraper from "components/LogScraper.vue";
+	//import LogScraper from "components/LogScraper.vue";
 
 	export default {
 		components: {
-			LogScraper
+			//LogScraper
 		}
 	}
 </script>

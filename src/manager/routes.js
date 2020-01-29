@@ -27,19 +27,14 @@ export default [
 			},
 			{
 				path: "*",
-				redirect: "instagram" 
+				redirect: "/settings/instagram" 
 			}
 		]
 	},
-	// Trainer included in code not needed
-	/*{
-		path: "/trainer",
-		component: dev?Trainer:undefined,
-		redirect:  dev?undefined:"/"
-	},*/
 	{
 		path: "/",
-		component: dev?Home:NotFound
+		redirect:"/settings/instagram",
+		component: Home
 	},
 
 	// Page not found fallback

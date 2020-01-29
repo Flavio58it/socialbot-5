@@ -4,48 +4,19 @@
 		:settings.sync="settings"
 		@loaded="followFilterManager"
 	>
-			<template slot="left" scope="data">
+			<template v-slot:left="data">
 				<b-tabs>
-					<b-tab title="General">
-						<div>
-							<b-form-checkbox v-model="data.settings.enabled">
-								<b>Bot enabled</b>
-								<div class="description">Enable the bot</div>
-							</b-form-checkbox>
-						</div>
-						<div v-if="false">
-							<b-form-checkbox v-model="data.settings.notifications">
-								Notifications
-								<div class="description">Show notifications on desktop</div>
-							</b-form-checkbox>
-						</div>
-						<div>
-							<b-form-checkbox v-model="data.settings.likeDash">
-								Like dashboard
-								<div class="description">Like the images from your dashboard</div>
-							</b-form-checkbox>
-						</div>
-						<div v-if="dev">
-							<b-form-checkbox v-model="data.settings.followBack">
-								Followback
-								<div class="description">Follow back the people who follows you</div>
-							</b-form-checkbox>
-						</div>
-						<div v-if="dev">
-							<b-form-checkbox v-model="data.settings.unFollowBack">
-								UnFollowback
-								<div class="description">When a user unfollows you will be unfollowed back. (Whitelist applied)</div>
-							</b-form-checkbox>
-						</div>
-						<div>
-							<b-form-checkbox v-model="data.settings.likeBack.enabled">
-								LikeBack 
-								<helper title="LikeBack">
-									<p>When a user like one of the your images the bot will check their gallery and like back a couple of images.</p>
-									<p>In order to not over-like a user who likes more than one of your photos a control will be performed. If the user has been already liked by the bot in the last {{settings.likeBack.ignoreTime}} days will be skipped.</p>
-								</helper>
-								<div class="description">When a user likes a photo of yours the bot will like a couple of theirs.</div>
-							</b-form-checkbox>
+					<b-tab title="Status">
+						<div class="row">
+							<div class="col-6">
+								<b-form-checkbox v-model="data.settings.enabled">
+									<b>Bot enabled</b>
+									<div class="description">Enable the bot</div>
+								</b-form-checkbox>
+							</div>
+							<div class="col-6 showStatus">
+								Status: <i :class="{'fa':true, 'fa-thumbs-up': data.running, 'fa-thumbs-down': !data.running}"/>
+							</div>
 						</div>
 					</b-tab>
 					<b-tab title="Timings & rates">
@@ -93,7 +64,7 @@
 						<hr/>
 						<div>
 							<b>Like Rates</b>
-							<div class="description">Limit hourly, daily and monthly rates in order to avoid instagram bans</div>
+							<div class="description">Limit hourly, daily and monthly rates in order to avoid instagram limitations</div>
 						</div>
 						<div class="row">
 							<div class="col-4">
@@ -120,6 +91,23 @@
 						</div>
 					</b-tab>
 					<b-tab title="Likes">
+						<b>
+							Like options
+						</b>
+						<b-form-checkbox v-model="data.settings.likeDash">
+							Like dashboard
+							<div class="description">Like the images from your dashboard</div>
+						</b-form-checkbox>
+						<div>
+							<b-form-checkbox v-model="data.settings.likeBack.enabled">
+								LikeBack 
+								<helper title="LikeBack">
+									<p>When a user like one of the your images the bot will check their gallery and like back a couple of images.</p>
+									<p>In order to not over-like a user who likes more than one of your photos a control will be performed. If the user has been already liked by the bot in the last {{settings.likeBack.ignoreTime}} days will be skipped.</p>
+								</helper>
+								<div class="description">When a user likes a photo of yours the bot will like a couple of theirs.</div>
+							</b-form-checkbox>
+						</div>
 						<div>
 							<b>
 								Like conditions
@@ -229,6 +217,19 @@
 						</div>
 					</b-tab>
 					<b-tab title="Follow">
+						<b>Follow options</b>
+						<div>
+							<b-form-checkbox v-model="data.settings.followBack">
+								Followback
+								<div class="description">Follow back the people who follows you (Blacklist applied)</div>
+							</b-form-checkbox>
+						</div>
+						<div>
+							<b-form-checkbox v-model="data.settings.unFollowBack">
+								UnFollowback
+								<div class="description">When a user unfollows you will be unfollowed back. (Whitelist applied)</div>
+							</b-form-checkbox>
+						</div>
 						<div>
 							<b>Follow conditions</b>
 							<div class="description">Leave the filter to 0 to disable it.</div>
@@ -346,7 +347,14 @@
 </template>
 
 <style lang="scss" scoped>
-	
+	.showStatus {
+		line-height: 40px;
+		text-align: right;
+		
+		i {
+			color: $blue;
+		}
+	}
 </style>
 
 <script>

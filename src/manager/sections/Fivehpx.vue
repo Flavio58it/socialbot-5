@@ -3,7 +3,7 @@
 		:plug="type"
 		:settings.sync="settings"
 	>
-		<template slot="left" scope="data">
+		<template v-slot:left="data">
 			<b-tabs>
 				<b-tab title="General">
 					<b-form-checkbox v-model="data.settings.enabled">
