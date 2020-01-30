@@ -144,6 +144,61 @@ describe("#robot()", function () {
         });
     })
 
+    it("Should call directAction from inited plug and nothing else", function () {    
+        var doSomething = sinon.fake(),
+            doSomethingAction = sinon.fake();
+
+        var bot = new robot(simulateSetting({
+            enabled: true
+        }), {
+            init: () => {
+                return Promise.resolve({
+                    logged: true,
+                    domain: {
+                        match: "",
+                        res: ""
+                    }
+                })
+            },
+            directActions: {
+                doSomething
+            },
+            actions: {
+                doSomethingAction
+            }
+        }, "test");
+
+        return bot.directAction("doSomething", {data: false}).then(() => {
+            chai.assert(doSomething.called, "Direct action")
+            chai.assert(!doSomethingAction.called, "Normal action")
+        })
+    })
+
+    it("Should throw error as directAction does not exist", function () {    
+        var bot = new robot(simulateSetting({
+            enabled: true
+        }), {
+            init: () => {
+                return Promise.resolve({
+                    logged: true,
+                    domain: {
+                        match: "",
+                        res: ""
+                    }
+                })
+            },
+            directActions: {
+                
+            }
+        }, "test");
+
+        return bot.directAction("doSomething", {data: false}).then(() => {
+            chai.assert.Throw("The function should not be called");
+        }).catch((e) => {
+            chai.expect(e).to.equal("Action not found")
+        })
+    })
+
     it("Init with fake plug, not logged", function () {
         var bot = new robot(simulateSetting({
             enabled: true

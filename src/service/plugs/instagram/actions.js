@@ -122,7 +122,7 @@ const lib = {
 		return Promise.resolve(true);
 	},
 	searchUsers: async function (userName) {
-		var result = await axios(getUrl(format(urls.get.searchUsers, userName, "0.9"), true));
+		var result = await axios(getUrl(format(urls.get.searchUsers, userName, ""), true));
 		return objectMapper(result.data, mappers.users);
 	},
 	newDbUser: function(us, now, toFollow) {

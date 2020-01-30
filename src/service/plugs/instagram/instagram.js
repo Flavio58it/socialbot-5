@@ -62,6 +62,24 @@ export default function () {
 					}
 			}
 		},
+		// Actions performed directly from frontend
+		directActions: {
+			whitelistUser: async function (data) {
+				var edited = await db.users.where("[plug+userid]").equals([data.plug, data.id]).modify({whitelisted: data.add, blacklisted: false});
+				if (edited === 1)
+					return edited
+				var newUser = await db.users.add({userid: data.id, plug: data.plug, whitelisted: data.add})
+				return newUser
+			},
+			blacklistUser: async function (data) {
+				var edited = await db.users.where("[plug+userid]").equals([data.plug, data.id]).modify({blacklisted: data.add, whitelisted: false});
+				if (edited === 1)
+					return edited
+				var newUser = await db.users.add({userid: data.id, plug: data.plug, blacklisted: data.add})
+				return newUser
+			}
+		},
+		// Actions performed by the BOT
 		actions: {
 			async likeTagImages (tagName, wait, limit) { // Like the images by tag
 				if (!csrf)

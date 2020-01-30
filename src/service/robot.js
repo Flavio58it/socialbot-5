@@ -181,6 +181,15 @@ export default function (settings, plug, plugName) {
 		return plug
 	}
 
+	// Perform direct action 
+	t.directAction = async (actionName, data) => {
+		var plugInstance = await t.getPlug()
+		var fun = plugInstance.directActions[actionName];
+		if (!fun)
+			return Promise.reject("Action not found")
+		return fun(data);
+	}
+
 	/**
 	 * Set various events callbacks
 	 * 

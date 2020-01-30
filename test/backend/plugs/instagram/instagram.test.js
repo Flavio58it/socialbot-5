@@ -58,6 +58,95 @@ describe("@instagram", function () {
         });
     });
 
+    context("directAction()", function () {
+        it("whitelistUser - Should create user and whitelist it", function () {
+            var instance = new instagram();
+            return instance.init(simulateSetting()).then(function (data) {
+                return instance.directActions.whitelistUser({
+                    plug: "instagram",
+                    id: 11,
+                    add: 12345
+                }).then(() => db.users.toArray()).then((database) => {
+                    chai.expect(database).to.have.lengthOf(1, "User should be added")
+                    chai.expect(database[0]).to.have.property("whitelisted", 12345) // Adds date of whitelisting in field
+                })
+            });
+        });
+
+
+        it("whitelistUser - Should whitelist an user that does not exist, so must be added", function () {
+            var instance = new instagram();
+            return instance.init(simulateSetting()).then(function (data) {
+                return instance.directActions.whitelistUser({
+                    plug: "instagram",
+                    id: 11,
+                    add: 12345
+                }).then(() => db.users.toArray()).then((database) => {
+                    chai.expect(database).to.have.lengthOf(1, "User should be added")
+                    chai.expect(database[0]).to.have.property("whitelisted", 12345) // Adds date of whitelisting in field
+                })
+            });
+        });
+
+        it("whitelistUser - Should whitelist an user", function () {
+            var instance = new instagram();
+            return db.users.add({userid: 11, plug: "instagram"}).then(() => instance.init(simulateSetting())).then(function (data) {
+                return instance.directActions.whitelistUser({
+                    plug: "instagram",
+                    id: 11,
+                    add: 12345
+                }).then(() => db.users.toArray()).then((database) => {
+                    chai.expect(database).to.have.lengthOf(1)
+                    chai.expect(database[0]).to.have.property("whitelisted", 12345) // Adds date of whitelisting in field
+                })
+            });
+        });
+
+        it("whitelistUser - Should whitelist an user and remove blacklist", function () {
+            var instance = new instagram();
+            return db.users.add({userid: 11, plug: "instagram", blacklisted: 1234}).then(() => instance.init(simulateSetting())).then(function (data) {
+                return instance.directActions.whitelistUser({
+                    plug: "instagram",
+                    id: 11,
+                    add: 12345
+                }).then(() => db.users.toArray()).then((database) => {
+                    chai.expect(database).to.have.lengthOf(1)
+                    chai.expect(database[0]).to.have.property("whitelisted", 12345) // Adds date of whitelisting in field
+                    chai.expect(database[0]).to.have.property("blacklisted", false)
+                })
+            });
+        });
+
+        it("blacklistUser - Should blacklist an user", function () {
+            var instance = new instagram();
+            return db.users.add({userid: 11, plug: "instagram"}).then(() => instance.init(simulateSetting())).then(function (data) {
+                return instance.directActions.blacklistUser({
+                    plug: "instagram",
+                    id: 11,
+                    add: 12345
+                }).then(() => db.users.toArray()).then((database) => {
+                    chai.expect(database).to.have.lengthOf(1)
+                    chai.expect(database[0]).to.have.property("blacklisted", 12345) // Adds date of whitelisting in field
+                })
+            });
+        });
+
+        it("blacklistUser - Should blacklist an user that does not exist, so must be added", function () {
+            var instance = new instagram();
+            return instance.init(simulateSetting()).then(function (data) {
+                return instance.directActions.blacklistUser({
+                    plug: "instagram",
+                    id: 11,
+                    add: 12345
+                }).then(() => db.users.toArray()).then((database) => {
+                    chai.expect(database).to.have.lengthOf(1, "User should be added")
+                    chai.expect(database[0]).to.have.property("blacklisted", 12345) // Adds date of blacklisting in field
+                })
+            });
+        });
+        
+    });
+
     context("likeTagImages()", function () {
         it("Should perform calls to server and respond", function () {
             var instance = new instagram();

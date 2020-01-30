@@ -77,10 +77,8 @@ Comm.listen("manager", function(action, data) {
 			});
 		break;
 		case "directAction": // Direct operations to users by popup page and followManager
-			switch(data.operation){
-				case "whitelistUser": db.users.where("[plug+userid]").equals([data.plug, data.id]).modify({whitelisted: data.add});break;// Whitelist a user
-				
-			}
+			if (plugs[data.plug].bot !== false)
+				plugs[data.plug].bot.directAction(data.operation, data);
 		break;
 	}
 	if (error) // Sure?
