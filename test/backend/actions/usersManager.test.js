@@ -19,24 +19,12 @@ describe("directAction()", function () {
         })
     });
 
-
-    it("whitelistUser - Should whitelist an user that does not exist, so must be added", function () {
-        return usersManager.flagUser("whitelist", {
-            plug: "instagram",
-            id: 11,
-            add: 12345
-        }).then(() => db.users.toArray()).then((database) => {
-            chai.expect(database).to.have.lengthOf(1, "User should be added")
-            chai.expect(database[0]).to.have.property("whitelisted", 12345) // Adds date of whitelisting in field
-        })
-    });
-
     it("whitelistUser - Should whitelist an user", function () {
-        return usersManager.flagUser("whitelist", {
+        return db.users.add({userid: 11, plug: "instagram"}).then(() => usersManager.flagUser("whitelist", {
             plug: "instagram",
             id: 11,
             add: 12345
-        }).then(() => db.users.toArray()).then((database) => {
+        })).then(() => db.users.toArray()).then((database) => {
             chai.expect(database).to.have.lengthOf(1)
             chai.expect(database[0]).to.have.property("whitelisted", 12345) // Adds date of whitelisting in field
         })
@@ -55,11 +43,11 @@ describe("directAction()", function () {
     });
 
     it("blacklistUser - Should blacklist an user", function () {
-        return usersManager.flagUser("blacklist", {
+        return db.users.add({userid: 11, plug: "instagram", blacklisted: 1234}).then(() => usersManager.flagUser("blacklist", {
             plug: "instagram",
             id: 11,
             add: 12345
-        }).then(() => db.users.toArray()).then((database) => {
+        })).then(() => db.users.toArray()).then((database) => {
             chai.expect(database).to.have.lengthOf(1)
             chai.expect(database[0]).to.have.property("blacklisted", 12345) // Adds date of whitelisting in field
         })
