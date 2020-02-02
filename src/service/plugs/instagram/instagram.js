@@ -64,19 +64,9 @@ export default function () {
 		},
 		// Actions performed directly from frontend
 		directActions: {
-			whitelistUser: async function (data) {
-				var edited = await db.users.where("[plug+userid]").equals([data.plug, data.id]).modify({whitelisted: data.add, blacklisted: false});
-				if (edited === 1)
-					return edited
-				var newUser = await db.users.add({userid: data.id, plug: data.plug, whitelisted: data.add})
-				return newUser
-			},
-			blacklistUser: async function (data) {
-				var edited = await db.users.where("[plug+userid]").equals([data.plug, data.id]).modify({blacklisted: data.add, whitelisted: false});
-				if (edited === 1)
-					return edited
-				var newUser = await db.users.add({userid: data.id, plug: data.plug, blacklisted: data.add})
-				return newUser
+			searchUsers: async function (data) {
+				var result = await decodeObject(getUrl(format(urls.get.searchUsers, data.username, ""), true));
+				return objectMapper(result, mappers.users);
 			}
 		},
 		// Actions performed by the BOT

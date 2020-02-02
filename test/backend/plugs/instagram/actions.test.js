@@ -211,37 +211,4 @@ describe("@actions", function () {
         })
         
     })
-
-    context("searchUsers()", function() {
-        it("Search for one user", function () {
-            var server = sinon.createFakeServer({
-                respondImmediately: true
-            });
-
-            server.respondWith(/\/web\/search\/topsearch\//, function (xhr) {
-                xhr.respond(200, 
-                    { "Content-Type": "application/json" },
-                    JSON.stringify({
-                        users: [
-                            {
-                                position: 1,
-                                "user": {
-                                    "pk": "1111111111",
-                                    "username": "tester",
-                                    "full_name": "tester",
-                                    "profile_pic_url": "TESTIMG",
-                                }
-                            }
-                        ]
-                    })
-                )
-            });
-
-            return actions.searchUsers("tester").then((result) => {
-                chai.expect(result).to.be.lengthOf(1)
-                chai.expect(result[0]).to.have.property("username", "tester")
-                chai.expect(result[0]).to.have.property("fullName", "tester")
-            })
-        });
-    });
 })

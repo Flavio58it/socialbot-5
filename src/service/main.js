@@ -7,6 +7,8 @@ import logger from "./db/logger";
 
 import robot from "./robot";
 
+import actions from "./actions";
+
 // Import all plugins into the bot
 import instagram from "./plugs/instagram/instagram";
 import fivehpx from "./plugs/fivehpx/fivehpx";
@@ -76,9 +78,16 @@ Comm.listen("manager", function(action, data) {
 				Comm.sendMessage("logs", {list: data, forWhich: data.forWhich});
 			});
 		break;
-		case "directAction": // Direct operations to users by popup page and followManager
+		// Direct operations to users by popup page and followManager
+		// Perform operation by bot type
+		case "directAction":
 			if (plugs[data.plug].bot !== false)
 				plugs[data.plug].bot.directAction(data.operation, data);
+		break;
+		// Generic operation, usually related to internal database. Is same for every bot
+		case "performOperation":
+			if (data.operation)
+				actions[data.operation](data);
 		break;
 	}
 	if (error) // Sure?
