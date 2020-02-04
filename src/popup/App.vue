@@ -1,6 +1,6 @@
 <template>
   <div id = "app" style="width: 480px;">
-    <Headbar :showSettings="true" :showAccounts="true" :separator="false"/>
+    <Headbar showsettings showaccounts separator/>
     <div class="container">
       <div class="status"></div>
       <ErrorDash/>

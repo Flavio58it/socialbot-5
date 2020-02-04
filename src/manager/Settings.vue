@@ -1,26 +1,18 @@
 <template>
 	<div id="navigator">
-		<div class="row">
-			<div class="col">
-				<h3>Settings</h3>
-			</div>
-			<div class="col text-right">
-				<a class="font-small" href="#" @click.prevent="showAdvanced = !showAdvanced">Advanced</a>
-			</div>
-		</div>
-		<hr/>
-		<div v-if="showAdvanced" class="container advanced">
-			<div class="row">
-				<div>
-					<a class="btn-link" href="#" @click.prevent="$send('resetStorage')">Reset storage</a>
-					<a class="btn-link" href="#" @click.prevent="$send('resetDB')">  Reset database</a>
-				</div>
-			</div>
-		</div>
-		<hr v-if="showAdvanced"/>
+		<b-modal
+			v-model="showAdvanced"
+			title="Advanced options"
+		>
+			<b-button-group class="d-block">
+				<b-button variant="success" @click.prevent="$send('resetStorage')">Reset storage</b-button>
+				<b-button variant="info" @click.prevent="$send('resetDB')">Reset database</b-button>
+			</b-button-group>
+		</b-modal>
 		<div class="container errorContainer">
 			<ErrorDash class="row"/>
 		</div>
+		<i class="fas fa-wrench advancedSettings" @click="showAdvanced = !showAdvanced"/>
 		<div class="container">
 			<div class="row text-center">
 				<div v-for="(cat, key) in cats" :key="key" :class="['col', 'cat', (key==$route.name)?'selected':'']" @click="navigate(key)">
@@ -54,6 +46,17 @@
 	}
 	.errorContainer {
 		padding-bottom: $spacer-small;
+	}
+
+	#navigator {
+		position: relative;
+
+		.advancedSettings {
+			cursor: pointer;
+			position: absolute;
+			right: 10px;
+			top: 10px;
+		}
 	}
 </style>
 

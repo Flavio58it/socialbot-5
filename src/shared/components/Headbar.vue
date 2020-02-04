@@ -6,10 +6,11 @@
 					<i class="fa fa-user-circle-o"></i> <!-- When no account is connected this is showed! -->
 					<!--<a href="www.instagram.com" target="_blank"><img :src="user.image" :alt="user.username"></img></a>-->
 				</div>
-				<div :class="[showSettings?'col-8':'col-9', 'title', 'text-center']">
-					<a :href="links.home"><b>SocialBot</b> control panel</a>
+				<div :class="[showsettings?'col-8':'col-9', 'title', 'text-center']">
+					<a v-if="titlelink" :href="links.home"><b>SocialBot</b> control panel</a>
+					<a v-else href="#" @click.prevent=""><b>SocialBot</b> control panel</a>
 				</div>
-				<div v-if="showSettings" class="col-1 text-right">
+				<div v-if="showsettings" class="col-1 text-right">
 					<a :href="links.settings" target="_blank">
 			          <i class="fa fa-gear"/>
 			        </a>
@@ -43,10 +44,17 @@
 <script>
 	export default {
 		props: {
-			showSettings:{},
-			showUsers: {},
+			showsettings:{
+				type: Boolean
+			},
+			showusers: {
+				type: Boolean
+			},
 			separator: {
 				default: true
+			},
+			titlelink: {
+				type: Boolean
 			}
 		},
 		data () {

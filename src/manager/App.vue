@@ -1,6 +1,6 @@
 <template>
   <div id = "app">
-    <Headbar/>
+    <Headbar titlelink/>
     <div class="mainContent">
       <router-view />
     </div>
