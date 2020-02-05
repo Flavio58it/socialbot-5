@@ -6,6 +6,7 @@ export default {
 	unFollowBack: false, // Unfollow the people that unfollows you (managed by whitelist)
 	likeBack: {
 		enabled: true,
+		useLikeFilters: true, // Use filters of like functionality also for likeBack
 		likes: 4, // How much photos to like
 		ignoreTime: 30, // Days to ignore the user
 		maxUsersLike: 10 // Maximum users to like per session

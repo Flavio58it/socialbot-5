@@ -58,7 +58,7 @@ const lib = {
 			return objectMapper(notifications, mappers.notifications);
 		});
 	},
-	likeUserPosts: function (username, csrf, limit, checker, log) {
+	likeUserPosts: function ({username, csrf, limit, checker, log}) {
 		return lib.getUserData(username).then((userData) => {
 			var len = userData.posts.list.length;
 			if (len === 0)

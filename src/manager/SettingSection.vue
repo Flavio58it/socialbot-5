@@ -20,31 +20,6 @@
 			<div>
 				<button @click="save" class="btn btn-primary btn-lg float-right save" title="Save and restart the bot">Save</button>
 			</div>
-			<div  class="clearfix"/>
-			<hr/>
-			<div>
-				<b>Followers manager</b>
-				<Helper title="Followers manager">
-					<p>With this tool you can see the overall situation of the your account.</p>
-					<p>You can filter by name and the user situation towards you and then perform actions</p>
-
-					<p>FollowManager is disabled by default as needs a lot of resources to operate. In order to have filtering and stats controls available the system will load all your followers. This may take <b>a lot</b> of time, depending of your number of followers.</p>
-
-					<hr/>
-					<b>Badges:</b>
-					<div>
-						<div><b-badge variant="success">Follower</b-badge> - The user is following you</div>
-						<div><b-badge variant="danger">Follower</b-badge> - The user is NOT following you</div>
-						<div><b-badge variant="info">Followback</b-badge> - You are following him back</div>
-						<div><b-badge variant="warning">Following</b-badge> - You are following him (and he is not following you)</div>
-					</div>
-				</Helper>
-			</div>
-			<div class="description">Here you can manage your followers.</div>
-			<div v-if="!followManager" class="text-center">
-				<b-button @click="followManager = !followManager" class="button" variant="primary">Enable Followers manager</b-button>
-			</div>
-			<FollowManager v-else :plug="plug"/>
 		</div>
 		<Loading v-else/>
 	</div>
@@ -78,7 +53,7 @@
 	import Loading from "components/Loading.vue";
 	import Tags from "./Tags.vue";
 	import FollowManager from "./FollowManager.vue";
-	import Helper from "components/Helper.vue";
+	
 
 	export default {
 		props: [
@@ -88,7 +63,6 @@
 		data () {
 			return {
 				status: false,
-				followManager: false,
 				waiting: {
 					id: false,
 					showMessage: false
@@ -141,8 +115,7 @@
 		components: {
 			Loading,
 			FollowManager,
-			Tags,
-			Helper
+			Tags
 		}
 	}
 </script>

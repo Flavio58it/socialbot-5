@@ -1,4 +1,5 @@
 import Settings from "./Settings.vue";
+import Followers from "./Followers.vue";
 
 import NotFound from "components/NotFound.vue";
 
@@ -30,6 +31,10 @@ export default [
 				redirect: "/settings/instagram" 
 			}
 		]
+	},
+	{
+		path: "/followers/:plug",
+		component: Followers
 	},
 	{
 		path: "/",

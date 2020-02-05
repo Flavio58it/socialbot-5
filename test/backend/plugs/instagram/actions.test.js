@@ -125,7 +125,13 @@ describe("@actions", function () {
             
             // This test depends on "Get user data with cache" test. It uses cached user setted here. 
             // If the cache test fails, it will also here.
-            var promis = actions.likeUserPosts("tester", "1", "4", false, {userInteraction: fakedLogger}).then(() => {
+            var promis = actions.likeUserPosts({
+                username: "tester", 
+                csrf: "1", 
+                limit: "4", 
+                checker: false, 
+                log: {userInteraction: fakedLogger}
+            }).then(() => {
                 chai.expect(server.requests.length).to.equal(2)
                 chai.expect(fakedLogger.callCount).to.equal(1)
             });
@@ -202,7 +208,13 @@ describe("@actions", function () {
             
             // This test depends on "Get user data with cache" test. It uses cached user setted here. 
             // If the cache test fails, it will also here.
-            var promis = actions.likeUserPosts("testerone", "1", "4", false, {userInteraction: fakedLogger}).then(() => {
+            var promis = actions.likeUserPosts({
+                username: "testerone", 
+                csrf: "1", 
+                limit: "4", 
+                checker: false, 
+                log: {userInteraction: fakedLogger}
+            }).then(() => {
                 chai.expect(server.requests.length).to.equal(5)
                 chai.expect(fakedLogger.callCount).to.equal(2)
             });

@@ -401,12 +401,12 @@ export default function () {
 				console.log("Getting notifications: ", notifications);
 
 				for (let i = 0; i < notifications.list.length; i++) {
-					let t = notifications.list[i];
+					let notification = notifications.list[i];
 
-					if (t.type != 1)
+					if (notification.type !== 1)
 						continue;
 					
-					let query = await db.users.where("[plug+userid]").equals(["instagram", t.id]),
+					let query = await db.users.where("[plug+userid]").equals(["instagram", notification.id]),
 						qres = await query.toArray();
 
 					if ((qres.length && (!qres[0].lastInteraction || (qres[0].lastInteraction  <= now - ms.days(likeBackSettings.ignoreTime)))) || !qres.length) {
@@ -414,15 +414,24 @@ export default function () {
 							continue;
 						likebacked ++;
 
-						await actions.likeUserPosts(t.username, csrf, likeBackSettings.likes, checker, log);
+						await actions.likeUserPosts({
+							username: notification.username,
+							csrf,
+							limit: likeBackSettings.likes,
+							checker: {
+								instance: checker,
+								shouldCheck: likeBackSettings.useLikeFilters
+							},
+							log
+						});
 
 						let res = await query.modify({
 							lastInteraction: now
 						})
 
 						if (!res) {
-							let userData = await actions.getUserData(t.username)
-							await db.users.add(actions.newDbUser(t, now, 2))
+							let userData = await actions.getUserData(notification.username)
+							await db.users.add(actions.newDbUser(notification, now, 2))
 						}
 						await waiter(1000, 10000)
 					} else {
