@@ -109,7 +109,7 @@
 										<p>This condition allows to select precisely what type of photos the bot will like basing on image description.</p>
 										<p>Click on the gear and insert text, hashtags or regex filters.</p>
 										<p>If you have previously liked a post it will not be unliked.</p>
-										<p>This filter will apply to all like actions (tags/dashboard/likeback)</p>
+										<p>This filter will apply to tags/dashboard like actions</p>
 									</div>
 								</helper>
 							</div>

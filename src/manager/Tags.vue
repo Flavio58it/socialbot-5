@@ -34,19 +34,19 @@
 			return {
 				text: "",
 				list: this.value,
-				state: "success"
+				state: true
 			}
 		},
 		methods: {
 			saveTag () {
 				if (this.text == "") {
-					this.state = "error";
+					this.state = false;
 					return;
 				}
 				this.list.push(this.text);
 				this.text = "";
 				this.$emit("input", this.list);
-				this.state = "success";
+				this.state = true;
 			},
 			removeTag (i) {
 				this.list.splice(i, 1);

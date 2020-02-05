@@ -1,14 +1,14 @@
 <template>
 	<div id="main" class="row">
-		<div v-if="value && value.length" class="col-9">
+		<div v-if="value && value.length" class="col-8">
 			{{value.length}} filters
 		</div>
-		<div v-else class="col-9">
+		<div v-else class="col-8">
 			No filters
 		</div>
 		<div class="clear"></div>
-		<div class="col-3">
-			<i @click="addEditModal" class="fa fa-gear fa-2x"/>
+		<div class="col-4">
+			<b-button @click="addEditModal" variant="primary" block>Edit</b-button>
 		</div>
 		<b-modal id="modalFilters" ref="modalFilters" title="Add/Edit comment filters" :ok-only="true" @hide="cleanArray" @show="editIndex = false">
 			<div class="content">
@@ -17,31 +17,34 @@
 			<hr/>
 			<div v-if="value.length">
 				<div v-for="(option, i) in value" :key="i">
-					<div v-if="editIndex !== false && editIndex == i" class="row">
+					<div v-if="editIndex !== false && editIndex == i" class="row filterrow">
 						<div class="col-2 text-center">
-							<b-badge :variant="variantCreator(option).badge">{{variantCreator(option).text}}</b-badge>
+							<b-badge v-if="variantCreator(option)" :variant="variantCreator(option).badge">{{variantCreator(option).text}}</b-badge>
 						</div>
-						<div class="col-8">
+						<div class="col-7">
 							<b-form-input
 								v-model="value[i]"
 								@keyup.enter.stop="saveEl"
 								@keyup.space.prevent.stop="saveEl"
 							/>
 						</div>
-						<div class="col-2 align-left">
+						<div class="col-3 align-left">
 							<i @click.prevent.stop="saveEl" class="fa fa-save"/>
-							<i v-if="(value[i] != '' && i == (value.length-1)) || (i != (value.length-1))" @click.prevent.stop="remEl(i)" class="fa fa-remove"/>
+							<template v-if="(value[i] != '' && i == (value.length-1)) || (i != (value.length-1))">
+								<i @click.prevent.stop="closeEditEl(i)" class="fa fa-remove"/>
+								<i @click.prevent.stop="remEl(i)" class="fa fa-trash"/>
+							</template>
 						</div>
 					</div>
-					<div v-else class="editable tags row">
-						<div class="col-2">
+					<div v-else class="editable tags row filterrow">
+						<div class="col-2 text-center">
 							<b-badge :variant="variantCreator(option).badge">{{variantCreator(option).text}}</b-badge>
 						</div>
 						<div class="col-7">
 							<b class="tag">{{option}}</b>
 						</div>
 						<div class="col-3">
-							<a href="#" @click.prevent="editIndex = i">Edit</a> <a href="#" @click.prevent="remEl(i)" class="remove">Remove</a>
+							<a href="#" @click.prevent="editEl(i)">Edit</a> <a href="#" @click.prevent="remEl(i)" class="remove">Remove</a>
 						</div>
 					</div>
 				</div>
@@ -60,8 +63,11 @@
 			line-height: 40px;
 		}
 	} 
+	.filterrow {
+		line-height: 40px;
+	}
 	.fa-remove {
-		padding: 10px;
+		padding: 5px;
 	}
 	.remove {
 		color: $font-color-error;
@@ -77,10 +83,16 @@
 
 <script>
 	export default {
-		props: ["value"],
+		props: {
+			value: {
+				type: Array,
+				retuired: true
+			}
+		},
 		data () {
 			return {
-				editIndex: false
+				editIndex: false,
+				oldValue: false
 			}
 		},
 		methods: {
@@ -95,15 +107,37 @@
 			},
 			cleanArray () {
 				var tt = this;
-				this.value.forEach(function(t, i) {
-					if (!t)
+				this.value.forEach(function(filter, i) {
+					if (!filter)
 						tt.value.splice(i, 1);
 					else
-						t = t.trim();
+						filter = filter.trim();
 				})
 			},
 			remEl (i) {
-				this.value.splice(i, 1);
+				var newArray = this.value;
+				newArray.splice(i, 1);
+				this.$emit("input", newArray);
+				this.editIndex = false;
+			},
+			updateValue (index, value) {
+				var newArray = this.value;
+				newArray[index] = value;
+				this.$emit("input", newArray);
+			},
+			editEl (index) {
+				this.cleanArray();
+				this.editIndex = index;
+				this.oldValue = this.value[index]
+			},
+			closeEditEl () {
+				if (this.oldValue)
+					this.updateValue(this.editIndex, this.oldValue);
+				else
+					this.updateValue(this.editIndex, ""); // When no old value is provided just use an empty one, so cleanArray can dispose of the row
+				this.editIndex = false;
+				this.oldValue = false;
+				this.cleanArray();
 			},
 			focusInput () {
 				this.$nextTick(() => {// Wait a moment!
@@ -118,6 +152,8 @@
 				this.focusInput()
 			},
 			variantCreator (opt) {
+				if (!opt)
+					return false;
 				if (opt.indexOf("#") == 0)
 					return {
 						badge: "success",
