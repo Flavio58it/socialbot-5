@@ -357,7 +357,7 @@ export default function () {
 						if ((isFirstTime || !settingsData.followBack) && !onlyFetch) // Not followbacking all the people the first time
 							continue;
 							
-						let followResult = await actions.followUser(us.id, checker)
+						let followResult = await actions.followUser(us.id)
 						
 						if (followResult) {
 							await log.userInteraction("FOLLOWBACK", {

@@ -89,33 +89,9 @@ const lib = {
 			return flow;
 		})
 	},
-	followUser: function (userId, checker) {
-		console.log("Checking if should follow");
-		if (!checker)
-			return follow(); // Here will directly follow without checks
-
-		// Followback algorhytm below ---
-		return db.users.where("[plug+userid]").equals(["instagram", userId]).toArray().then((data) => { // Check if the user has to be followed
-			if (data.length > 1)
-				return Promise.reject({error: "Users number mismatch", id: "DB_USER_EXCEEDING", action: "RELOAD"});
-			if (data[0].toFollow) {
-				console.log("Authorized by DB");
-				return lib.getUserData(data[0].username).then((userInfo) =>  checker.shouldFollow({user:userInfo, data: data[0]})).then((auth) => {
-					if (auth) {
-						return follow()
-					} else {
-						console.warn("Not authorized by police")
-						return Promise.resolve(false)
-					}
-				});
-			}
-		}).then (() => {
-			return db.users.where("[plug+userid]").equals(["instagram", userId]).modify({toFollow: false});
-		})
-		
-		function follow(){ // TODO, perform the call when you are sure that is working :D
-			console.log("Authorized by police or bypassed directly");
-		}
+	followUser: function (userId) {
+		console.log("FollowUserAction")
+		return Promise.resolve(true)
 	},
 	unfollowUser: function (userId) {
 		console.log("UnfollowUserAction")
