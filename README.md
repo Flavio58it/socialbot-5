@@ -21,7 +21,7 @@
 * Completely personalized settings in dedicated control panel
 
 ## Changelogs
-* v2.0rc1 - in progress - v2 branch
+* v2.0a1 - in progress - v2 branch
     * Heavy refactoring and code update
     * Updated all libraries to latest versions + fixed compatibility issues
     * Added testing libraries and tests to all main functionalities
@@ -30,7 +30,14 @@
     * [Instagram] Inclusion of rate limiter
     * [Instagram] Added work hours in order to not clash with user
 
-* v1 - Legacy version - master branch
+* v1 - released - master branch
+    * Instagram somewhat working
+
+## Why chrome extension?
+
+Two are the reasons that convinced me that this approach is the better:
+* __Instagram AI knows that you are a bot.__ Using a real browser adds a possibility that Instagram will not catch suspect activity.
+* Login information storage. This bot does __NOT__ ask you for any login information. You perform login in your browser and that's it. No credentials, no risks.
 
 ## Build Setup
 
