@@ -17,7 +17,7 @@ const lib = {
 	likePost: function (postId, csrf) {
 		return axios(getUrl(format(urls.post.like, postId), true), _postData(csrf));
 	},
-	getUsersBatch: function(query, userid, list, pointer) {
+	getUsersBatch: async function(query, userid, list, pointer) {
 		if (!list)
 			var list = [];
 		var data = {
@@ -26,68 +26,68 @@ const lib = {
 		};
 		if (pointer)
 			data.after = pointer;
-		return decodeObject(urlParams.add(format(urls.get.query, query), "variables", JSON.stringify(data)), {
+
+		var user = await decodeObject(urlParams.add(format(urls.get.query, query), "variables", JSON.stringify(data)), {
 			overrideJson: true
-		}).then(data => data.data.user)
-		.then((data) => {
-			var fdata = data.edge_followed_by?data.edge_followed_by:data.edge_follow;
-			list.push(...fdata.edges);
-			if (fdata.page_info.has_next_page && fdata.page_info.end_cursor)
-				return lib.getUsersBatch(query, userid, list, fdata.page_info.end_cursor);
-			return list;
-		})
+		});
+
+		user = user.data.user;
+
+		var fdata = user.edge_followed_by?user.edge_followed_by:user.edge_follow;
+
+		list.push(...fdata.edges);
+
+		if (fdata.page_info.has_next_page && fdata.page_info.end_cursor)
+			return lib.getUsersBatch(query, userid, list, fdata.page_info.end_cursor);
+
+		return list;
 	},
-	getUserData: function(username) {
+	getUserData: async function(username) {
 		var now = new Date().getTime();
 		if (!cache.userData)
 			cache.userData = {}
 		if (cache.userData[username] && cache.userData[username].time >= (now - ms.minutes(20))) // Cached users for 20 minutes
-			return Promise.resolve(cache.userData[username].data);
-		return decodeObject(format(urls.get.user, username)).then((userData) => {
-			var mapped = objectMapper(userData, mappers.user);
-			console.log("User data expired for "+username+". Refetched.");
-			cache.userData[username] = {
-				data: mapped,
-				time: now
+			return cache.userData[username].data;
+
+		var userData = await decodeObject(format(urls.get.user, username));
+		var mapped = objectMapper(userData, mappers.user);
+
+		console.log("User data expired for "+username+". Refetched.");
+		cache.userData[username] = {
+			data: mapped,
+			time: now
+		}
+		return mapped;
+	},
+	getNotifications: async function() { // TODO: Send notifications to FE
+		var notifications = await decodeObject(urls.get.notifications);
+		return objectMapper(notifications, mappers.notifications);
+	},
+	likeUserPosts: async function ({username, csrf, limit, checker, log}) {
+		var userData = await lib.getUserData(username);
+
+		const len = userData.posts.list.length;
+		if (len === 0)
+			return;
+			
+		var randNumbers = randomArray(limit, 0, len - 1);
+
+		for (let i = 0; i < len; i++) {
+			let details = userData.posts.list[i];
+
+			if (randNumbers && randNumbers.indexOf(i) != -1) { // If the post index is in array proceed
+				let post = await decodeObject(format(urls.get.post, details.code));
+
+				post = objectMapper(post, mappers.postData);
+				if (!post.liked) {
+					var likedPost = await lib.likePost(details.id, csrf);
+					userData.img = details.src;
+					await log.userInteraction("LIKEBACK", userData, {})
+					await waiter(ms.seconds(1), ms.seconds(5))
+				} else
+					await waiter(ms.seconds(1), ms.seconds(5)); // Do not like but wait anyway... a call has been made!
 			}
-			return mapped;
-		})
-	},
-	getNotifications: function() { // TODO: Send notifications to FE
-		return decodeObject(urls.get.notifications).then((notifications) => {
-			return objectMapper(notifications, mappers.notifications);
-		});
-	},
-	likeUserPosts: function ({username, csrf, limit, checker, log}) {
-		return lib.getUserData(username).then((userData) => {
-			var len = userData.posts.list.length;
-			if (len === 0)
-				return Promise.resolve();
-				
-			var flow = Promise.resolve(),
-				randNumbers = randomArray(limit, 0, len - 1);
-
-			userData.posts.list.forEach((details, i) => {
-				if (randNumbers && randNumbers.indexOf(i) != -1) { // If the post index is in array proceed
-					flow = flow.then(() => decodeObject(format(urls.get.post, details.code)).then((post) => { // Check the post and see if has already been liked
-						post = objectMapper(post, mappers.postData);
-						if (!post.liked)
-							return lib
-								.likePost(details.id, csrf)
-								.then(() => {
-									//console.log("POPOST: ", details);
-									userData.img = details.src; // Overwriting user image with post image
-									return log.userInteraction("LIKEBACK", userData, {})
-								})
-								.then(() => waiter(ms.seconds(1), ms.seconds(5))); // Like and wait TODO: Check with police!
-						else
-							return waiter(ms.seconds(1), ms.seconds(5)); // Do not like but wait anyway... a call has been made!
-					}))
-				}
-			});
-
-			return flow;
-		})
+		}	
 	},
 	followUser: function (userId) {
 		console.log("FollowUserAction")
