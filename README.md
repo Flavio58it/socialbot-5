@@ -12,6 +12,7 @@
 * Instagram
 * ___500px - in progress___
 * ___Flickr - in progress___
+* ___Twitter - considering___
 
 ## Main features
 
@@ -21,8 +22,12 @@
 * Completely personalized settings in dedicated control panel
 
 ## Changelogs
+* V2.0a3 - planned
+    * [500px] Refactoring of all code to reflect latest changes to framework
+    * [Flickr] Refactoring of all code to reflect latest changes to framework
 * v2.0a2 - planned
     * ___Inclusion of AI for images context recognition___
+    * [Instagram] Inclusion of rate limiter
     * [Instagram] Added work hours in order to not clash with user
 * v2.0a1 - in progress - v2 branch
     * Heavy refactoring and code update
@@ -30,8 +35,6 @@
     * Added testing libraries and tests to all main functionalities
     * Redone settings UI for better experience
     * Fixes to not working parts of code exposed by tests
-    * [Instagram] Inclusion of rate limiter
-
 * v1 - released - master branch
     * Instagram somewhat working
 
