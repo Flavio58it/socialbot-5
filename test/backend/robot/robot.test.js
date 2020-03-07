@@ -1,6 +1,9 @@
 import robot from "../../../src/service/robot";
 import { simulateSetting } from "../../utils/settingsManager";
-import { webRequest } from "../../utils/chrome";
+import { 
+    webRequest, 
+    storage 
+} from "../../utils/chrome";
 
 // **** Using instagram backend plugs for robot testing ****
 import { createServer } from "../plugs/instagram/servers";
@@ -11,7 +14,8 @@ describe("#robot()", function () {
     before(function () {
         window.chrome = {}
         chrome = {
-            webRequest: webRequest
+            webRequest,
+            storage
         }
 
         server = createServer([

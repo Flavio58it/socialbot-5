@@ -5,47 +5,42 @@
 
 import storage from "storage";
 
-import instagram from "./plugs/instagram/settings";
-import fivehpx from "./plugs/fivehpx/settings";
+export default async function (sub) {
+	var t = this, settings = await import(`./plugs/${sub}/settings`);
 
-/**
- * SETTINGS JS
- * 
- * Initialize plugin that allows the reading of the settings object from storage
- */
+	async function set (name, val) {
+		var obj = getAll()
 
-const settings = {
-	instagram,
-	fivehpx,
-	//flickr
-}
-
-export default function (sub) {
-	var t = this;
-
-	t.set = (name, val) => {
-		return t.getAll().then((obj) => {
-			var oo = {};
-			obj[name] = val;
-			oo[sub] = obj;
-			return storage.set(oo);
-		})
+		var oo = {};
+		obj[name] = val;
+		oo[sub] = obj;
+		return await storage.set(oo);
 	}
 
-	t.get = (name) => {
+	async function get (name) {
 		var obj = {};
 		obj[sub] = obj[sub] || {}
 		obj[sub][name] = settings[sub][name] || false;
-		return storage.get(obj).then(d => d[sub][name]);
+
+		var data = await storage.get(obj)
+		return data[sub][name];
 	}
 
-	t.setAll = (obj) => {
+	async function setAll (obj) {
 		var nobj = {};
 		nobj[sub] = obj;
-		return storage.set(nobj);
+		return await storage.set(nobj);
 	}
 
-	t.getAll = () => {
-		return storage.get(settings).then((data) => data[sub]);
+	async function getAll () {
+		var data = await storage.get(settings)
+		return data[sub];
+	}
+
+	return {
+		set,
+		get,
+		setAll,
+		getAll
 	}
 }

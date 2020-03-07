@@ -8,3 +8,19 @@ export var webRequest = {
         }
     }
 }
+
+var fakeStorage = {}
+
+export var storage = {
+    local: {
+        set: function(obj, cbk) {
+            fakeStorage = obj;
+            cbk();
+        }, 
+        get: function(name, cbk) {
+            if (fakeStorage[name] === undefined)
+                return cbk(name);
+            cbk(fakeStorage[name]);
+        }
+    }
+}
