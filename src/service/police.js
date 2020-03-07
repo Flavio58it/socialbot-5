@@ -92,13 +92,7 @@ function police (settings) {
 				return false
 			else if (following.number !== 0 && following.number > followedBy && following.more)
 				return false
-				
-		} else if (settings.ratio) {
-			console.log("By ratio");
-			var me = data.data, user = data.user
-			return (settings.ratio >= 5)
 		}
-
 		return true;
 	}
 

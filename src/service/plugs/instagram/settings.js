@@ -37,8 +37,7 @@ export default {
 			following: {
 				number: 0,
 				more: false
-			},
-			ratio: 0
+			}
 		}
 	},
 	limits: {

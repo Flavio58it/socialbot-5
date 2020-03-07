@@ -266,8 +266,7 @@ describe('#police()', function() {
                         following: {
                             number: 0,
                             more: false
-                        },
-                        ratio: 0
+                        }
                     }
                 }
             }));
@@ -294,8 +293,7 @@ describe('#police()', function() {
                         following: {
                             number: 0,
                             more: false
-                        },
-                        ratio: 0
+                        }
                     }
                 }
             }));
@@ -322,8 +320,7 @@ describe('#police()', function() {
                         following: {
                             number: 11,
                             more: true
-                        },
-                        ratio: 0
+                        }
                     }
                 }
             }));
@@ -350,8 +347,7 @@ describe('#police()', function() {
                         following: {
                             number: 11,
                             more: true
-                        },
-                        ratio: 0
+                        }
                     }
                 }
             }));
@@ -378,8 +374,7 @@ describe('#police()', function() {
                         following: {
                             number: 9,
                             more: true
-                        },
-                        ratio: 0
+                        }
                     }
                 }
             }));
@@ -406,8 +401,7 @@ describe('#police()', function() {
                         following: {
                             number: 16,
                             more: false
-                        },
-                        ratio: 0
+                        }
                     }
                 }
             }));
@@ -434,8 +428,7 @@ describe('#police()', function() {
                         following: {
                             number: 6,
                             more: true
-                        },
-                        ratio: 0
+                        }
                     }
                 }
             }));
@@ -462,8 +455,7 @@ describe('#police()', function() {
                         following: {
                             number: 0,
                             more: true
-                        },
-                        ratio: 0
+                        }
                     }
                 }
             }));
@@ -490,8 +482,7 @@ describe('#police()', function() {
                         following: {
                             number: 0,
                             more: true
-                        },
-                        ratio: 0
+                        }
                     }
                 }
             }));
