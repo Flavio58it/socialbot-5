@@ -5,42 +5,58 @@
 
 import storage from "storage";
 
+import objectPath from "object-path";
+import clone from "clone"
+
 export default async function (sub) {
 	var t = this, settings = await import(`./plugs/${sub}/settings`);
 
-	async function set (name, val) {
-		var obj = getAll()
+	async function set (path, val) {
+		let obj = clone(await getAll())
 
-		var oo = {};
-		obj[name] = val;
-		oo[sub] = obj;
-		return await storage.set(oo);
+		if (!objectPath.has(obj, path))
+			throw new Error("Not existent setting");
+
+		objectPath.set(obj, path, val);
+
+		var storageObj = {};
+		storageObj[sub] = obj;
+		return await storage.set(storageObj);
 	}
 
-	async function get (name) {
-		var obj = {};
-		obj[sub] = obj[sub] || {}
-		obj[sub][name] = settings[sub][name] || false;
+	async function get (path) {
+		var obj = {...await getAll()}
 
-		var data = await storage.get(obj)
-		return data[sub][name];
+		if (!objectPath.has(obj, path))
+			throw new Error("Not existent setting");
+
+		return objectPath.get(obj, path);
 	}
 
 	async function setAll (obj) {
-		var nobj = {};
-		nobj[sub] = obj;
-		return await storage.set(nobj);
+		let storageObj = {};
+		storageObj[sub] = clone(obj);
+		return await storage.set(storageObj);
 	}
 
 	async function getAll () {
-		var data = await storage.get(settings)
+		let storageObj = {}
+		storageObj[sub] = {...settings.default}
+		let data = await storage.get(storageObj)
 		return data[sub];
+	}
+
+	async function resetAll () {
+		let storageObj = {}
+		storageObj[sub] = settings.default
+		return await storage.set(storageObj)
 	}
 
 	return {
 		set,
 		get,
 		setAll,
-		getAll
+		getAll,
+		resetAll
 	}
 }

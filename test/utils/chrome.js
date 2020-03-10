@@ -17,10 +17,8 @@ export var storage = {
             fakeStorage = obj;
             cbk();
         }, 
-        get: function(name, cbk) {
-            if (fakeStorage[name] === undefined)
-                return cbk(name);
-            cbk(fakeStorage[name]);
+        get: function(obj, cbk) {
+            cbk({...obj, ...fakeStorage});
         }
     }
 }
