@@ -9,23 +9,10 @@ import robot from "./robot";
 
 import actions from "./actions";
 
-// Import all plugins into the bot
-import instagram from "./plugs/instagram/instagram";
-import fivehpx from "./plugs/fivehpx/fivehpx";
+import plugs from "./plugs";
 
-// Main plugins object. All the pòlugins must be initialized here in order to have all the data
-var plugs = {
-	instagram: {
-		settings: new settings("instagram"),
-		plug: new instagram(),
-		bot: false
-	},
-	fivehpx: {
-		settings: new settings("fivehpx"),
-		plug: new fivehpx(),
-		bot: false
-	}
-}, error = false;
+// Main plugins object. All the plugins must be initialized here in order to have all the data
+var plugsInstances = {}, error = false;
 
 // Initialize communication between control panel and backend.
 Comm.listen("manager", function(action, data) {
@@ -94,9 +81,22 @@ Comm.listen("manager", function(action, data) {
 		Comm.sendMessage("backendError", {error});
 });
 
+for(var plugIndex = 0; plugs.enabledPlugs.length; plugIndex++) {
+	let plug = plugs.enabledPlugs[plugIndex],
+		plugInstantiator = await require(`./plugs/${plug}/${plug}`);
+
+	let settingsInterface = new settings(plug);
+
+	plugsInstances[plug] = {
+		settings: settingsInterface,
+		plug: new plugInstantiator(settingsInterface),
+		bot: false
+	}
+}
+
 // Start the bot when the browser is started!
 for (var i in plugs) {
-	var plugContainer = plugs[i];
+	var plugContainer = plugsInstances[i];
 	if (plugContainer.bot)
 		continue;
 

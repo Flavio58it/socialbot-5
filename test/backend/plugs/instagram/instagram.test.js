@@ -47,9 +47,9 @@ describe("@instagram", function () {
         });
 
         it("Init with basic settings, should return object with main params", function () {
-            var instance = new instagram();
+            var instance = new instagram(simulateSetting());
 
-            return instance.init(simulateSetting()).then(function (data) {
+            return instance.init().then(function (data) {
                 chai.expect(server.requests.length).to.equal(1, "Should call server to get informations")
                 chai.expect(data).to.have.property("connectionOk", true)
                 chai.expect(data).to.have.property("logged", true)
@@ -60,7 +60,7 @@ describe("@instagram", function () {
 
     context("likeTagImages()", function () {
         it("Should perform calls to server and respond", function () {
-            var instance = new instagram();
+            var instance = new instagram(simulateSetting());
 
             server.respond(/\/explore\/tags\/testtag\//, function (xhr) {
                 xhr.respond(200, 
@@ -82,7 +82,7 @@ describe("@instagram", function () {
                 );
             });
 
-            return instance.init(simulateSetting())
+            return instance.init()
                 .then(() => instance.actions.likeTagImages("testtag", 1000, 4)) // Tag, millisec wait, limit
                 .then((error) => {
                     chai.expect(error).to.be.undefined
@@ -94,7 +94,7 @@ describe("@instagram", function () {
         });
 
         it("Should not like as is tagged as already liked", function () {
-            var instance = new instagram();
+            var instance = new instagram(simulateSetting());
 
             server.respond(/\/explore\/tags\/testtag\//, function (xhr) {
                 xhr.respond(200, 
@@ -116,7 +116,7 @@ describe("@instagram", function () {
                 );
             });
 
-            return instance.init(simulateSetting())
+            return instance.init()
                 .then(() => instance.actions.likeTagImages("testtag", 1000, 4)) // Tag, millisec wait, limit
                 .then((error) => {
                     chai.expect(error.stoppedBy).to.equal("ALREADY_LIKED", "Ensure that the bot was stopped by the correct error")
@@ -127,7 +127,7 @@ describe("@instagram", function () {
         });
 
         it("Like until limit is reached", function () {
-            var instance = new instagram();
+            var instance = new instagram(simulateSetting());
 
             server.respond(/\/explore\/tags\/testtag\//, function (xhr) {
                 xhr.respond(200, 
@@ -155,7 +155,7 @@ describe("@instagram", function () {
                 liked++
             })
 
-            return instance.init(simulateSetting())
+            return instance.init()
                 .then(() => instance.actions.likeTagImages("testtag", 1000, 4)) // Tag, millisec wait, limit
                 .then((error) => {
                     chai.expect(liked).to.equal(4, "Should like 4 photos as is default in settings")
@@ -168,7 +168,15 @@ describe("@instagram", function () {
         });
 
         it("Should not like as police rejects it", function () {
-            var instance = new instagram();
+            var instance = new instagram(simulateSetting({
+                filters: {
+                    likes: {
+                        isLikeNumber: 100,
+                        isLikeNumberInclusive: true,
+                        isLikeNumberMoreLess: true
+                    }
+                }
+            }));
 
             server.respond(/\/explore\/tags\/testtag\//, function (xhr) {
                 xhr.respond(200, 
@@ -196,15 +204,7 @@ describe("@instagram", function () {
                 liked = true
             })
 
-            return instance.init(simulateSetting({
-                filters: {
-                    likes: {
-                        isLikeNumber: 100,
-                        isLikeNumberInclusive: true,
-                        isLikeNumberMoreLess: true
-                    }
-                }
-            }))
+            return instance.init()
                 .then(() => instance.actions.likeTagImages("testtag", 1000, 4)) // Tag, millisec wait, limit
                 .then((error) => {
                     chai.expect(liked).to.equal(false, "Should not like anything");
@@ -215,7 +215,7 @@ describe("@instagram", function () {
         });
 
         it("Check next page functionality", function () {
-            var instance = new instagram(), nextPage = true;
+            var instance = new instagram(simulateSetting()), nextPage = true;
 
             server.respond(/\/explore\/tags\/testtag\//, function (xhr, url) {
                 var obj = createImagesObject(1);
@@ -257,7 +257,7 @@ describe("@instagram", function () {
                 liked++
             })
 
-            return instance.init(simulateSetting())
+            return instance.init()
                 .then(() => instance.actions.likeTagImages("testtag", 1000, 4)) // Tag, millisec wait, limit
                 .then((error) => {
                     chai.expect(liked).to.equal(2, "Should like one image from first and one from the second page")
@@ -268,7 +268,7 @@ describe("@instagram", function () {
         });
         
         it("Should fail and ask to reload app as instagram 'crashed'", function () {
-            var instance = new instagram();
+            var instance = new instagram(simulateSetting());
 
             server.respond(/\/explore\/tags\/testtag\//, function (xhr) {
                 xhr.respond(200, 
@@ -287,7 +287,7 @@ describe("@instagram", function () {
                 liked = true
             })
 
-            return instance.init(simulateSetting())
+            return instance.init()
                 .then(() => instance.actions.likeTagImages("testtag", 1000, 4)) // Tag, millisec wait, limit
                 .then((error) => {
                     throw new Error("Should not be a success")
@@ -326,9 +326,9 @@ describe("@instagram", function () {
                 );
             })
 
-            var instance = new instagram();
+            var instance = new instagram(simulateSetting());
 
-            return instance.init(simulateSetting())
+            return instance.init()
                 .then(() => instance.actions.likeDashboard(1000, 4)) // Millisec wait, limit
                 .then((error) => {
                     chai.expect(error).to.equal(undefined)
@@ -370,9 +370,9 @@ describe("@instagram", function () {
                 ])
             })
 
-            var instance = new instagram();
+            var instance = new instagram(simulateSetting());
 
-            return instance.init(simulateSetting())
+            return instance.init()
                 .then(() => instance.actions.likeDashboard(1000, 4)) // Millisec wait, limit
                 .then((error) => {
                     chai.expect(error).to.equal(undefined)
@@ -416,9 +416,9 @@ describe("@instagram", function () {
                 );
             })
 
-            var instance = new instagram();
+            var instance = new instagram(simulateSetting());
 
-            return instance.init(simulateSetting())
+            return instance.init()
                 .then(() => instance.actions.likeDashboard(1000, 4)) // Millisec wait, limit
                 .then((error) => {
                     chai.expect(error).to.have.property("stoppedBy", "ALREADY_LIKED")
@@ -454,9 +454,9 @@ describe("@instagram", function () {
                 );
             })
 
-            var instance = new instagram();
+            var instance = new instagram(simulateSetting());
 
-            return instance.init(simulateSetting())
+            return instance.init()
                 .then(() => instance.actions.likeDashboard(1000, 4)) // Millisec wait, limit
                 .then((error) => {
                     chai.expect(error).to.have.property("stoppedBy", "LIKE_LIMIT_REACHED")
@@ -493,9 +493,7 @@ describe("@instagram", function () {
                 );
             })
 
-            var instance = new instagram();
-
-            return instance.init(simulateSetting({
+            var instance = new instagram(simulateSetting({
                 filters: {
                     likes: {
                         isLikeNumber: 2,
@@ -503,7 +501,9 @@ describe("@instagram", function () {
                         isLikeNumberMoreLess: true
                     }
                 }
-            }))
+            }));
+
+            return instance.init()
                 .then(() => instance.actions.likeDashboard(1000, 4)) // Millisec wait, limit
                 .then((error) => {
                     chai.expect(liked).to.equal(0, "No likes as is filtered")
@@ -516,7 +516,10 @@ describe("@instagram", function () {
 
     context("followManager()", function () {
         it("Followback, unFollowBack and onlyFetch disabled, should only update 'followed by' users", function () {
-            var instance = new instagram();
+            var instance = new instagram(simulateSetting({
+                followBack: false,
+                unFollowBack: false
+            }));
 
             server.attachCallback("homepage_logged", function () {
                 return rawHomePageStructure({
@@ -543,10 +546,7 @@ describe("@instagram", function () {
                 }));
             })
 
-            return instance.init(simulateSetting({
-                followBack: false,
-                unFollowBack: false
-            }))
+            return instance.init()
             .then(() => instance.actions.followManager(false)).then((users) => {
                 chai.expect(users).to.be.lengthOf(1) // User is returden to caller
                 return db.users.toArray();
@@ -556,7 +556,10 @@ describe("@instagram", function () {
         });
 
         it("Should update follow", function () {
-            var instance = new instagram();
+            var instance = new instagram(simulateSetting({
+                followBack: false,
+                unFollowBack: false
+            }));
 
             server.attachCallback("homepage_logged", function () {
                 return rawHomePageStructure({
@@ -583,10 +586,7 @@ describe("@instagram", function () {
                 }));
             })
 
-            return instance.init(simulateSetting({
-                followBack: false,
-                unFollowBack: false
-            }))
+            return instance.init()
             .then(() => instance.actions.followManager(false)).then((users) => {
                 chai.expect(users).to.be.lengthOf(1, "All users are returned") // User is returden to caller
                 return db.users.toArray();
@@ -596,7 +596,10 @@ describe("@instagram", function () {
         });
 
         it("Should find next page users", function () {
-            var instance = new instagram(), endCursor = "END_CURSR";
+            var instance = new instagram(simulateSetting({
+                followBack: false,
+                unFollowBack: false
+            })), endCursor = "END_CURSR";
 
             server.attachCallback("homepage_logged", function () {
                 return rawHomePageStructure({
@@ -629,10 +632,7 @@ describe("@instagram", function () {
                 endCursor = false
             })
 
-            return instance.init(simulateSetting({
-                followBack: false,
-                unFollowBack: false
-            }))
+            return instance.init()
             .then(() => instance.actions.followManager(false)).then((users) => {
                 chai.expect(users).to.be.lengthOf(2, "All users are returned, one per page") // User is returden to caller
                 chai.expect(server.requests.length).to.equal(4, "Check if all calls are performed")
@@ -643,7 +643,7 @@ describe("@instagram", function () {
         })
     
         it("Should fail gracefully as user in database is corrupted", function () {
-            var instance = new instagram();
+            var instance = new instagram(simulateSetting());
 
             server.attachCallback("homepage_logged", function () {
                 return rawHomePageStructure({
@@ -673,7 +673,7 @@ describe("@instagram", function () {
                 }));
             })
 
-            return db.users.add({userid: undefined}).then(() => instance.init(simulateSetting()))
+            return db.users.add({userid: undefined}).then(() => instance.init())
             .then(() => instance.actions.followManager(false)).then(() => {
                 chai.assert.Throw("Should not be successful")
             }).catch((error) => {
@@ -686,7 +686,7 @@ describe("@instagram", function () {
         });
 
         it("Should do nothing, the user exists", function () {
-            var instance = new instagram();
+            var instance = new instagram(simulateSetting());
 
             server.attachCallback("homepage_logged", function () {
                 return rawHomePageStructure({
@@ -718,7 +718,7 @@ describe("@instagram", function () {
 
             var dbUser = user().user;
 
-            return db.users.add({plug: "instagram", userid: dbUser.id, username: dbUser.username}).then(() => instance.init(simulateSetting()))
+            return db.users.add({plug: "instagram", userid: dbUser.id, username: dbUser.username}).then(() => instance.init())
             .then(() => instance.actions.followManager(false)).then((data) => {
                 chai.expect(data).to.be.lengthOf(1, "User remains to 1")
 
@@ -729,7 +729,7 @@ describe("@instagram", function () {
         });
 
         it("Should do nothing but the name in database is updated", function () {
-            var instance = new instagram();
+            var instance = new instagram(simulateSetting());
 
             server.attachCallback("homepage_logged", function () {
                 return rawHomePageStructure({
@@ -761,7 +761,7 @@ describe("@instagram", function () {
 
             var dbUser = user().user;
 
-            return db.users.add({plug: "instagram", userid: dbUser.id, username: "Chewbacca"}).then(() => instance.init(simulateSetting()))
+            return db.users.add({plug: "instagram", userid: dbUser.id, username: "Chewbacca"}).then(() => instance.init())
             .then(() => instance.actions.followManager(false)).then((data) => {
                 chai.expect(data).to.be.lengthOf(1, "User remains to 1")
 
@@ -773,7 +773,7 @@ describe("@instagram", function () {
         });
     
         it("Should change status of user to likeBacked", function () {
-            var instance = new instagram();
+            var instance = new instagram(simulateSetting());
 
             server.attachCallback("homepage_logged", function () {
                 return rawHomePageStructure({
@@ -805,7 +805,7 @@ describe("@instagram", function () {
 
             var dbUser = user().user;
 
-            return db.users.add({plug: "instagram", userid: dbUser.id, username: "Chewbacca"}).then(() => instance.init(simulateSetting()))
+            return db.users.add({plug: "instagram", userid: dbUser.id, username: "Chewbacca"}).then(() => instance.init())
             .then(() => instance.actions.followManager(false)).then((data) => {
                 chai.expect(data).to.be.lengthOf(1, "User remains to 1")
 
@@ -817,7 +817,9 @@ describe("@instagram", function () {
         });
 
         it("Should edit already present user in database and follow it", function () {
-            var instance = new instagram();
+            var instance = new instagram(simulateSetting({
+                followBack: true
+            }));
 
             server.attachCallback("homepage_logged", function () {
                 return rawHomePageStructure({
@@ -853,9 +855,7 @@ describe("@instagram", function () {
 
             var dbUser = user().user;
 
-            return db.users.add({plug: "instagram", userid: dbUser.id, username: "tester", toFollow: 2}).then(() => instance.init(simulateSetting({
-                followBack: true
-            })))
+            return db.users.add({plug: "instagram", userid: dbUser.id, username: "tester", toFollow: 2}).then(() => instance.init())
             .then(() => instance.actions.followManager(false)).then((data) => {
                 chai.expect(data).to.be.lengthOf(1, "User remains 1")
 
@@ -872,7 +872,7 @@ describe("@instagram", function () {
 
     context("searchUsers()", function() {
         it("Search for one user", function () {
-            var instance = new instagram();
+            var instance = new instagram(simulateSetting());
 
             server.respondWith(/\/web\/search\/topsearch\//, function (xhr) {
                 chai.expect(xhr.url).contains("query=tester")
@@ -894,7 +894,7 @@ describe("@instagram", function () {
                 )
             });
 
-            return instance.init(simulateSetting()).then(() => instance.directActions["searchUsers"]({username: "tester"})).then((result) => {
+            return instance.init().then(() => instance.directActions["searchUsers"]({username: "tester"})).then((result) => {
                 chai.expect(result).to.be.lengthOf(1)
                 chai.expect(result[0]).to.have.property("username", "tester")
                 chai.expect(result[0]).to.have.property("fullName", "tester")
@@ -904,7 +904,7 @@ describe("@instagram", function () {
 
     context("likeBack()", function () {
         it("Should likeBack one user image", function () {
-            var instance = new instagram(),
+            var instance = new instagram(simulateSetting()),
                 required = {
                     liked: 0,
                     user: false,
@@ -936,7 +936,7 @@ describe("@instagram", function () {
                 }));
             });
 
-            return instance.init(simulateSetting()).then((data) => instance.actions.likeBack()).then((result) => {
+            return instance.init().then((data) => instance.actions.likeBack()).then((result) => {
                 chai.expect(result).to.be.undefined
                 chai.expect(required.user).to.equal(true, "User has been required")
                 chai.expect(required.homepage).to.equal(true, "Homepage has been required")
@@ -945,7 +945,7 @@ describe("@instagram", function () {
         });
 
         it("Should not likeBack as the image has already ben liked", function () {
-            var instance = new instagram(),
+            var instance = new instagram(simulateSetting()),
                 required = {
                     liked: 0,
                     homepage: false
@@ -971,7 +971,7 @@ describe("@instagram", function () {
                 }));
             });
 
-            return instance.init(simulateSetting()).then((data) => instance.actions.likeBack()).then((result) => {
+            return instance.init().then((data) => instance.actions.likeBack()).then((result) => {
                 chai.expect(result).to.be.undefined
                 chai.expect(required.homepage).to.equal(true, "Homepage has been required")
                 chai.expect(required.liked).to.equal(0, "Image already liked")
@@ -983,7 +983,7 @@ describe("@instagram", function () {
         });
 
         it("Should not likeBack as the user has already been liked recently", function () {
-            var instance = new instagram(),
+            var instance = new instagram(simulateSetting()),
                 required = {
                     liked: 0,
                     homepage: false
@@ -1009,7 +1009,7 @@ describe("@instagram", function () {
                 }));
             });
 
-            return db.users.add({plug: "instagram", userid: 998, lastInteraction: new Date().getTime()}).then(() => instance.init(simulateSetting()))
+            return db.users.add({plug: "instagram", userid: 998, lastInteraction: new Date().getTime()}).then(() => instance.init())
                 .then((data) => instance.actions.likeBack()).then((result) => {
                     chai.expect(result).to.be.undefined
                     chai.expect(required.homepage).to.equal(true, "Homepage has been required")
@@ -1018,7 +1018,7 @@ describe("@instagram", function () {
         });
 
         it("Should likeBack with user already in database. Update of lastInteraction", function () {
-            var instance = new instagram(),
+            var instance = new instagram(simulateSetting()),
                 required = {
                     liked: 0,
                     homepage: false
@@ -1044,7 +1044,7 @@ describe("@instagram", function () {
                 }));
             });
 
-            return db.users.add({plug: "instagram", userid: 998, lastInteraction: 99999999}).then(() => instance.init(simulateSetting()))
+            return db.users.add({plug: "instagram", userid: 998, lastInteraction: 99999999}).then(() => instance.init())
                 .then((data) => instance.actions.likeBack()).then((result) => {
                     chai.expect(result).to.be.undefined
                     chai.expect(required.homepage).to.equal(true, "Homepage has been required")
