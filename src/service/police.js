@@ -69,8 +69,8 @@ function police (settings) {
 		if (!await settings.get("enabled"))
 			return Promise.reject({stopped: true});
 
-		var followers = await settings.get("followers"),
-			following = await settings.get("following");
+		var followers = await settings.get("filters.follow.followers"),
+			following = await settings.get("filters.follow.following");
 
 		if (followers.number || following.number) {
 			var followedBy = data.user.followedBy,

@@ -1,6 +1,8 @@
 // Using instagram as is the default controller for the bot
 import instagramSettings from "../../src/service/plugs/instagram/settings";
 
+import objectPath from "object-path";
+
 /**
  * 
  * Function that simulates the settings local storage of browser
@@ -21,7 +23,7 @@ export function simulateSetting (object) {
             return Promise.resolve(newObj[cat])
         },
         get: function(attr) {
-            return Promise.resolve(newObj[attr])
+            return Promise.resolve(objectPath.get(newObj, attr))
         }
     }
 }
