@@ -8,8 +8,18 @@ import storage from "storage";
 import objectPath from "object-path";
 import clone from "clone"
 
-export default async function (sub) {
+/**
+ * 
+ * @param {String} sub - Plugin from which the settings should be picked
+ * @param {Object} overrider - Default values to override
+ */
+
+export default async function (sub, overrider) {
 	var t = this, settings = await import(`./plugs/${sub}/settings`);
+
+	if (overrider)
+		settings = {...settings, default: overrider}
+
 
 	async function set (path, val) {
 		let obj = clone(await getAll())

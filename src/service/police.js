@@ -22,26 +22,20 @@ const genericMapper = {
 };
 
 function police (settings) {
-	var t = this, 
-	catsettings = () => settings.getAll(),  // Must be in a function in order to update with new data.
-	mapOverride = false, 
-	dataMapOverride = false,
-	brain = false;
+	var t = this;
 
 	t.shouldLike = async (data) => {
-		var settings = await getSetting("like"),
-			catsetting = await catsettings();
-
-		if (!catsetting.enabled)
+		if (!await settings.get("enabled"))
 			return Promise.reject({stopped: true});
 
-		if (!settings.options.videos && data.isVideo)
+		if (!await settings.get("filters.likes.videos") && data.isVideo)
 			return false;
 		// Match by like number
-		if (settings.options.isLikeNumber && settings.options.isLikeNumber !== "0") {
-			var likeNumber = parseInt(settings.options.isLikeNumber),
-				inclusive = settings.options.isLikeNumberInclusive,
-				moreLess = settings.options.isLikeNumberMoreLess,
+		let isLikeNumber = await settings.get("filters.likes.isLikeNumber");
+		if (isLikeNumber && isLikeNumber !== "0") {
+			var likeNumber = parseInt(isLikeNumber),
+				inclusive = await settings.get("filters.likes.isLikeNumberInclusive"),
+				moreLess = await settings.get("filters.likes.isLikeNumberMoreLess"),
 				likes = data.likes;
 
 			if (moreLess && likes >= likeNumber && !inclusive)
@@ -51,15 +45,16 @@ function police (settings) {
 		}
 
 		// Match by the text in image comment
-		if (settings.options.textFilters && settings.options.textFilters.length) {
-			var result = matcher(settings.options.textFilters, data.comment),
-				inclusive = settings.options.isTextInclusive;
+		let textFilters = await settings.get("filters.likes.textFilters");
+		if (textFilters && textFilters.length) {
+			var result = matcher(textFilters, data.comment),
+				inclusive = await settings.get("filters.likes.isTextInclusive");
 
 			if (!result || !inclusive)
 				return false
 		}
 		
-		if (settings.options.brain === true) { // As is the last returns are locked here.
+		if (settings.get("filters.likes.brain") === true) { // As is the last returns are locked here.
 			return imageRecognition(data.imgThumb).then((seen) => {
 				// New Brain implementation
 
@@ -71,14 +66,11 @@ function police (settings) {
 	}
 
 	t.shouldFollow = async (data) => {
-		var settings = await getSetting("follow"),
-			catsetting = await catsettings();
-
-		if (!catsetting.enabled)
+		if (!await settings.get("enabled"))
 			return Promise.reject({stopped: true});
 
-		var followers = settings.followers,
-			following = settings.following;
+		var followers = await settings.get("followers"),
+			following = await settings.get("following");
 
 		if (followers.number || following.number) {
 			var followedBy = data.user.followedBy,
@@ -95,22 +87,6 @@ function police (settings) {
 		}
 		return true;
 	}
-
-	// Set mapper only for one time
-	t._setMapper = (mapper) => { mapOverride = mapper; return t;}
-	t._setDataMapper = (mapper) => { dataMapOverride = mapper; return t;}
-	
-
-	// -------- FUNC
-
-	// Use the mapper above to get settings attribute
-	function getSetting (cat) {
-		return catsettings().then((cats) => objectMapper(cats, mapOverride || genericMapper[cat])).then((data) => {
-			mapOverride = false;
-			return data;
-		});
-	}
-	
 }
 
 export default police;
