@@ -5,7 +5,7 @@ import logger from "../../db/logger";
 import ms from "milliseconds";
 import db from "../../db/db";
 import objectMapper from "object-mapper";
-import police from "../../police";
+import police from "../../bot/police";
 
 import mappers from "./mappers";
 import {getUrl, decodeObject} from "./utils";

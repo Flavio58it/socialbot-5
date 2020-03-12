@@ -15,7 +15,7 @@ import clone from "clone"
  */
 
 export default async function (sub, overrider) {
-	var t = this, settings = await import(`./plugs/${sub}/settings`);
+	var t = this, settings = await import(`../plugs/${sub}/settings`);
 
 	if (overrider)
 		settings = {...settings, default: overrider}

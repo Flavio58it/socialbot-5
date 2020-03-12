@@ -6,7 +6,7 @@
  **/
 
 import objectMapper from "object-mapper";
-import {imageRecognition} from "./ai/neural";
+import {imageRecognition} from "../ai/neural";
 import matcher from "matcher";
 
 // The default mapper for the settings. As the settings object is extended, only the needed data is extracted

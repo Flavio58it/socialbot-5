@@ -1,6 +1,6 @@
 // Test settings implementation
 
-import settings from "../../src/service/settings";
+import settings from "../../src/service/bot/settings";
 
 import { 
     storage 

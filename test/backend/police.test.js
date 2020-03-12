@@ -1,6 +1,6 @@
 // Test Police js implementation
 
-import police from "../../src/service/police"
+import police from "../../src/service/bot/police"
 import { simulateSetting } from "../utils/settingsManager"
 
 describe('#police()', function() {

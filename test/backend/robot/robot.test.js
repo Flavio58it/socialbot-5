@@ -1,4 +1,4 @@
-import robot from "../../../src/service/robot";
+import robot from "../../../src/service/bot/robot";
 import { simulateSetting } from "../../utils/settingsManager";
 import { 
     webRequest 
