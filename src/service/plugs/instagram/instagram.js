@@ -5,7 +5,7 @@ import logger from "../../db/logger";
 import ms from "milliseconds";
 import db from "../../db/db";
 import objectMapper from "object-mapper";
-import police from "../../police";
+import police from "../../bot/police";
 
 import mappers from "./mappers";
 import {getUrl, decodeObject} from "./utils";
@@ -25,18 +25,16 @@ export var cache = {
 * -------------- Exposed functions
 **/
 
-export default function () {
+export default function (settings) {
 	var csrf = false, query_id = false, user = false,
 		log = new logger({type: "instagram"}),
-		checker = false,
-		settings = false;
+		checker = false;
 
 	return {
-		async init (settingsData) {
-			settings = settingsData
-			checker = new police(settingsData); // Init the main checker.
+		async init () {
+			checker = new police(settings); // Init the main checker.
 			// Check if user is logged in and get the tokens
-			if (!settingsData)
+			if (!settings)
 				return Promise.reject({error: "NO_SETTINGS"})
 
 			var homeData = await decodeObject(urls.home, {

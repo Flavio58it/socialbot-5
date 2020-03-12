@@ -1,31 +1,14 @@
-import Comm from "./comm";
-import settings from "./settings";
+import Comm from "./bot/comm";
 
 import storage from "storage";
 import db from "./db/db";
-import logger from "./db/logger";
-
-import robot from "./robot";
 
 import actions from "./actions";
 
-// Import all plugins into the bot
-import instagram from "./plugs/instagram/instagram";
-import fivehpx from "./plugs/fivehpx/fivehpx";
+import bootstrap from './bot/bootstrap'
 
-// Main plugins object. All the pòlugins must be initialized here in order to have all the data
-var plugs = {
-	instagram: {
-		settings: new settings("instagram"),
-		plug: new instagram(),
-		bot: false
-	},
-	fivehpx: {
-		settings: new settings("fivehpx"),
-		plug: new fivehpx(),
-		bot: false
-	}
-}, error = false;
+// Main plugins object. All the plugins must be initialized here in order to have all the data available for the messages
+var plugsInstances = {}, error = false;
 
 // Initialize communication between control panel and backend.
 Comm.listen("manager", function(action, data) {
@@ -43,20 +26,20 @@ Comm.listen("manager", function(action, data) {
 			db.delete();
 		break;
 		case "getSettings":
-			plugs[data.plug].settings.getAll().then((settings) => {
+			plugsInstances[data.plug].settings.getAll().then((settings) => {
 				Comm.sendMessage("settings", {
 					plug: data.plug,
 					settings,
-					status: plugs[data.plug].bot.getStatus()
+					status: plugsInstances[data.plug].bot.getStatus()
 				});
 			});
 		break;
 		case "saveSettings":
-			plugs[data.plug].settings.setAll(data.settings).then(() => plugs[data.plug].bot.reboot());
+			plugsInstances[data.plug].settings.setAll(data.settings).then(() => plugsInstances[data.plug].bot.reboot());
 		break;
 
 		case "getUsers": 
-			plugs[data.plug].bot.getPlug().then((plug) => {
+			plugsInstances[data.plug].bot.getPlug().then((plug) => {
 				return plug.actions.followManager(true);
 			}).then((users) => {
 				Comm.sendMessage("usersData", {list: users, plug: data.plug});
@@ -81,8 +64,8 @@ Comm.listen("manager", function(action, data) {
 		// Direct operations to users by popup page and followManager
 		// Perform operation by bot type
 		case "directAction":
-			if (plugs[data.plug].bot !== false)
-				plugs[data.plug].bot.directAction(data.operation, data);
+			if (plugsInstances[data.plug].bot !== false)
+				plugsInstances[data.plug].bot.directAction(data.operation, data);
 		break;
 		// Generic operation, usually related to internal database. Is same for every bot
 		case "performOperation":
@@ -94,42 +77,10 @@ Comm.listen("manager", function(action, data) {
 		Comm.sendMessage("backendError", {error});
 });
 
-// Start the bot when the browser is started!
-for (var i in plugs) {
-	var plugContainer = plugs[i];
-	if (plugContainer.bot)
-		continue;
-
-	// Let's dance!
-	plugContainer.bot = new robot(plugContainer.settings, plugContainer.plug, i);
-	plugContainer.bot.start();
-
-	// Send errors to frontend when necessary
-	plugContainer.bot.addListener("error", (t, name, error) => {
-		Comm.sendMessage("backendError", {
-			plug: name,
-			data: error
-		});
-	});
-
-	// Reset errors on bot boot
-	plugContainer.bot.addListener("start", (t, name) => {
-		error = false;
-
-		Comm.sendMessage("backendError", {remove: true, plug: name});
-		// Update settings status
-		Comm.sendMessage("statusUpdate", {status: t.getStatus(), plug: name});
-	});
-
-	// Send update to frontend. Ideally at this moment the user is showing a waiting screen during reboot
-	plugContainer.bot.addListener("reboot", (t, name) => {
-		Comm.sendMessage("statusUpdate", {status: t.getStatus(), plug: name});
-	});
-
-	plugContainer.bot.addListener("stop", (t, name) => {
-		Comm.sendMessage("statusUpdate", {status: t.getStatus(), plug: name});
-	});
-}
+// Start bot
+bootstrap({
+	Comm
+}).then((plugs) => {plugsInstances = plugs})
 
 function getAllInitInfo() {
 	Comm.sendMessage("initInfo", {});

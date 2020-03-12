@@ -67,6 +67,15 @@ module.exports = function(config) {
       optimization: {
         nodeEnv: "test"
       },
+      module: {
+        rules: [
+          {
+            test: /\.js$/,
+            loader: 'babel-loader',
+            exclude: /node_modules/
+          }
+        ]
+      },
       resolve: {
         modules: wconf.shortcuts
       }
