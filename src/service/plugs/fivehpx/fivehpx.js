@@ -6,7 +6,7 @@ import urls from "./urls";
 import {getUrl, _postData} from "./utils";
 import mappers from "./mappers";
 import actions from "./actions";
-import police from "../../police";
+import police from "../../bot/police";
 
 export default function() {
 	var settings = false,

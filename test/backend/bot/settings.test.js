@@ -1,10 +1,10 @@
 // Test settings implementation
 
-import settings from "../../src/service/bot/settings";
+import settings from "../../../src/service/bot/settings";
 
 import { 
     storage 
-} from "../utils/chrome";
+} from "../../utils/chrome";
 
 // Chose with which plug settings we will test
 const testSettings = "instagram",
