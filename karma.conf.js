@@ -3,7 +3,8 @@
 // Edited based on https://github.com/gabel/karma-webpack-example/blob/master/karma.conf.js
 
 var webpack = require("webpack"),
-    wconf = require("./webpack.config.js");
+    wconf = require("./webpack.config.js"),
+    VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 process.env.CHROME_BIN = process.env.CHROMIUM_BIN = require('puppeteer').executablePath()
 
@@ -68,17 +69,17 @@ module.exports = function(config) {
         nodeEnv: "test"
       },
       module: {
-        rules: [
-          {
-            test: /\.js$/,
-            loader: 'babel-loader',
-            exclude: /node_modules/
-          }
-        ]
+        rules: wconf.rules
       },
       resolve: {
+        alias: {
+          'vue$': 'vue/dist/vue.esm.js'
+        },
         modules: wconf.shortcuts
-      }
+      },
+      plugins:[
+        new VueLoaderPlugin()
+      ]
     },
 
 

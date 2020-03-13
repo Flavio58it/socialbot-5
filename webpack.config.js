@@ -10,6 +10,48 @@ var shortcuts = [
   path.resolve('./node_modules')
 ]
 
+var rules = [
+  {
+    test: /\.vue$/,
+    loader: 'vue-loader'
+  },
+  {
+    test: /\.js$/,
+    loader: 'babel-loader',
+    exclude: /node_modules/
+  },
+  {
+    test: /\.css$/,
+    use: [
+      { loader: "style-loader" },
+      { loader: "css-loader" }
+    ]
+  },
+  {
+    test: /\.scss$/,
+    use: [
+      'vue-style-loader',
+      'css-loader',
+      'sass-loader',
+      {
+        //Load the main variables into the sass files.
+        loader: 'sass-resources-loader',
+        options: {
+          resources: path.resolve(__dirname, 'src/shared/assets/style/_variables.scss')
+        }
+      }
+    ]
+  }
+  // File loader is not needed as the chrome extension does not have cache.
+  /*{
+    test: /\.(png|jpg|gif|svg)$/,
+    loader: 'file-loader',
+    options: {
+      name: '[name].[ext]?[hash]'
+    }
+  }*/
+]
+
 module.exports = [
     page_mode('./src/popup/main.js', 'popup.js'),
     page_mode('./src/manager/main.js', 'manager.js'),
@@ -66,47 +108,7 @@ function page_mode(input, output){
           filename: output
         },
         module: {
-          rules: [
-            {
-              test: /\.vue$/,
-              loader: 'vue-loader'
-            },
-            {
-              test: /\.js$/,
-              loader: 'babel-loader',
-              exclude: /node_modules/
-            },
-            {
-              test: /\.css$/,
-              use: [
-                { loader: "style-loader" },
-                { loader: "css-loader" }
-              ]
-            },
-            {
-              test: /\.scss$/,
-              use: [
-                'vue-style-loader',
-                'css-loader',
-                'sass-loader',
-                {
-                  //Load the main variables into the sass files.
-                  loader: 'sass-resources-loader',
-                  options: {
-                    resources: path.resolve(__dirname, 'src/shared/assets/style/_variables.scss')
-                  }
-                }
-              ]
-            }
-            // File loader is not needed as the chrome extension does not have cache.
-            /*{
-              test: /\.(png|jpg|gif|svg)$/,
-              loader: 'file-loader',
-              options: {
-                name: '[name].[ext]?[hash]'
-              }
-            }*/
-          ]
+          rules
         },
         resolve: {
           alias: {
@@ -129,6 +131,7 @@ function page_mode(input, output){
 }
 
 module.exports.shortcuts = shortcuts;
+module.exports.rules = rules
 
 if (process.env.NODE_ENV === 'production') {
   module.exports.devtool = '#source-map'
