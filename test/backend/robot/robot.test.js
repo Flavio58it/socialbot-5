@@ -105,7 +105,11 @@ describe("#robot()", function () {
         var bot = new robot(simulateSetting({
             enabled: true,
             likeDash: false,
-            likeBack: false,
+            filters: {
+                likeBack: {
+                    enabled: false
+                }
+            },
             follow: {
                 tags: []
             }

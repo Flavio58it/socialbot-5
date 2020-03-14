@@ -263,8 +263,8 @@ export default function (settings) {
 					return await Promise.reject({error: "User error, try to restart", id: "USER_DATA_NOT_FOUND", action: "RELOAD"})
 
 				var settingsData = {
-					followBack: await settings.get("followBack"),
-					unFollowBack: await settings.get("unFollowBack")
+					followBack: await settings.get("modules.follow.followBack"),
+					unFollowBack: await settings.get("modules.follow.unFollowBack")
 				},
 				accountUsers = {
 					followers: await actions.getUsersBatch(query_id.followers, user.id),
@@ -392,7 +392,7 @@ export default function (settings) {
 				console.log("Starting likeBack");
 
 				var notifications = await actions.getNotifications(),
-					likeBackSettings = await settings.get("likeBack"),
+					likeBackSettings = await settings.get("modules.likeBack"),
 					now = new Date().getTime(), 
 					likebacked = 0;
 

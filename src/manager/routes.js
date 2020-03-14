@@ -3,7 +3,7 @@ import Followers from "./Followers.vue";
 
 import NotFound from "components/NotFound.vue";
 
-import Instagram from "./sections/Instagram.vue";
+import Instagram from "./sections/Instagram/Instagram.vue";
 import Fivehpx from "./sections/Fivehpx.vue";
 
 import Home from "./Home.vue";

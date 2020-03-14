@@ -14,7 +14,7 @@
 					<b>Tags follower</b>
 					<div class="description">These tags will be periodically checked and the new posts will be liked</div>
 					<hr/>
-					<Tags v-model="settings.follow.tags"/>
+					<Tags v-model="settings.modules.like.tags"/>
 				</div>
 			</div>
 			<div>

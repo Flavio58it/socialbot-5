@@ -1,6 +1,8 @@
 import requests from "./requests";
 import waiter from "waiter";
 
+import logger from "../db/logger";
+
 /**
  * ROBOT JS
  * 
@@ -16,7 +18,8 @@ const bot = async function (settings, plug, plugName) {
 	if (!plugData.logged)
 		return Promise.reject({id: "LOGGED_OUT", error: "Login failure. Please go to the homepage and login.", action: "PLUG_HOME"})
 	
-	var request = new requests(plugData.domain.match, plugData.domain.res).listen(); // Modify requests to instagram server
+	// TODO: Check if has sense move to single plug initialization as is not always needed!
+	var request = new requests(plugData.domain.match, plugData.domain.res).listen(); // Modify requests to server
 
 	try {
 		// 1st phase: likeTagImages
@@ -45,14 +48,13 @@ const bot = async function (settings, plug, plugName) {
 
 		// 3rd phase: followManager
 		// Manage followers of the user
-
 		await plug.actions.followManager(false)
 
 		// 4th phase: likeBack
 		// Like images of users that liked yours
-		var shouldLikeBack = await settings.get("likeBack");
+		var likeBackSettings = await settings.get("filters.likeBack");
 
-		if (shouldLikeBack.enabled && plug.actions.likeBack)
+		if (likeBackSettings && likeBackSettings.enabled && plug.actions.likeBack)
 			await plug.actions.likeBack()
 		
 		console.info("[robot] Round finished");
