@@ -1,0 +1,15 @@
+<template>
+    <b-row>
+        
+    </b-row>
+</template>
+
+<style lang="scss" scoped>
+
+</style>
+
+<script>
+    export default {
+        
+    }
+</script>

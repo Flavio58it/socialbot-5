@@ -53,6 +53,11 @@
 		//overflow-x: auto;
 	}
 
+	.noLogs {
+		height: 120px;
+		line-height: 120px;
+	}
+
 	#head {
 		line-height: 40px;
 		background-color: $background-color-darker;
