@@ -7,7 +7,7 @@
 			<Filters v-model="filter" class="col text-right"/>
 		</div>
 		<div id="logs" class="row">
-			<div v-for="(log, i) in list" :class="['logItem', 'col-12']">
+			<div v-for="(log, i) in list" :key="i" :class="['logItem', 'col-12']">
 				<div class="row">
 					<div v-if="log.details.img" :class="[(i==0)?'col-5':'col-3', 'mainimg']">
 						<div :class="[(i==0)?'big':'small', 'imgwrapper']">
@@ -40,7 +40,7 @@
 				</div>
 			</div>
 			<Loading v-if="!list"/>
-			<div v-if="list instanceof Array && !list.length" class="col text-center">
+			<div v-if="list instanceof Array && !list.length" class="col text-center noLogs">
 				No logs available
 			</div>
 		</div>

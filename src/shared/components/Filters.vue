@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<span v-for="sharer in sharers">
+		<span v-for="sharer in sharers" :key="sharer.name">
 			<a href="#" @click.prevent="$emit('input', sharer.name)" :class="[(sharer.name == value)?'selected':'']" :title="sharer.title">
 				<i :class="['fa', sharer.class]"/>
 			</a>

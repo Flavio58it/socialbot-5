@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div id="headBar">
 		<div class="container">
 			<div class="row">
 				<div class="col-2 userImage text-left">
@@ -45,9 +45,6 @@
 	export default {
 		props: {
 			showsettings:{
-				type: Boolean
-			},
-			showusers: {
 				type: Boolean
 			},
 			separator: {
