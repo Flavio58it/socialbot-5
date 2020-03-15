@@ -158,15 +158,15 @@ describe('#police()', function() {
                     like: {
                         filters: {
                             isLikeNumber: 80,
-                            isLikeNumberInclusive: true,
-                            isLikeNumberMoreLess: false
+                            isLikeNumberInclusive: false,
+                            isLikeNumberMoreLess: true
                         }
                     }
                 } 
             }));
 
             return policeObj.shouldLike({
-                likes: 90 
+                likes: 100
             }).then((result) => {
                 chai.expect(result).to.equal(false);
             })

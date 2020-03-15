@@ -24,27 +24,22 @@ const bot = async function (settings, plug, plugName) {
 	try {
 		// 1st phase: likeTagImages
 		// Bot will get the list of tags from settings and like a predefined number of photos from them
-		var tags = await settings.get("follow");
-		tags = tags.tags
-
-		var waiter = await settings.get("waiter"),
-			limits = await settings.get("limits")
+		var tags = await settings.get("modules.like.tags");
 
 		for (let i = 0; i < tags.length; i++) {
 			let tagName = tags[i]
 
 			await plug.actions.likeTagImages(
-				tagName, 
-				waiter,
-				limits.likes.tag
+				tagName
 			)
+			
 		}
 
 		// 2nd phase: likeDashboard
 		// Bot will like the user dashboard
-		var shouldLikeDash = await settings.get("likeDash")
+		var shouldLikeDash = await settings.get("modules.like.likeDash")
 		if (shouldLikeDash && plug.actions.likeDashboard)
-			await plug.actions.likeDashboard(waiter, limits.likes.dash)
+			await plug.actions.likeDashboard()
 
 		// 3rd phase: followManager
 		// Manage followers of the user
@@ -52,7 +47,7 @@ const bot = async function (settings, plug, plugName) {
 
 		// 4th phase: likeBack
 		// Like images of users that liked yours
-		var likeBackSettings = await settings.get("filters.likeBack");
+		var likeBackSettings = await settings.get("modules.likeBack");
 
 		if (likeBackSettings && likeBackSettings.enabled && plug.actions.likeBack)
 			await plug.actions.likeBack()

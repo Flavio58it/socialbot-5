@@ -13,6 +13,7 @@ export default {
 				isLikeNumber: 0,
 				videos: true,
 				brain: {
+					enabled: false,
 					included: [], // If the image has these objects will be liked {type: int, min_width: int, score: float}
 					excluded: [] // If the image hasn't these objects will not be liked
 				}

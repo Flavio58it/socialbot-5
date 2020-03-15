@@ -55,8 +55,19 @@ describe("#robot()", function () {
 
         var bot = new robot(simulateSetting({
             enabled: true,
-            follow: {
-                tags: ["boom"]
+            modules: {
+                like: {
+                    likeDash: true,
+                    tags: ["boom"]
+                },
+                likeBack: {
+                    enabled: true
+                },
+                limits: {
+                    tag: 15,
+                    dash: 15,
+                    explorer: 15
+                }
             }
         }), {
             init: () => {
@@ -89,6 +100,9 @@ describe("#robot()", function () {
 
                 s();
             });
+            bot.addListener("error", function (e) {
+                f(e)
+            })
             bot.start(true)
         });
     });
@@ -104,14 +118,19 @@ describe("#robot()", function () {
 
         var bot = new robot(simulateSetting({
             enabled: true,
-            likeDash: false,
-            filters: {
+            modules: {
+                like: {
+                    likeDash: false,
+                    tags: []
+                },
                 likeBack: {
                     enabled: false
+                },
+                limits: {
+                    tag: 15,
+                    dash: 15,
+                    explorer: 15
                 }
-            },
-            follow: {
-                tags: []
             }
         }), {
             init: () => {
@@ -146,6 +165,9 @@ describe("#robot()", function () {
 
                 s();
             });
+            bot.addListener("error", function (e) {
+                f(e)
+            })
             bot.start(true)
         });
     })
