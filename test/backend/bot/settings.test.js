@@ -8,7 +8,7 @@ import {
 
 // Chose with which plug settings we will test
 const testSettings = "instagram",
-      testNestedAttribute = "filters.likes.isTextInclusive";
+      testNestedAttribute = "modules.like.filters.isTextInclusive";
 
 describe("#settings()", function () {
 

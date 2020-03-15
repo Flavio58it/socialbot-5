@@ -11,16 +11,18 @@ describe('#police()', function() {
         chai.expect(policeObj).to.be.an("object");
     });
 
-    it('Service stopped', function () {
+    it('Service stopped', async function () {
         var policeObj = new police(simulateSetting({enabled: false}));
 
-        var result = policeObj.shouldLike();
+        try {
+            var result = await policeObj.shouldLike();
 
-        return result.then(function () {
             chai.assert.fail()
-        }, function (data) {
-            chai.expect(data).to.have.property("stopped");
-        });
+        } catch (e) {
+            chai.expect(e).to.have.property("stopped");
+        }
+
+        return result
     });
 
     context("Liker", function () {
@@ -28,13 +30,15 @@ describe('#police()', function() {
         it("Like as is video and settings allows that", function () {
             var policeObj = new police(simulateSetting({
                 enabled: true, 
-                filters: {
-                    likes: {
-                        videos: true
+                modules: {
+                    like: {
+                        filters: {
+                            videos: true
+                        }
                     }
                 }
             }));
-    
+
             return policeObj.shouldLike({
                 isVideo: true
             }).then((result) => {
@@ -45,9 +49,11 @@ describe('#police()', function() {
         it("Do not like as is video and settings disallow that", function () {
             var policeObj = new police(simulateSetting({
                 enabled: true, 
-                filters: {
-                    likes: {
-                        videos: false
+                modules: {
+                    like: {
+                        filters: {
+                            videos: false
+                        }
                     }
                 }
             }));
@@ -63,11 +69,13 @@ describe('#police()', function() {
         it("Disallow like. Likenumber inclusive more", function () {
             var policeObj = new police(simulateSetting({
                 enabled: true, 
-                filters: {
-                    likes: {
-                        isLikeNumber: 100, // Simulate 100 treshold for likes
-                        isLikeNumberInclusive: true, // True if the like should be done, false if not
-                        isLikeNumberMoreLess: true // True if the like number should be more than or less than
+                modules: {
+                    like: {
+                        filters: {
+                            isLikeNumber: 100, // Simulate 100 treshold for likes
+                            isLikeNumberInclusive: true, // True if the like should be done, false if not
+                            isLikeNumberMoreLess: true // True if the like number should be more than or less than
+                        }
                     }
                 }
             }));
@@ -83,11 +91,13 @@ describe('#police()', function() {
         it("Allow like. Likenumber inclusive more", function () {
             var policeObj = new police(simulateSetting({
                 enabled: true, 
-                filters: {
-                    likes: {
-                        isLikeNumber: 80,
-                        isLikeNumberInclusive: true,
-                        isLikeNumberMoreLess: true
+                modules: {
+                    like: {
+                        filters: {
+                            isLikeNumber: 80,
+                            isLikeNumberInclusive: true,
+                            isLikeNumberMoreLess: true
+                        }
                     }
                 }
             }));
@@ -102,11 +112,13 @@ describe('#police()', function() {
         it("Disallow like. Likenumber exclusive more", function () {
             var policeObj = new police(simulateSetting({
                 enabled: true, 
-                filters: {
-                    likes: {
-                        isLikeNumber: 80,
-                        isLikeNumberInclusive: false,
-                        isLikeNumberMoreLess: true
+                modules: {
+                    like: {
+                        filters: {
+                            isLikeNumber: 80,
+                            isLikeNumberInclusive: false,
+                            isLikeNumberMoreLess: true
+                        }
                     }
                 }
             }));
@@ -120,14 +132,16 @@ describe('#police()', function() {
     
         it("Allow like. Likenumber exclusive less", function () {
             var policeObj = new police(simulateSetting({
-                enabled: true, 
-                filters: {
-                    likes: {
-                        isLikeNumber: 100,
-                        isLikeNumberInclusive: true,
-                        isLikeNumberMoreLess: false
+                enabled: true,
+                modules: {
+                    like: {
+                        filters: {
+                            isLikeNumber: 100,
+                            isLikeNumberInclusive: true,
+                            isLikeNumberMoreLess: false
+                        }
                     }
-                }
+                } 
             }));
     
             return policeObj.shouldLike({
@@ -140,32 +154,36 @@ describe('#police()', function() {
         it("Disallow like. Likenumber exclusive less - likenumber 100", function () {
             var policeObj = new police(simulateSetting({
                 enabled: true, 
-                filters: {
-                    likes: {
-                        isLikeNumber: 100,
-                        isLikeNumberInclusive: true,
-                        isLikeNumberMoreLess: false
+                modules: {
+                    like: {
+                        filters: {
+                            isLikeNumber: 80,
+                            isLikeNumberInclusive: false,
+                            isLikeNumberMoreLess: true
+                        }
                     }
-                }
+                } 
             }));
 
             return policeObj.shouldLike({
-                likes: 90 
+                likes: 100
             }).then((result) => {
-                chai.expect(result).to.equal(true);
+                chai.expect(result).to.equal(false);
             })
         });
 
         it("Allow like. Text filter with present text", function () {
             var policeObj = new police(simulateSetting({
                 enabled: true, 
-                filters: {
-                    likes: {
-                        isTextInclusive: true,
-                        textFilters: [
-                            "Woot woot",
-                            "Rule"
-                        ]
+                modules: {
+                    like: {
+                        filters: {
+                            isTextInclusive: true,
+                            textFilters: [
+                                "Woot woot",
+                                "Rule"
+                            ]
+                        }
                     }
                 }
             }));
@@ -180,13 +198,15 @@ describe('#police()', function() {
         it("Disallow like. Text filter with present text but with inverted inclusion", function () {
             var policeObj = new police(simulateSetting({
                 enabled: true, 
-                filters: {
-                    likes: {
-                        isTextInclusive: false,
-                        textFilters: [
-                            "Woot woot",
-                            "Rule"
-                        ]
+                modules: {
+                    like: {
+                        filters: {
+                            isTextInclusive: false,
+                            textFilters: [
+                                "Woot woot",
+                                "Rule"
+                            ]
+                        }
                     }
                 }
             }));
@@ -201,13 +221,15 @@ describe('#police()', function() {
         it("Disallow like. Text not present and not inclusive", function () {
             var policeObj = new police(simulateSetting({
                 enabled: true, 
-                filters: {
-                    likes: {
-                        isTextInclusive: false,
-                        textFilters: [
-                            "Woot woot",
-                            "Rule"
-                        ]
+                modules: {
+                    like: {
+                        filters: {
+                            isTextInclusive: false,
+                            textFilters: [
+                                "Woot woot",
+                                "Rule"
+                            ]
+                        }
                     }
                 }
             }));
@@ -222,13 +244,15 @@ describe('#police()', function() {
         it("Disallow like. Text not present but inclusive", function () {
             var policeObj = new police(simulateSetting({
                 enabled: true, 
-                filters: {
-                    likes: {
-                        isTextInclusive: true,
-                        textFilters: [
-                            "Woot woot",
-                            "Rule"
-                        ]
+                modules: {
+                    like: {
+                        filters: {
+                            isTextInclusive: true,
+                            textFilters: [
+                                "Woot woot",
+                                "Rule"
+                            ]
+                        }
                     }
                 }
             }));
@@ -257,15 +281,17 @@ describe('#police()', function() {
         it("Follow as defaults are all 0", function () {
             var policeObj = new police(simulateSetting({
                 enabled: true, 
-                filters: {
+                modules: {
                     follow: {
-                        followers: {
-                            number: 0,
-                            more: false
-                        },
-                        following: {
-                            number: 0,
-                            more: false
+                        filters: {
+                            followers: {
+                                number: 0,
+                                more: false
+                            },
+                            following: {
+                                number: 0,
+                                more: false
+                            }
                         }
                     }
                 }
@@ -284,15 +310,17 @@ describe('#police()', function() {
         it("No Follow as followers are less than in settings and more is true", function () {
             var policeObj = new police(simulateSetting({
                 enabled: true, 
-                filters: {
+                modules: {
                     follow: {
-                        followers: {
-                            number: 15,
-                            more: true
-                        },
-                        following: {
-                            number: 0,
-                            more: false
+                        filters: {
+                            followers: {
+                                number: 15,
+                                more: true
+                            },
+                            following: {
+                                number: 0,
+                                more: false
+                            }
                         }
                     }
                 }
@@ -311,15 +339,17 @@ describe('#police()', function() {
         it("No follow as following is less than in settings and more is true", function () {
             var policeObj = new police(simulateSetting({
                 enabled: true, 
-                filters: {
+                modules: {
                     follow: {
-                        followers: {
-                            number: 0,
-                            more: false
-                        },
-                        following: {
-                            number: 11,
-                            more: true
+                        filters: {
+                            followers: {
+                                number: 0,
+                                more: false
+                            },
+                            following: {
+                                number: 11,
+                                more: true
+                            }
                         }
                     }
                 }
@@ -337,19 +367,21 @@ describe('#police()', function() {
 
         it("No follow as following is less than in settings and more is true", function () {
             var policeObj = new police(simulateSetting({
-                enabled: true, 
-                filters: {
+                enabled: true,
+                modules: {
                     follow: {
-                        followers: {
-                            number: 0,
-                            more: false
-                        },
-                        following: {
-                            number: 11,
-                            more: true
+                        filters: {
+                            followers: {
+                                number: 0,
+                                more: false
+                            },
+                            following: {
+                                number: 11,
+                                more: true
+                            }
                         }
                     }
-                }
+                } 
             }));
 
             return policeObj.shouldFollow({
@@ -365,18 +397,20 @@ describe('#police()', function() {
         it("Follow as following is more than in settings and more is true", function () {
             var policeObj = new police(simulateSetting({
                 enabled: true, 
-                filters: {
+                modules: {
                     follow: {
-                        followers: {
-                            number: 0,
-                            more: false
-                        },
-                        following: {
-                            number: 9,
-                            more: true
+                        filters: {
+                            followers: {
+                                number: 0,
+                                more: false
+                            },
+                            following: {
+                                number: 9,
+                                more: true
+                            }
                         }
                     }
-                }
+                } 
             }));
 
             return policeObj.shouldFollow({
@@ -392,18 +426,20 @@ describe('#police()', function() {
         it("Follow as following is more than in settings and more is false", function () {
             var policeObj = new police(simulateSetting({
                 enabled: true, 
-                filters: {
+                modules: {
                     follow: {
-                        followers: {
-                            number: 0,
-                            more: false
-                        },
-                        following: {
-                            number: 16,
-                            more: false
+                        filters: {
+                            followers: {
+                                number: 0,
+                                more: false
+                            },
+                            following: {
+                                number: 16,
+                                more: false
+                            }
                         }
                     }
-                }
+                } 
             }));
 
             return policeObj.shouldFollow({
@@ -418,16 +454,18 @@ describe('#police()', function() {
 
         it("Follow as followers/following is more and both true", function () {
             var policeObj = new police(simulateSetting({
-                enabled: true, 
-                filters: {
+                enabled: true,
+                modules: {
                     follow: {
-                        followers: {
-                            number: 8,
-                            more: true
-                        },
-                        following: {
-                            number: 6,
-                            more: true
+                        filters: {
+                            followers: {
+                                number: 8,
+                                more: true
+                            },
+                            following: {
+                                number: 6,
+                                more: true
+                            }
                         }
                     }
                 }
@@ -446,15 +484,17 @@ describe('#police()', function() {
         it("Follow as followers is less and true", function () {
             var policeObj = new police(simulateSetting({
                 enabled: true, 
-                filters: {
+                modules: {
                     follow: {
-                        followers: {
-                            number: 8,
-                            more: true
-                        },
-                        following: {
-                            number: 0,
-                            more: true
+                        filters: {
+                            followers: {
+                                number: 8,
+                                more: true
+                            },
+                            following: {
+                                number: 0,
+                                more: true
+                            }
                         }
                     }
                 }
@@ -473,15 +513,17 @@ describe('#police()', function() {
         it("Follow as followers is more and more is false", function () {
             var policeObj = new police(simulateSetting({
                 enabled: true, 
-                filters: {
+                modules: {
                     follow: {
-                        followers: {
-                            number: 15,
-                            more: false
-                        },
-                        following: {
-                            number: 0,
-                            more: true
+                        filters: {
+                            followers: {
+                                number: 15,
+                                more: false
+                            },
+                            following: {
+                                number: 0,
+                                more: true
+                            }
                         }
                     }
                 }
@@ -496,6 +538,5 @@ describe('#police()', function() {
                 chai.expect(result).to.equal(true);
             })
         });
-        
     });
 });

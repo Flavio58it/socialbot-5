@@ -69,12 +69,14 @@ export default function (settings) {
 		},
 		// Actions performed by the BOT
 		actions: {
-			async likeTagImages (tagName, wait, limit) { // Like the images by tag
+			async likeTagImages (tagName) { // Like the images by tag
 				if (!csrf)
 					return await Promise.reject({error: "Init failed"});
 
 				var numberLiked = 0,
 					rejector = 0; // When a like is rejected this increases. When too much rejections happens, the numberLikes must increase in order to prevent hangs of the system (too strict filters)
+
+				var limit = await settings.get("modules.like.limits.tag")
 
 				async function like (pointer) {
 					var nextQuery = format((urls.get.tag), tagName);
@@ -167,8 +169,11 @@ export default function (settings) {
 			*
 			**/
 
-			async likeDashboard (wait, limit) {
+			async likeDashboard () {
 				var numberLiked = 0, rejector = 0;
+
+				var limit = await settings.get("modules.like.limits.dash"),
+					wait = await settings.get("waiter")
 
 				async function like(pointer) {
 					var homeData = await decodeObject(urls.home),
@@ -263,8 +268,8 @@ export default function (settings) {
 					return await Promise.reject({error: "User error, try to restart", id: "USER_DATA_NOT_FOUND", action: "RELOAD"})
 
 				var settingsData = {
-					followBack: await settings.get("followBack"),
-					unFollowBack: await settings.get("unFollowBack")
+					followBack: await settings.get("modules.follow.followBack"),
+					unFollowBack: await settings.get("modules.follow.unFollowBack")
 				},
 				accountUsers = {
 					followers: await actions.getUsersBatch(query_id.followers, user.id),
@@ -392,7 +397,7 @@ export default function (settings) {
 				console.log("Starting likeBack");
 
 				var notifications = await actions.getNotifications(),
-					likeBackSettings = await settings.get("likeBack"),
+					likeBackSettings = await settings.get("modules.likeBack"),
 					now = new Date().getTime(), 
 					likebacked = 0;
 

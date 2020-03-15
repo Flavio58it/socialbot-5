@@ -83,7 +83,7 @@ describe("@instagram", function () {
             });
 
             return instance.init()
-                .then(() => instance.actions.likeTagImages("testtag", 1000, 4)) // Tag, millisec wait, limit
+                .then(() => instance.actions.likeTagImages("testtag")) // Tag, millisec wait, limit
                 .then((error) => {
                     chai.expect(error).to.be.undefined
                     chai.expect(server.requests.length).to.equal(4)
@@ -117,7 +117,7 @@ describe("@instagram", function () {
             });
 
             return instance.init()
-                .then(() => instance.actions.likeTagImages("testtag", 1000, 4)) // Tag, millisec wait, limit
+                .then(() => instance.actions.likeTagImages("testtag")) // Tag, millisec wait, limit
                 .then((error) => {
                     chai.expect(error.stoppedBy).to.equal("ALREADY_LIKED", "Ensure that the bot was stopped by the correct error")
                     chai.expect(server.requests.length).to.equal(3, "One less request as like is not performed")
@@ -127,7 +127,17 @@ describe("@instagram", function () {
         });
 
         it("Like until limit is reached", function () {
-            var instance = new instagram(simulateSetting());
+            var instance = new instagram(simulateSetting({
+                modules: {
+                    like: {
+                        limits: {
+                            tag: 4,
+                            dash: 5,
+                            explorer: 6
+                        }
+                    }
+                }
+            }));
 
             server.respond(/\/explore\/tags\/testtag\//, function (xhr) {
                 xhr.respond(200, 
@@ -156,7 +166,7 @@ describe("@instagram", function () {
             })
 
             return instance.init()
-                .then(() => instance.actions.likeTagImages("testtag", 1000, 4)) // Tag, millisec wait, limit
+                .then(() => instance.actions.likeTagImages("testtag")) // Tag, millisec wait, limit
                 .then((error) => {
                     chai.expect(liked).to.equal(4, "Should like 4 photos as is default in settings")
                     chai.expect(error.stoppedBy).to.equal("LIKE_LIMIT_REACHED", "Ensure that the bot was stopped by the correct error")
@@ -169,11 +179,13 @@ describe("@instagram", function () {
 
         it("Should not like as police rejects it", function () {
             var instance = new instagram(simulateSetting({
-                filters: {
-                    likes: {
-                        isLikeNumber: 100,
-                        isLikeNumberInclusive: true,
-                        isLikeNumberMoreLess: true
+                modules: {
+                    like: {
+                        filters: {
+                            isLikeNumber: 100,
+                            isLikeNumberInclusive: true,
+                            isLikeNumberMoreLess: true
+                        }
                     }
                 }
             }));
@@ -205,7 +217,7 @@ describe("@instagram", function () {
             })
 
             return instance.init()
-                .then(() => instance.actions.likeTagImages("testtag", 1000, 4)) // Tag, millisec wait, limit
+                .then(() => instance.actions.likeTagImages("testtag")) // Tag, millisec wait, limit
                 .then((error) => {
                     chai.expect(liked).to.equal(false, "Should not like anything");
                     //chai.expect(server.requests.length).to.equal(3, "Like not performed")
@@ -258,7 +270,7 @@ describe("@instagram", function () {
             })
 
             return instance.init()
-                .then(() => instance.actions.likeTagImages("testtag", 1000, 4)) // Tag, millisec wait, limit
+                .then(() => instance.actions.likeTagImages("testtag")) // Tag, millisec wait, limit
                 .then((error) => {
                     chai.expect(liked).to.equal(2, "Should like one image from first and one from the second page")
                 }).then(() => db.logs.toArray()).then((database) => {
@@ -288,7 +300,7 @@ describe("@instagram", function () {
             })
 
             return instance.init()
-                .then(() => instance.actions.likeTagImages("testtag", 1000, 4)) // Tag, millisec wait, limit
+                .then(() => instance.actions.likeTagImages("testtag")) // Tag, millisec wait, limit
                 .then((error) => {
                     throw new Error("Should not be a success")
                 }, function (error) {
@@ -329,7 +341,7 @@ describe("@instagram", function () {
             var instance = new instagram(simulateSetting());
 
             return instance.init()
-                .then(() => instance.actions.likeDashboard(1000, 4)) // Millisec wait, limit
+                .then(() => instance.actions.likeDashboard()) // Millisec wait, limit
                 .then((error) => {
                     chai.expect(error).to.equal(undefined)
                     chai.expect(liked).to.equal(1, "Liked one image")
@@ -373,7 +385,7 @@ describe("@instagram", function () {
             var instance = new instagram(simulateSetting());
 
             return instance.init()
-                .then(() => instance.actions.likeDashboard(1000, 4)) // Millisec wait, limit
+                .then(() => instance.actions.likeDashboard()) // Millisec wait, limit
                 .then((error) => {
                     chai.expect(error).to.equal(undefined)
                     chai.expect(liked).to.equal(1, "Liked one image")
@@ -419,7 +431,7 @@ describe("@instagram", function () {
             var instance = new instagram(simulateSetting());
 
             return instance.init()
-                .then(() => instance.actions.likeDashboard(1000, 4)) // Millisec wait, limit
+                .then(() => instance.actions.likeDashboard()) // Millisec wait, limit
                 .then((error) => {
                     chai.expect(error).to.have.property("stoppedBy", "ALREADY_LIKED")
                     chai.expect(liked).to.equal(0, "Already liked")
@@ -454,16 +466,26 @@ describe("@instagram", function () {
                 );
             })
 
-            var instance = new instagram(simulateSetting());
+            var instance = new instagram(simulateSetting({
+                modules: {
+                    like: {
+                        limits: {
+                            tag: 4,
+                            dash: 5,
+                            explorer: 6
+                        }
+                    }
+                }
+            }));
 
             return instance.init()
-                .then(() => instance.actions.likeDashboard(1000, 4)) // Millisec wait, limit
+                .then(() => instance.actions.likeDashboard()) // Millisec wait, limit
                 .then((error) => {
                     chai.expect(error).to.have.property("stoppedBy", "LIKE_LIMIT_REACHED")
-                    chai.expect(liked).to.equal(4, "Liked four images")
+                    chai.expect(liked).to.equal(5, "Liked four images")
                     chai.expect(home).to.equal(true)
                 }).then(() => db.logs.toArray()).then((database) => {
-                    chai.expect(database).to.have.lengthOf(4, "4 likes in database")
+                    chai.expect(database).to.have.lengthOf(5, "4 likes in database")
                     chai.expect(database[0]).to.have.property("action", "USER_LIKE")
                 })
         });
@@ -494,17 +516,19 @@ describe("@instagram", function () {
             })
 
             var instance = new instagram(simulateSetting({
-                filters: {
-                    likes: {
-                        isLikeNumber: 2,
-                        isLikeNumberInclusive: true,
-                        isLikeNumberMoreLess: true
+                modules: {
+                    like: {
+                        filters: {
+                            isLikeNumber: 2,
+                            isLikeNumberInclusive: true,
+                            isLikeNumberMoreLess: true
+                        }
                     }
                 }
             }));
 
             return instance.init()
-                .then(() => instance.actions.likeDashboard(1000, 4)) // Millisec wait, limit
+                .then(() => instance.actions.likeDashboard()) // Millisec wait, limit
                 .then((error) => {
                     chai.expect(liked).to.equal(0, "No likes as is filtered")
                     chai.expect(home).to.equal(true)
@@ -517,8 +541,12 @@ describe("@instagram", function () {
     context("followManager()", function () {
         it("Followback, unFollowBack and onlyFetch disabled, should only update 'followed by' users", function () {
             var instance = new instagram(simulateSetting({
-                followBack: false,
-                unFollowBack: false
+                modules: {
+                    follow: {
+                        followBack: false,
+                        unFollowBack: false
+                    }
+                }
             }));
 
             server.attachCallback("homepage_logged", function () {
@@ -818,7 +846,11 @@ describe("@instagram", function () {
 
         it("Should edit already present user in database and follow it", function () {
             var instance = new instagram(simulateSetting({
-                followBack: true
+                modules: {
+                    follow: {
+                        followBack: true
+                    }
+                }
             }));
 
             server.attachCallback("homepage_logged", function () {

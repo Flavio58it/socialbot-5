@@ -1,6 +1,8 @@
 import requests from "./requests";
 import waiter from "waiter";
 
+import logger from "../db/logger";
+
 /**
  * ROBOT JS
  * 
@@ -16,43 +18,38 @@ const bot = async function (settings, plug, plugName) {
 	if (!plugData.logged)
 		return Promise.reject({id: "LOGGED_OUT", error: "Login failure. Please go to the homepage and login.", action: "PLUG_HOME"})
 	
-	var request = new requests(plugData.domain.match, plugData.domain.res).listen(); // Modify requests to instagram server
+	// TODO: Check if has sense move to single plug initialization as is not always needed!
+	var request = new requests(plugData.domain.match, plugData.domain.res).listen(); // Modify requests to server
 
 	try {
 		// 1st phase: likeTagImages
 		// Bot will get the list of tags from settings and like a predefined number of photos from them
-		var tags = await settings.get("follow");
-		tags = tags.tags
-
-		var waiter = await settings.get("waiter"),
-			limits = await settings.get("limits")
+		var tags = await settings.get("modules.like.tags");
 
 		for (let i = 0; i < tags.length; i++) {
 			let tagName = tags[i]
 
 			await plug.actions.likeTagImages(
-				tagName, 
-				waiter,
-				limits.likes.tag
+				tagName
 			)
+			
 		}
 
 		// 2nd phase: likeDashboard
 		// Bot will like the user dashboard
-		var shouldLikeDash = await settings.get("likeDash")
+		var shouldLikeDash = await settings.get("modules.like.likeDash")
 		if (shouldLikeDash && plug.actions.likeDashboard)
-			await plug.actions.likeDashboard(waiter, limits.likes.dash)
+			await plug.actions.likeDashboard()
 
 		// 3rd phase: followManager
 		// Manage followers of the user
-
 		await plug.actions.followManager(false)
 
 		// 4th phase: likeBack
 		// Like images of users that liked yours
-		var shouldLikeBack = await settings.get("likeBack");
+		var likeBackSettings = await settings.get("modules.likeBack");
 
-		if (shouldLikeBack.enabled && plug.actions.likeBack)
+		if (likeBackSettings && likeBackSettings.enabled && plug.actions.likeBack)
 			await plug.actions.likeBack()
 		
 		console.info("[robot] Round finished");
