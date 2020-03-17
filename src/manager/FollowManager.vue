@@ -64,17 +64,21 @@
 </template>
 
 <style scoped lang="scss">
-	.user {
-		padding: 15px;
+	#userlist {
+		padding: 10px;
 
-		img {
-			width: 90px;
-		}
+		.user {
+			padding: 15px;
 
-		hr {
-			margin-top:5px;
-			margin-bottom: 7px;
-			padding:0;
+			img {
+				width: 90px;
+			}
+
+			hr {
+				margin-top:5px;
+				margin-bottom: 7px;
+				padding:0;
+			}
 		}
 	}
 

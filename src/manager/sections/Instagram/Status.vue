@@ -24,6 +24,8 @@
 </style>
 
 <script>
+    import StatsViewer from "components/StatsViewer";
+
     export default {
         props: ['data']
     }

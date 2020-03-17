@@ -1,6 +1,11 @@
 <template>
     <b-row>
-        
+        <b-col>
+            <MainChart/>
+        </b-col>
+        <b-col>
+            Yup
+        </b-col>
     </b-row>
 </template>
 
@@ -9,7 +14,16 @@
 </style>
 
 <script>
+    import MainChart from "./MainChart"
+
     export default {
-        
+        data: {
+            stats: {
+                likes: []
+            }
+        },
+        components: {
+            MainChart
+        }
     }
 </script>
