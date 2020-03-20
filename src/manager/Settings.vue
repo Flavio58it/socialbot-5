@@ -66,6 +66,7 @@
 	export default {
 		data () {
 			return {
+				// TODO: Get cats from backend
 				showAdvanced: false,
 				cats: {
 					instagram: {text: "Instagram"},

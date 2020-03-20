@@ -44,13 +44,13 @@
 							<b class="tag">{{option}}</b>
 						</div>
 						<div class="col-3">
-							<a href="#" @click.prevent="editEl(i)">Edit</a> <a href="#" @click.prevent="remEl(i)" class="remove">Remove</a>
+							<a href="#" @click.prevent="editEl(i)" class="edit">Edit</a> <a href="#" @click.prevent="remEl(i)" class="remove">Remove</a>
 						</div>
 					</div>
 				</div>
 			</div>
 			<div v-else class="text-center">No entries</div>
-			<button v-if="editIndex === false" @click="newEntry" class="btn btn-primary float-right">Add</button>
+			<button v-if="editIndex === false" @click="newEntry" class="btn btn-primary float-right add">Add</button>
 		</b-modal>
 	</div>
 </template>

@@ -1,7 +1,5 @@
 import { mount } from '@vue/test-utils'
 
-import Vue from 'vue'
-
 import Headbar from '../../../src/shared/components/Headbar.vue'
 
 describe("#Headbar", function () {
