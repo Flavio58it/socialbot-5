@@ -8,6 +8,7 @@
 				<b-tabs>
 					<b-tab title="Status">
 						<Status :data="data"/>
+						<StatsViewer :plug="type"/>
 					</b-tab>
 					<b-tab title="Timings & rates">
 						<Timings :data="data"/>
@@ -30,6 +31,8 @@
 	import SettingSection from "../../SettingSection.vue";
 
 	import Status from "./Status.vue"
+	import StatsViewer from "../../StatsViewer/StatsViewer.vue"
+
 	import Timings from "./Timings.vue"
 	import Likes from "./Likes.vue"
 	import LikeBack from "./LikeBack.vue"
@@ -60,6 +63,7 @@
 		},
 		components: {
 			SettingSection,
+			StatsViewer,
 
 			Status,
 			LikeBack,

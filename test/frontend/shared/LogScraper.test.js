@@ -1,6 +1,8 @@
 import { mount } from '@vue/test-utils'
-
+import BootstrapVue from 'bootstrap-vue';
 import Vue from 'vue'
+
+Vue.use(BootstrapVue)
 
 import LogScraper from '../../../src/shared/components/LogScraper.vue'
 

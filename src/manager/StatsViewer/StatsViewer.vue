@@ -1,7 +1,7 @@
 <template>
     <b-row>
         <b-col>
-            <MainChart/>
+            <MainChart :stats='stats'/>
         </b-col>
         <b-col>
             Yup
@@ -14,12 +14,13 @@
 </style>
 
 <script>
-    import MainChart from "./MainChart"
+    import MainChart from "./MainChart.vue"
 
     export default {
-        data: {
+        props: {
             stats: {
-                likes: []
+                type: Object,
+                default: () => {}
             }
         },
         components: {
