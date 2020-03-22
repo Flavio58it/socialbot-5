@@ -2,7 +2,7 @@ import {
     getPeriodStats
 } from "../../../src/service/db/filters"
 
-import db from "../../../src/service/db/db"
+import db from "../../../src/service/bot/db"
 
 
 // Mock log entries

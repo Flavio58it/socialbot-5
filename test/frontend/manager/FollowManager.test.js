@@ -21,7 +21,7 @@ describe("#Tags", function () {
         })
 
         chai.expect(sent.called).to.equal(true, "Should call backend for info")
-        chai.expect(wrapper.html()).to.contain("fa-circle-o-notch", "Should show loading")
+        chai.expect(wrapper.html()).to.contain("fa-circle-notch", "Should show loading")
     })
 
     it("Should mount with a user and show it", async function () {
@@ -47,7 +47,7 @@ describe("#Tags", function () {
         })
 
         chai.expect(sent.called).to.equal(true, "Should call backend for info")
-        chai.expect(wrapper.html()).to.not.contain("fa-circle-o-notch", "Should not show loading")
+        chai.expect(wrapper.html()).to.not.contain("fa-circle-notch", "Should not show loading")
 
         chai.expect(wrapper.contains("img[src='user_test_image']")).to.equal(true)
         chai.expect(wrapper.contains("a[href='user_profile_url']")).to.equal(true)

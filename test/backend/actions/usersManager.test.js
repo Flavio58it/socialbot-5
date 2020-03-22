@@ -1,6 +1,6 @@
 import usersManager from "../../../src/service/actions/usersManager";
 
-import db from "../../../src/service/db/db";
+import db from "../../../src/service/bot/db";
 
 describe("directAction()", function () {
     beforeEach(function () {

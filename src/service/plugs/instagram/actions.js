@@ -1,6 +1,5 @@
 import waiter from "waiter";
 import axios from "axios";
-import db from "../../db/db";
 import ms from "milliseconds";
 import randomArray from "randEngine";
 import objectMapper from "object-mapper";
@@ -11,7 +10,6 @@ import {cache} from "./instagram";
 import {getUrl, decodeObject, _postData} from "./utils";
 import mappers from "./mappers";
 import urls from "./urls";
-import logger from "../../db/logger";
 
 const lib = {
 	likePost: function (postId, csrf) {
@@ -110,9 +108,6 @@ const lib = {
 			lastInteraction: toFollow == 2?now:false,
 			added: now
 		}
-	},
-	cleanDB: function (){ // Clean database from old users. Async mode! Don't even try to make it syncronous!
-		
 	}
 }
 

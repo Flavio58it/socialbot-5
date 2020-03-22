@@ -1,4 +1,4 @@
-import db from "./db";
+import db from "../bot/db";
 
 export default function (settings) {
 	var settings = settings || {};

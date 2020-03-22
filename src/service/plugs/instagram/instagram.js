@@ -3,7 +3,7 @@ import urlParams from "url-params";
 import waiter from "waiter";
 import logger from "../../db/logger";
 import ms from "milliseconds";
-import db from "../../db/db";
+import Users from "../../db/users";
 import objectMapper from "object-mapper";
 import police from "../../bot/police";
 
@@ -28,6 +28,7 @@ export var cache = {
 export default function (settings) {
 	var csrf = false, query_id = false, user = false,
 		log = new logger({type: "instagram"}),
+		dbUser = new Users("instagram"),
 		checker = false;
 
 	return {
@@ -308,7 +309,7 @@ export default function (settings) {
 					});
 				});
 
-				var arr = await db.users.toArray()
+				var arr = await dbUser.getAllUsers()
 
 				var cache = {}, //Cache users by id in order to avoid nested foreach
 					now = new Date().getTime(), 
@@ -339,7 +340,7 @@ export default function (settings) {
 						user.found = true; // The user has been found so has not unfollowed
 						us.whitelisted = user.whitelisted;
 						// TODO: Update in real time the details to the db in order to have all info updated somehow [partially done]
-						await db.users.where("[plug+userid]").equals(["instagram", us.id]).modify({
+						await dbUser.editUserData(us.id, {
 							username: user.username,
 							"details.img": user.img
 						})
@@ -347,14 +348,14 @@ export default function (settings) {
 						let toFollow = !((!settingsData.followBack) || isFirstTime);
 
 						if (user){ // When the user is in database but has already been added by likeBack
-							await db.users.where("[plug+userid]").equals(["instagram", us.id]).modify({
+							await dbUser.editUserData(us.id, {
 								toFollow
-							});
+							})
 							us.whitelisted = user.whitelisted; // TODO: Not sure if needed
 						} else{ // Here normal addition.
-							await db.users.add(
+							await dbUser.addUser(
 								await actions.newDbUser(us, now, toFollow)
-							);
+							)
 						}
 
 						if ((isFirstTime || !settingsData.followBack) && !onlyFetch) // Not followbacking all the people the first time
@@ -368,7 +369,7 @@ export default function (settings) {
 								userId: us.id,
 								username: us.username
 							});
-							await db.users.where("[plug+userid]").equals(["instagram", us.id]).modify({ // Specify that has been auto_followed
+							await dbUser.editUserData(us.id, { // Specify that has been auto_followed
 								"details.autoFollowed": true,
 								lastInteraction: now // If has been followed no interaction will occur for some time (TODO: May rethink this.)
 							})
@@ -409,8 +410,7 @@ export default function (settings) {
 					if (notification.type !== 1)
 						continue;
 					
-					let query = await db.users.where("[plug+userid]").equals(["instagram", notification.id]),
-						qres = await query.toArray();
+					let qres = await dbUser.getUserData(notification.id);
 
 					if ((qres.length && (!qres[0].lastInteraction || (qres[0].lastInteraction  <= now - ms.days(likeBackSettings.ignoreTime)))) || !qres.length) {
 						if (likebacked >= likeBackSettings.maxUsersLike)
@@ -428,13 +428,13 @@ export default function (settings) {
 							log
 						});
 
-						let res = await query.modify({
+						let res = await dbUser.editUserData(notification.id, {
 							lastInteraction: now
 						})
 
 						if (!res) {
 							let userData = await actions.getUserData(notification.username)
-							await db.users.add(actions.newDbUser(notification, now, 2))
+							await dbUser.addUser(actions.newDbUser(notification, now, 2))
 						}
 						await waiter(1000, 10000)
 					} else {

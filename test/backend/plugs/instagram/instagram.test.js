@@ -1,6 +1,6 @@
 import instagram from "../../../../src/service/plugs/instagram/instagram";
 import urls from "../../../../src/service/plugs/instagram/urls";
-import db from "../../../../src/service/db/db";
+import db from "../../../../src/service/bot/db";
 
 import { simulateSetting } from "../../../utils/settingsManager";
 import { createServer } from "./servers";

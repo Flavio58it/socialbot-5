@@ -1,5 +1,11 @@
 import Dexie from "dexie";
 
+/**
+ * WARNING --
+ * 
+ * Is advisable to NOT use this file directly. The database should be accessed with classes present in db folder.
+*/
+
 var db = new Dexie("socialbot");
 
 db.version(1).stores({
