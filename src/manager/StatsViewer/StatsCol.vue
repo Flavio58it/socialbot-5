@@ -1,8 +1,7 @@
 <template>
     <div class="statsCol">
         <i :class="{
-            'fa': true, 
-            'fa-3x': true,
+            'fa': true,
             'fa-sort-up': isMore && !equals,
             'fa-sort-down': !isMore && !equals,
             'fa-equals': equals
@@ -15,9 +14,11 @@
     .statsCol {
         margin: 0px auto;
         text-align: center;
+        font-size: $font-huge + 6;
 
         i{
             padding: 0 10px;
+            vertical-align: middle;
 
             &.fa-sort-up {
                 color: green;
@@ -30,7 +31,8 @@
 
         b, .description {
             font-size: $font-huge;
-            line-height: 45px;
+            line-height: 30px;
+            vertical-align: middle;
         }
     }
 </style>

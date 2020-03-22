@@ -2,7 +2,10 @@
 	<div>
 		<span v-for="sharer in sharers" :key="sharer.name">
 			<a href="#" @click.prevent="$emit('input', sharer.name)" :class="[(sharer.name == value)?'selected':'']" :title="sharer.title">
-				<i :class="['fa', sharer.class]"/>
+				<i :class="[{
+					'fab': sharer.class !== 'fa-globe',
+					'fa': sharer.class === 'fa-globe'
+				}, sharer.class]"/>
 			</a>
 		</span>
 	</div>
