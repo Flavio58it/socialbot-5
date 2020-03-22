@@ -28,7 +28,27 @@
             return {
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false
+                    maintainAspectRatio: false,
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            },
+                            gridLines: {
+                                color: "rgba(0, 0, 0, 0.05)"
+                            }   
+                        }],
+                        xAxes: [{
+                            gridLines: {
+                                color: "rgba(0, 0, 0, 0.05)"
+                            }
+                        }]
+                    },
+                    elements: {
+                        point:{
+                            radius: 0
+                        }
+                    }
                 }
             }
         },
@@ -51,7 +71,7 @@
                 // The chart shows stats in the latest 29 days (starting from yesterday)
                 data.forEach((dayStats, index) => {
                     var date = new Date()
-                    date.setDate(date.getDate() - (index + 1))
+                    date.setDate(date.getDate() - (index + 2))
 
                     retroDays.push(date.getDate() + "/" + (date.getMonth() + 1))
 

@@ -6,19 +6,9 @@
 			<div v-if="waiting.showMessage" class="text-center waitMessage"><b>Waiting for timers to expire...</b></div>
 		</div>
 		<div v-else-if="settings">
-			<div class="row">
-				<div class="col-8">
-					<slot :settings="settings" name="left" :stats="serverData.stats" :running="status.running"/>
-				</div>
-				<div class="col-4">
-					<b>Tags follower</b>
-					<div class="description">These tags will be periodically checked and the new posts will be liked</div>
-					<hr/>
-					<Tags v-model="settings.modules.like.tags"/>
-				</div>
-			</div>
-			<div>
-				<button @click="save" class="btn btn-primary btn-lg float-right save" title="Save and restart the bot">Save</button>
+			<slot :settings="settings" name="left" :stats="serverData.stats" :running="status.running"/>
+			<div class="saveContainer">
+				<button @click="save" class="btn btn-primary btn-lg float-right save btn-center" title="Save and restart the bot">Save</button>
 			</div>
 		</div>
 		<Loading v-else/>
@@ -47,11 +37,14 @@
 	.waitMessage {
 		padding: 10px;
 	}
+
+	.saveContainer {
+		margin-top: 15px;
+	}
 </style>
 
 <script>
 	import Loading from "components/Loading.vue";
-	import Tags from "./Tags.vue";
 	import FollowManager from "./FollowManager.vue";
 	
 
@@ -119,8 +112,7 @@
 		},
 		components: {
 			Loading,
-			FollowManager,
-			Tags
+			FollowManager
 		}
 	}
 </script>
