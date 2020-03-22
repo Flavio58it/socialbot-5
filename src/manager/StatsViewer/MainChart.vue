@@ -1,8 +1,29 @@
 <script>
     import { Line, mixins } from 'vue-chartjs'
 
+    const colors = [
+        "green",
+        "yellow",
+        "lightblue",
+        "pink",
+        "violet"
+    ]
+
+   function transformFromCamelCase (string) {
+       return string
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^./, function(str){ return str.toUpperCase(); })
+   }        
+
     export default {
-        props: ['stats'],
+        props: {
+            stats: {
+                type: Array,
+                default () {
+                    return []
+                }
+            }
+        },
         data () {
             return {
                 options: {
@@ -12,18 +33,54 @@
             }
         },
         mounted () {
-            if (this.stats)
-                this.updateChart(this.data.stats)
+            if (this.stats && this.stats.length)
+                this.updateChart(this.stats)
         },
         watch: {
             stats: function () {
-                this.updateChart(this.data.stats)
+                this.updateChart(this.stats)
             }
         },
         methods: {
             updateChart(data) {
-                console.log(data)
-                this.renderChart(data, this.options)
+                console.log("Received data", data)
+                var retroDays = [], retroData = {};
+                
+                var keyIndex = 0;
+
+                // The chart shows stats in the latest 29 days (starting from yesterday)
+                data.forEach((dayStats, index) => {
+                    var date = new Date()
+                    date.setDate(date.getDate() - (index + 1))
+
+                    retroDays.push(date.getDate() + "/" + (date.getMonth() + 1))
+
+                    for (let key in dayStats) {
+                        let dayData = dayStats[key];
+
+                        if (!retroData[key]) {
+                            retroData[key] = {
+                                label: transformFromCamelCase(key),
+                                data: [dayData],
+                                backgroundColor: [colors[keyIndex]]
+                            }
+                            keyIndex += 1
+                        } else {
+                            retroData[key].data.push(dayData)
+                        }
+                    }
+                });
+
+                const datasets = []
+
+                for (let key in retroData) {
+                    datasets.push(retroData[key])
+                }
+
+                this.renderChart({
+                    labels: retroDays,
+                    datasets
+                }, this.options)
             }
         },
         extends: Line

@@ -3,6 +3,10 @@ import Comm from "./bot/comm";
 import storage from "storage";
 import db from "./db/db";
 
+import {
+	getPeriodStats
+} from "./db/filters"
+
 import actions from "./actions";
 
 import bootstrap from './bot/bootstrap'
@@ -11,7 +15,7 @@ import bootstrap from './bot/bootstrap'
 var plugsInstances = {}, error = false;
 
 // Initialize communication between control panel and backend.
-Comm.listen("manager", function(action, data) {
+Comm.listen("manager", async function (action, data) {
 	switch (action) {
 		case "sendAll":
 			Comm.sendMessage(data.forwardAction, data.data);
@@ -26,12 +30,19 @@ Comm.listen("manager", function(action, data) {
 			db.delete();
 		break;
 		case "getSettings":
-			plugsInstances[data.plug].settings.getAll().then((settings) => {
-				Comm.sendMessage("settings", {
-					plug: data.plug,
-					settings,
-					status: plugsInstances[data.plug].bot.getStatus()
-				});
+			let settings = await plugsInstances[data.plug].settings.getAll();
+			let status = plugsInstances[data.plug].bot.getStatus();
+			let stats = {
+				month: await getPeriodStats(data.plug, 1, 30),
+				summaryMonth: await getPeriodStats(data.plug, 1, 30, {sum: true}),
+				today: await getPeriodStats(data.plug, 0, 1)
+			}
+
+			Comm.sendMessage("settings", {
+				plug: data.plug,
+				settings,
+				status,
+				stats
 			});
 		break;
 		case "saveSettings":

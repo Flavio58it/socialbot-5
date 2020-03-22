@@ -7,8 +7,8 @@
 			<template v-slot:left="data">
 				<b-tabs>
 					<b-tab title="Status">
+						<StatsViewer :stats="data.stats"/>
 						<Status :data="data"/>
-						<StatsViewer :plug="type"/>
 					</b-tab>
 					<b-tab title="Timings & rates">
 						<Timings :data="data"/>

@@ -1,16 +1,13 @@
 <template>
-    <b-row>
-        <b-col>
-            <MainChart :stats='stats'/>
-        </b-col>
-        <b-col>
-            Yup
-        </b-col>
-    </b-row>
+    <div>
+        <MainChart class="chart" :stats='stats.month'/>
+    </div>
 </template>
 
 <style lang="scss" scoped>
-
+ .chart {
+     height: 220px;
+ }
 </style>
 
 <script>
@@ -20,7 +17,9 @@
         props: {
             stats: {
                 type: Object,
-                default: () => {}
+                default () {
+                    return {}
+                }
             }
         },
         components: {

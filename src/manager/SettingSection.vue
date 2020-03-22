@@ -8,7 +8,7 @@
 		<div v-else-if="settings">
 			<div class="row">
 				<div class="col-8">
-					<slot :settings="settings" name="left" :running="status.running"/>
+					<slot :settings="settings" name="left" :stats="serverData.stats" :running="status.running"/>
 				</div>
 				<div class="col-4">
 					<b>Tags follower</b>
@@ -62,7 +62,7 @@
 		],
 		data () {
 			return {
-				status: false,
+				serverData: false,
 				waiting: {
 					id: false,
 					showMessage: false
@@ -82,7 +82,7 @@
 			if (action == "settings") {
 				console.log("Received settings data: ", data);
 				this.$emit("update:settings", data.settings);
-				this.status = data.status;
+				this.serverData = data;
 				this.$emit("loaded");
 			} else if (action == "statusUpdate")
 				this.status = data.status;
@@ -110,6 +110,11 @@
 					plug: this.plug, 
 					settings: this.settings
 				});
+			}
+		},
+		computed: {
+			status: function () {
+				return this.serverData?this.serverData.status:false
 			}
 		},
 		components: {
