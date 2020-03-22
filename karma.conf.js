@@ -37,7 +37,8 @@ module.exports = function(config) {
       require("karma-chai"), // https://www.chaijs.com/
       require("karma-sinon-chai"), // https://sinonjs.org/
       require('karma-chrome-launcher'),
-      require('karma-mocha-reporter')
+      require('karma-mocha-reporter'),
+      require("karma-coverage")
     ],
 
     // https://railsware.com/blog/mocking-es6-module-import-without-dependency-injection/
@@ -48,17 +49,21 @@ module.exports = function(config) {
     preprocessors: {
       // only specify one entry point
       // and require all tests in there
-      'test/**/*.test.js': ['webpack']
+      'test/**/*.test.js': ['webpack', 'coverage']
     },
 
     mochaReporter: {
       output: "autowatch"
     },
 
+    coverageReporter: {
+      type : 'lcovonly'
+    },
+
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['mocha'], // https://www.npmjs.com/package/karma-mocha-reporter
+    reporters: ['mocha', /* coverage */], // https://www.npmjs.com/package/karma-mocha-reporter
 
 
     // Minimal webpack configuration in order to recognize services
