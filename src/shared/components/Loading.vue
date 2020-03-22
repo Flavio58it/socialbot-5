@@ -1,6 +1,6 @@
 <template>
 	<div class="loader text-center">
-		<i class="fa fa-circle-o-notch fa-spin fa-3x"></i>
+		<i class="fa fa-circle-notch fa-spin fa-3x"></i>
 	</div>
 </template>
 
