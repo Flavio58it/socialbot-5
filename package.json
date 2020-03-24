@@ -8,7 +8,8 @@
     "dev": "cross-env NODE_ENV=development webpack --watch  --mode=development",
     "qa": "karma start",
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules  --mode=production",
-    "test": "karma start --single-run"
+    "test": "karma start --single-run",
+    "deploy": "webstore publish --extension-id $EXTENSION_ID"
   },
   "dependencies": {
     "@babel/runtime": "^7.9.0",
@@ -33,6 +34,7 @@
     "babel-preset-env": "^1.7.0",
     "chai": "^4.2.0",
     "chart.js": "^2.9.3",
+    "chrome-webstore-upload-cli": "^1.2.0",
     "clone": "^2.1.2",
     "color": "^3.1.2",
     "color-name": "^1.1.4",
