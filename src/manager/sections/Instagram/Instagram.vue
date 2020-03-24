@@ -8,7 +8,7 @@
 				<b-tabs>
 					<b-tab title="Status">
 						<StatsViewer :stats="data.stats"/>
-						<Status :data="data"/>
+						<MasterSwitch v-model="data.settings.enabled" :running="data.running"/>
 					</b-tab>
 					<b-tab title="Tags Follower">
 						<div class="description">These tags will be periodically checked and the new posts will be liked</div>
@@ -35,6 +35,7 @@
 	import SettingSection from "../../SettingSection.vue";
 
 	import Status from "./Status.vue"
+	import MasterSwitch from "components/MasterSwitch.vue"
 	import StatsViewer from "../../StatsViewer/StatsViewer.vue"
 	import Tags from "../../Tags.vue";
 
@@ -68,6 +69,7 @@
 		},
 		components: {
 			SettingSection,
+			MasterSwitch,
 			StatsViewer,
 			Tags,
 

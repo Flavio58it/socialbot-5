@@ -12,7 +12,7 @@
 				</div>
 				<div v-if="showsettings" class="col-1 text-right">
 					<a :href="links.settings" target="_blank">
-			          <i class="fa fa-gear"/>
+			          <i class="fa fa-cog"/>
 			        </a>
 				</div>
 				<div class="col-1 text-right">

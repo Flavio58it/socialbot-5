@@ -1,7 +1,7 @@
 import Comm from "./bot/comm";
 
 import storage from "storage";
-import db from "./db/db";
+import db from "./bot/db";
 
 import {
 	getPeriodStats
