@@ -106,8 +106,14 @@
 			}
 		},
 		computed: {
-			status: function () {
-				return this.serverData?this.serverData.status:false
+			status: {
+				set (status) {
+					if (this.serverData)
+						this.serverData.status = status
+				},
+				get () {
+					return this.serverData?this.serverData.status:false
+				}
 			}
 		},
 		components: {

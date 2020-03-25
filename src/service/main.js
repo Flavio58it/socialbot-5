@@ -7,7 +7,7 @@ import {
 	getPeriodStats
 } from "./db/filters"
 
-import actions from "./actions";
+import actions from "./actions/index";
 
 import bootstrap from './bot/bootstrap'
 
@@ -90,8 +90,11 @@ Comm.listen("manager", async function (action, data) {
 
 // Start bot
 bootstrap({
-	Comm
-}).then((plugs) => {plugsInstances = plugs})
+	Comm,
+	onStart: () => {error = false}
+}).then((instances) => {
+	plugsInstances = instances
+})
 
 function getAllInitInfo() {
 	Comm.sendMessage("initInfo", {});

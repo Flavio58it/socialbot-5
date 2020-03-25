@@ -12,8 +12,8 @@ import settings from "./settings"
 // Get enabled plugs list
 import plugs from "../plugs";
 
-export default async function bootstrap({ Comm }) {
-    var plugsInstances = {}
+export default async function bootstrap({ Comm, onStart }) {
+    var instances = {}
 
 	for (let plugIndex = 0; plugIndex < plugs.enabledPlugs.length; plugIndex ++) {
         let plug = plugs.enabledPlugs[plugIndex],
@@ -21,15 +21,15 @@ export default async function bootstrap({ Comm }) {
 	
         let settingsInterface = await new settings(plug);
 	
-		plugsInstances[plug] = {
+		instances[plug] = {
 			settings: settingsInterface,
 			plug: new plugInstantiator(settingsInterface),
 			bot: false
         }
 	}
 
-	for (var i in plugsInstances) {
-		var plugContainer = plugsInstances[i];
+	for (var i in instances) {
+		var plugContainer = instances[i];
 		if (plugContainer.bot)
 			continue;
 
@@ -47,7 +47,7 @@ export default async function bootstrap({ Comm }) {
 
 		// Reset errors on bot boot
 		plugContainer.bot.addListener("start", (t, name) => {
-			error = false;
+			onStart && onStart()
 
 			Comm.sendMessage("backendError", {remove: true, plug: name});
 			// Update settings status
@@ -64,5 +64,5 @@ export default async function bootstrap({ Comm }) {
 		});
     }
     
-    return plugsInstances;
+    return instances;
 }

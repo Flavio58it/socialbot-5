@@ -1,8 +1,6 @@
 import requests from "./requests";
 import waiter from "waiter";
 
-import logger from "../db/logger";
-
 /**
  * ROBOT JS
  * 
@@ -117,7 +115,7 @@ export default function (settings, plug, plugName) {
 			if (events.runstatus)
 				await Promise.resolve(events.runstatus(t, plugName, e));
 
-			if (e.stopped || e.details.stopped) {
+			if (e.stopped || (e.details && e.details.stopped)) {
 				if (rebooting) {
 					console.info("[robot] Rebooting");
 					rebooting = false;
