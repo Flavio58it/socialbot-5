@@ -1,55 +1,84 @@
 <template>
-    <div @click="updateStatus" :class="['btnContainer', stateClass]">
-        <div :class="['button', stateClass]">
-            Start
+    <div @click="updateStatus" :class="['btnContainer', stateClass]" draggable="false">
+        <div :class="['button', stateClass]" draggable="false">
+            <template v-if="stateClass == 'disabled'">
+                Start
+            </template>
+            <template v-else-if="stateClass == 'running'">
+                Stop
+            </template>
+            <template v-else-if="stateClass == 'standby'">
+                Stop
+            </template>
+            <template v-else>
+                Unknown
+            </template>
         </div>
     </div>
 </template>
 
 <style lang="scss" scoped>
     $mainColorSuccess: #4dde67;
-    $mainColorStandby: #f3c473;
-    $mainColorStopped: #c73627;
+    $mainColorStandby: #ff7b00;
+    $mainColorStopped: #e03e2c;
     $mainColorDisabled: #9d9d9d;
 
-    @mixin statuses ($opacity) {
-        transition: background-color 0.3s ease;
+    @mixin statuses ($opacity, $size) {
+        $shadow: 0px 0px 15px 0px;
+
+        width: $size;
+        height: $size;
+        border-radius: $size;
+
+        transition: all 0.3s ease;
+
         &.running {
             background-color: rgba($mainColorDisabled, $opacity);
+            box-shadow: $shadow rgba($mainColorDisabled, $opacity);
         }
 
         &.enabled {
             background-color: rgba($mainColorSuccess, $opacity);
+            box-shadow: $shadow rgba($mainColorSuccess, $opacity);
         }
 
         &.standby {
             background-color: rgba($mainColorStandby, $opacity);
+            box-shadow: $shadow rgba($mainColorStandby, $opacity);
         }
 
         &.disabled {
             background-color: rgba($mainColorStopped, $opacity);
+            box-shadow: $shadow rgba($mainColorStopped, $opacity);
         }
     }
 
     .btnContainer {
         $size: 100px;
-        width: $size;
-        height: $size;
-        border-radius: $size;
+        $centerer: 0.15;
+
         margin: 30px auto;
         position: relative;
         text-align: center;
-        line-height: $size;
         cursor: pointer;
-        
-        @include statuses(0.3);
+        user-select: none;
+        line-height: $size;
+
+        font-weight: bold;
+
+        @include statuses(0.3, $size + 30);
 
         &:hover {
-            @include statuses(0.5);
+            @include statuses(0.5, $size + 30);
         }
 
         .button {
-            @include statuses(0.7);
+            z-index: 1;
+            position: absolute;
+            user-select: none;
+            left: $size * $centerer;
+            top: $size * $centerer;
+            @include statuses(0.65, $size);
         }
     }
 </style>

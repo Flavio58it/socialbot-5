@@ -13,6 +13,7 @@ describe("#MasterSwitch", function () {
 
             chai.expect(wrapper.contains(".btnContainer.disabled")).to.equal(true, 'Should be disabled by default')
             chai.expect(wrapper.contains(".button.disabled")).to.equal(true, 'Should be disabled by default')
+            chai.expect(wrapper.html()).to.contain("Start", "Should have start text")
         })
 
         it("Should have correct values when enabled and running", function () {
@@ -25,6 +26,7 @@ describe("#MasterSwitch", function () {
 
             chai.expect(wrapper.contains(".btnContainer.running")).to.equal(true)
             chai.expect(wrapper.contains(".button.running")).to.equal(true)
+            chai.expect(wrapper.html()).to.contain("Stop", "Should have start text")
         })
 
         it("Should have correct values when enabled and not running", function () {
@@ -37,6 +39,7 @@ describe("#MasterSwitch", function () {
 
             chai.expect(wrapper.contains(".btnContainer.standby")).to.equal(true)
             chai.expect(wrapper.contains(".button.standby")).to.equal(true)
+            chai.expect(wrapper.html()).to.contain("Stop")
         })
 
         it("Should have disabled value when status is invalid", function () {
@@ -49,6 +52,7 @@ describe("#MasterSwitch", function () {
 
             chai.expect(wrapper.contains(".btnContainer.disabled")).to.equal(true)
             chai.expect(wrapper.contains(".button.disabled")).to.equal(true)
+            chai.expect(wrapper.html()).to.contain("Start")
         })
 
         it("Should emit event and become standby when clicked from disabled", async function () {
@@ -72,6 +76,7 @@ describe("#MasterSwitch", function () {
             chai.expect(wrapper.contains(".button.standby")).to.equal(true)
 
             chai.expect(wrapper.emitted()).to.have.deep.property("input", [[true]], "Should emit change to object")
+            chai.expect(wrapper.html()).to.contain("Stop")
         })
     })
 });
