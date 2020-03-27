@@ -9,17 +9,19 @@
 import robot from "./robot";
 import settings from "./settings"
 
-// Get enabled plugs list
-import plugs from "../plugs";
-
-export default async function bootstrap({ Comm, onStart }) {
+export default async function bootstrap({ 
+	Comm, 
+	onStart,
+	plugs,
+	plugInstantiators = {}
+}) {
     var instances = {}
 
 	for (let plugIndex = 0; plugIndex < plugs.enabledPlugs.length; plugIndex ++) {
-        let plug = plugs.enabledPlugs[plugIndex],
-            plugInstantiator = await require(`../plugs/${plug}/${plug}`).default;
+        const plug = plugs.enabledPlugs[plugIndex],
+            plugInstantiator = plugInstantiators[plug]?plugInstantiators[plug]:await require(`../plugs/${plug}/${plug}`).default;
 	
-        let settingsInterface = await new settings(plug);
+        const settingsInterface = await new settings(plug);
 	
 		instances[plug] = {
 			settings: settingsInterface,
