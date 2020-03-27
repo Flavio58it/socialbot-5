@@ -11,15 +11,15 @@ import settings from "./settings"
 
 export default async function bootstrap({ 
 	Comm, 
-	onStart,
 	plugs,
+	
 	plugInstantiators = {}
 }) {
     var instances = {}
 
 	for (let plugIndex = 0; plugIndex < plugs.enabledPlugs.length; plugIndex ++) {
         const plug = plugs.enabledPlugs[plugIndex],
-            plugInstantiator = plugInstantiators[plug]?plugInstantiators[plug]:await require(`../plugs/${plug}/${plug}`).default;
+            plugInstantiator = plugInstantiators[plug] ? plugInstantiators[plug] : await require(`../plugs/${plug}/${plug}`).default;
 	
         const settingsInterface = await new settings(plug);
 	
@@ -30,8 +30,8 @@ export default async function bootstrap({
         }
 	}
 
-	for (var i in instances) {
-		var plugContainer = instances[i];
+	for (const i in instances) {
+		const plugContainer = instances[i];
 		if (plugContainer.bot)
 			continue;
 
