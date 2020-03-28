@@ -13,7 +13,6 @@
 						<MasterSwitch v-model="data.settings.enabled" :running="data.running" @click="$refs.settingsSection.save()"/>
 					</b-tab>
 					<b-tab title="Tags Follower">
-						<div class="description">These tags will be periodically checked and the new posts will be liked</div>
 						<Tags v-model="settings.modules.like.tags"/>
 					</b-tab>
 					<b-tab title="Timings & rates">
