@@ -98,6 +98,7 @@
         methods: {
             updateStatus () {
                 this.$emit("input", !this.value);
+                this.$emit("click", !this.value);
             }
         },
         computed: {

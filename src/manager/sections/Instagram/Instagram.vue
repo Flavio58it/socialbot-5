@@ -1,14 +1,16 @@
 <template>
 	<SettingSection
+		ref="settingsSection"
 		:plug="type" 
 		:settings.sync="settings"
 		@loaded="followFilterManager"
+		:saveButton="selectedTab !== 0"
 	>
 			<template v-slot:left="data">
-				<b-tabs justified>
+				<b-tabs v-model="selectedTab" justified>
 					<b-tab title="Status">
 						<StatsViewer :stats="data.stats"/>
-						<MasterSwitch v-model="data.settings.enabled" :running="data.running"/>
+						<MasterSwitch v-model="data.settings.enabled" :running="data.running" @click="$refs.settingsSection.save()"/>
 					</b-tab>
 					<b-tab title="Tags Follower">
 						<div class="description">These tags will be periodically checked and the new posts will be liked</div>
@@ -48,6 +50,7 @@
 		data () {
 			return {
 				type: "instagram",
+				selectedTab: 0,
 				followConditionsMode: false,
 				settings: false
 			}

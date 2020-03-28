@@ -7,7 +7,7 @@
 		</div>
 		<div v-else-if="settings">
 			<slot :settings="settings" name="left" :stats="serverData.stats" :running="status.running"/>
-			<div class="saveContainer">
+			<div v-if="saveButton" class="saveContainer">
 				<button @click="save" class="btn btn-primary btn-lg float-right save btn-center" title="Save and restart the bot">Save</button>
 			</div>
 		</div>
@@ -49,10 +49,22 @@
 	
 
 	export default {
-		props: [
-			"plug", 
-			"settings"
-		],
+		props: {
+			plug: {
+				type: String,
+				required: true
+			},
+			settings: {
+				type: [Object, Boolean],
+				default () {
+					return {}
+				}
+			},
+			saveButton: {
+				type: Boolean,
+				default: true
+			}
+		},
 		data () {
 			return {
 				serverData: false,
@@ -107,7 +119,7 @@
 		},
 		methods: {
 			save () {
-				this.status = {rebooting: true};
+				this.status = { rebooting: true };
 				this.$send("saveSettings", {
 					plug: this.plug, 
 					settings: this.settings
