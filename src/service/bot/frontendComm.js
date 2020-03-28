@@ -34,7 +34,7 @@ export default class {
 			case "resetDB":
 				db.delete();
 			break;
-			case "getSettings":
+			case "getPlugData":
 				let settings = await this.plugsInstances[data.plug].settings.getAll();
 				let status = this.plugsInstances[data.plug].bot.getStatus();
 				let stats = {
@@ -43,12 +43,18 @@ export default class {
 					today: await getPeriodStats(data.plug, 0, 1)
 				}
 	
-				this.comm.sendMessage("settings", {
+				this.comm.sendMessage("plugData", {
 					plug: data.plug,
 					settings,
 					status,
 					stats
 				});
+			break;
+			case "getPlugDayStats":
+				this.comm.sendMessage("plugDayStats", {
+					plug: data.plug,
+					dayStats: await getPeriodStats(data.plug, 0, 1)
+				})
 			break;
 			case "saveSettings":
 				this.plugsInstances[data.plug].settings.setAll(data.settings).then(() => this.plugsInstances[data.plug].bot.reboot());

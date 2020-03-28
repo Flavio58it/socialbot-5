@@ -56,6 +56,7 @@
 		data () {
 			return {
 				serverData: false,
+				statsUpdateInterval: false,
 				waiting: {
 					id: false,
 					showMessage: false
@@ -67,18 +68,26 @@
 				this.status = data.status;
 		},
 		mounted () {
-			this.$send("getSettings", {plug: this.plug});
+			this.$send("getPlugData", {plug: this.plug});
+		},
+		beforeDestroy () {
+			clearInterval(this.statsUpdateInterval)
 		},
 		message (action, data) {
 			if (data.plug != this.plug)
 				return;
-			if (action == "settings") {
+			if (action == "plugData") {
 				console.log("Received settings data: ", data);
 				this.$emit("update:settings", data.settings);
 				this.serverData = data;
 				this.$emit("loaded");
-			} else if (action == "statusUpdate")
+				this.statsUpdateInterval = setInterval(() => this.$send("getPlugDayStats", { plug: this.plug }), 10000)
+			} else if (action == "statusUpdate") {
 				this.status = data.status;
+			} else if (action === "plugDayStats" && this.serverData && this.serverData.stats) {
+				this.$set(this.serverData.stats, "today", data.dayStats)
+			}
+
 		},
 		watch: {
 			"status.rebooting": function (status) {

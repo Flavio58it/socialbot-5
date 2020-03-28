@@ -49,8 +49,6 @@ export default async function bootstrap({
 
 		// Reset errors on bot boot
 		plugContainer.bot.addListener("start", (t, name) => {
-			onStart && onStart()
-
 			Comm.sendMessage("backendError", {remove: true, plug: name});
 			// Update settings status
 			Comm.sendMessage("statusUpdate", {status: t.getStatus(), plug: name});
