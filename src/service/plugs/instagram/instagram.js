@@ -74,10 +74,14 @@ export default function (settings) {
 				if (!csrf)
 					return await Promise.reject({error: "Init failed"});
 
-				var numberLiked = 0,
+				let numberLiked = 0,
 					rejector = 0; // When a like is rejected this increases. When too much rejections happens, the numberLikes must increase in order to prevent hangs of the system (too strict filters)
 
-				var limit = await settings.get("modules.like.limits.tag")
+				const limit = await settings.get("modules.like.limits.tag"),
+					timers = {
+						lower: await settings.get("waiter.actionLower"),
+						upper: await settings.get("waiter.actionUpper")
+					}
 
 				async function like (pointer) {
 					var nextQuery = format((urls.get.tag), tagName);
@@ -121,7 +125,7 @@ export default function (settings) {
 									liked: numberLiked
 								}
 							
-							await waiter(1000, 5000)
+							await waiter(ms.seconds(timers.lower), ms.seconds(timers.upper))
 
 							let likeCheckResult = await checker.shouldLike(d)
 							if  (!likeCheckResult) {
