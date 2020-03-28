@@ -33,13 +33,13 @@
         transition: all 0.3s ease;
 
         &.running {
-            background-color: rgba($mainColorDisabled, $opacity);
-            box-shadow: $shadow rgba($mainColorDisabled, $opacity);
+            background-color: rgba($mainColorSuccess, $opacity);
+            box-shadow: $shadow rgba($mainColorSuccess, $opacity);
         }
 
         &.enabled {
-            background-color: rgba($mainColorSuccess, $opacity);
-            box-shadow: $shadow rgba($mainColorSuccess, $opacity);
+            background-color: rgba($mainColorStandby, $opacity);
+            box-shadow: $shadow rgba($mainColorStandby, $opacity);
         }
 
         &.standby {

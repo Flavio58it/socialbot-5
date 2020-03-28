@@ -2,11 +2,11 @@
     import { Line, mixins } from 'vue-chartjs'
 
     const colors = [
-        "green",
-        "yellow",
-        "lightblue",
-        "pink",
-        "violet"
+        "#CBEAA6",
+        "#F2E085",
+        "#ACDDE7",
+        "#7D82B8",
+        "#D9CFC1"
     ]
 
    function transformFromCamelCase (string) {

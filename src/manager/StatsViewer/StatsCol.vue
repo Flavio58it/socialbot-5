@@ -2,6 +2,7 @@
     <div class="statsCol">
         <i :class="{
             'fa': true,
+            'fa-2x': !equals,
             'fa-sort-up': isMore && !equals,
             'fa-sort-down': !isMore && !equals,
             'fa-equals': equals
@@ -18,14 +19,22 @@
 
         i{
             padding: 0 10px;
-            vertical-align: middle;
+
+            &.fa-equals {
+                vertical-align: middle;
+                line-height: 30px;
+            }
 
             &.fa-sort-up {
                 color: green;
+                vertical-align: bottom;
+                line-height: 15px;
             }
 
             &.fa-sort-down {
                 color: red;
+                vertical-align: top;
+                line-height: 20px;
             }
         }
 
