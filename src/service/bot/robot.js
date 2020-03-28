@@ -200,8 +200,8 @@ export default function (settings, plug, plugName) {
 
 	// Simple timer that waits n ms before restarting server
 	async function triggerTimer () {
-		var waitTime = await settings.get("waiter")
-		await waiter(wait.roundPause * 1000 * 60);
+		var waitTime = await settings.get("waiter.roundPause")
+		await waiter(waitTime * 1000 * 60);
 
 		(!running)&&t.start();
 	}
