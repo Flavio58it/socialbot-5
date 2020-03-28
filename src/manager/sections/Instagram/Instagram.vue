@@ -5,7 +5,7 @@
 		@loaded="followFilterManager"
 	>
 			<template v-slot:left="data">
-				<b-tabs>
+				<b-tabs justified>
 					<b-tab title="Status">
 						<StatsViewer :stats="data.stats"/>
 						<MasterSwitch v-model="data.settings.enabled" :running="data.running"/>
