@@ -64,10 +64,16 @@ const lib = {
 	likeUserPosts: async function ({username, csrf, limit, checker, log}) {
 		var userData = await lib.getUserData(username);
 
+		if (!userData.posts) {
+			console.warn("No posts")
+			return;
+		}
+
 		const len = userData.posts.list.length;
 		if (len === 0)
 			return;
 			
+		// Like images randomly in the list
 		var randNumbers = randomArray(limit, 0, len - 1);
 
 		for (let i = 0; i < len; i++) {
@@ -81,9 +87,8 @@ const lib = {
 					var likedPost = await lib.likePost(details.id, csrf);
 					userData.img = details.src;
 					await log.userInteraction("LIKEBACK", userData, {})
-					await waiter(ms.seconds(1), ms.seconds(5))
-				} else
-					await waiter(ms.seconds(1), ms.seconds(5)); // Do not like but wait anyway... a call has been made!
+				}
+				await waiter(ms.seconds(1), ms.seconds(5));
 			}
 		}	
 	},

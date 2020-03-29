@@ -40,6 +40,7 @@ export default {
 		"graphql.shortcode_media.viewer_has_liked": "liked"
 	},
 	user: { // User homepage (dashboard + posts)
+		// Old version
 		"user.username": "username",
 		"user.full_name": "fullName",
 		"user.id": "id",
@@ -54,7 +55,24 @@ export default {
 		"user.media.nodes[].likes.count": "posts.list[].likes",
 		"user.media.nodes[].thumbnail_src": "posts.list[].src",
 		"user.media.nodes[].code": "posts.list[].code",
-		"user.media.nodes[].is_video": "posts.list[].video"
+		"user.media.nodes[].is_video": "posts.list[].video",
+
+		// New Version - 290320
+		"graphql.user.username": "username",
+		"graphql.user.full_name": "fullName",
+		"graphql.user.id": "id",
+		"graphql.user.profile_pic_url": "img",
+		"graphql.user.edge_followed_by.count": "followedBy",
+		"graphql.user.edge_follow.count": "follows",
+		"graphql.user.biography": "bio",
+		"graphql.user.follows_viewer": "followMe",
+		"graphql.user.has_blocked_viewer": "blocked",
+		"graphql.user.edge_owner_to_timeline_media.page_info.end_cursor": "posts.nextPage",
+		"graphql.user.edge_owner_to_timeline_media.edges[].node.id": "posts.list[].id",
+		"graphql.user.edge_owner_to_timeline_media.edges[].node.likes.count": "posts.list[].likes",
+		"graphql.user.edge_owner_to_timeline_media.edges[].node.thumbnail_src": "posts.list[].src",
+		"graphql.user.edge_owner_to_timeline_media.edges[].node.shortcode": "posts.list[].code",
+		"graphql.user.edge_owner_to_timeline_media.edges[].node.is_video": "posts.list[].video"
 	},
 	users: {
 		"users[].user.username": "[].username",

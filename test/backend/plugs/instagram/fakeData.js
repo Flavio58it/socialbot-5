@@ -1,7 +1,7 @@
 export function user (userId, userName) {
     return {
         user: {
-            id: 998,
+            id: userId || 998,
             username: userName || "tester",
             full_name: "Tester",
             media: {
