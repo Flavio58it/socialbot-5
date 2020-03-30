@@ -123,6 +123,10 @@ describe("@actions", function () {
                 csrf: "1", 
                 limit: "4", 
                 checker: false, 
+                waitTime: {
+                    min:1,
+                    max:1
+                },
                 log: {userInteraction: fakedLogger}
             }).then(() => {
                 chai.expect(server.requests.length).to.equal(2)
@@ -203,6 +207,10 @@ describe("@actions", function () {
                 csrf: "1", 
                 limit: "4", 
                 checker: false, 
+                waitTime: {
+                    min:1,
+                    max:1
+                },
                 log: {userInteraction: fakedLogger}
             }).then(() => {
                 chai.expect(server.requests.length).to.equal(5)
@@ -289,6 +297,10 @@ describe("@actions", function () {
                 csrf: "1", 
                 limit: "4", 
                 checker: false, 
+                waitTime: {
+                    min:1,
+                    max:1
+                },
                 log: {userInteraction: fakedLogger}
             }).then(() => {
                 chai.expect(server.requests.length).to.equal(5)
@@ -329,6 +341,10 @@ describe("@actions", function () {
                 csrf: "1", 
                 limit: "4", 
                 checker: false, 
+                waitTime: {
+                    min:1,
+                    max:1
+                },
                 log: {userInteraction: fakedLogger}
             }).then(() => {
                 chai.expect(server.requests.length).to.equal(1)

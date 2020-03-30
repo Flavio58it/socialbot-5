@@ -403,6 +403,10 @@ export default function (settings) {
 
 				var notifications = await actions.getNotifications(),
 					likeBackSettings = await settings.get("modules.likeBack"),
+					waitTime = {
+						min: await settings.get("waiter.actionLower"),
+						max: await settings.get("waiter.actionUpper")
+					},
 					now = new Date().getTime(), 
 					likebacked = 0;
 
@@ -429,6 +433,7 @@ export default function (settings) {
 								instance: checker,
 								shouldCheck: likeBackSettings.useLikeFilters
 							},
+							waitTime,
 							log
 						});
 

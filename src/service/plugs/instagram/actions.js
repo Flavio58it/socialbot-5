@@ -61,10 +61,10 @@ const lib = {
 		var notifications = await decodeObject(urls.get.notifications);
 		return objectMapper(notifications, mappers.notifications);
 	},
-	likeUserPosts: async function ({username, csrf, limit, checker, log}) {
-		var userData = await lib.getUserData(username);
+	likeUserPosts: async function ({username, csrf, limit, checker, log, waitTime}) {
+		var userData = await lib.getUserData(username)
 
-		if (!userData.posts) {
+		if (!userData.posts || !userData.posts.list) {
 			console.warn("No posts")
 			return;
 		}
@@ -88,7 +88,7 @@ const lib = {
 					userData.img = details.src;
 					await log.userInteraction("LIKEBACK", userData, {})
 				}
-				await waiter(ms.seconds(1), ms.seconds(5));
+				await waiter(ms.seconds(waitTime.min), ms.seconds(waitTime.max));
 			}
 		}	
 	},
