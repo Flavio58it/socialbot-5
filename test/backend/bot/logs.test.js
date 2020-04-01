@@ -4,6 +4,7 @@ describe("#logs()", function () {
 
     beforeEach(function () {
         logs.clearLogs()
+        logs.clearEvent()
     })
 
     context ("@Logger", function () {
@@ -89,6 +90,58 @@ describe("#logs()", function () {
             chai.expect(logListAfter[0].toRead).to.equal(false)
             chai.expect(logListAfter[1].toRead).to.equal(false)
         })
+
+        it ("Should trigger events", function () {
+            const fakeError = sinon.fake()
+            const fakeWarn = sinon.fake()
+            const fakeInfo = sinon.fake()
+            const fakeLog = sinon.fake()
+
+            const fakeClear = sinon.fake()
+            const fakeRead = sinon.fake()
+
+            logs.attachEvent("error", fakeError)
+            logs.attachEvent("warn", fakeWarn)
+            logs.attachEvent("info", fakeInfo)
+            logs.attachEvent("log", fakeLog)
+
+            logs.attachEvent("clear", fakeClear)
+            logs.attachEvent("read", fakeRead)
+
+    
+            logs.logError({
+                id: "ERROR_TYPE",
+                message: "Ugly error happened"
+            })
+
+            logs.logError({
+                id: "ERROR_TYPE",
+                message: "Ugly error happened"
+            })
+    
+            logs.logWarn({
+                id: "WARN",
+                message: "Ugly error happened"
+            })
+
+            logs.logInfo({
+                id: "INFO",
+                message: "Ugly error happened"
+            })
+
+            chai.expect(fakeError.callCount).to.equal(2)
+            chai.expect(fakeWarn.callCount).to.equal(1)
+            chai.expect(fakeInfo.callCount).to.equal(1)
+            chai.expect(fakeLog.callCount).to.equal(4)
+
+            logs.setLogAsRead()
+
+            chai.expect(fakeRead.callCount).to.equal(1)
+
+            logs.clearLogs()
+
+            chai.expect(fakeClear.callCount).to.equal(1)
+        })
     
     })
 
@@ -121,6 +174,30 @@ describe("#logs()", function () {
             chai.expect(logList[0].id).to.equal(1)
             chai.expect(logList[0].data.id).to.equal("ERROR_TYPE 1")
             chai.expect(logList[0].plug).to.not.exist
+        })
+
+        it ("Should trigger events", function () {
+            const logger = new PlugLogger("testplug")
+
+            const fakeError = sinon.fake()
+            const fakeLog = sinon.fake()
+
+            logs.attachEvent("error", fakeError)
+            logs.attachEvent("log", fakeLog)
+
+    
+            logger.logError({
+                id: "ERROR_TYPE 1",
+                message: "Ugly error happened"
+            })
+    
+            logger.logError({
+                id: "ERROR_TYPE 2",
+                message: "Ugly error happened"
+            })
+
+            chai.expect(fakeError.callCount).to.equal(2)
+            chai.expect(fakeLog.callCount).to.equal(2)
         })
     })
 })
