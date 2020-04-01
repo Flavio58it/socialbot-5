@@ -8,6 +8,7 @@
 
 import robot from "./robot";
 import settings from "./settings"
+import logs, { PlugLogger } from "./logs"
 
 export default async function bootstrap({ 
 	Comm, 
@@ -15,7 +16,17 @@ export default async function bootstrap({
 	
 	plugInstantiators = {}
 }) {
-    var instances = {}
+	var instances = {}
+	
+	logs.clearEvent()
+	// Implement realtime logging to frontend and popup
+	logs.attachEvent("log", function () {
+		Comm.sendMessage("logs", logs.getLogs());
+	})
+
+	logs.attachEvent("clear", function () {
+		Comm.sendMessage("logs", logs.getLogs());
+	})
 
 	for (let plugIndex = 0; plugIndex < plugs.enabledPlugs.length; plugIndex ++) {
         const plug = plugs.enabledPlugs[plugIndex],
@@ -26,6 +37,7 @@ export default async function bootstrap({
 		instances[plug] = {
 			settings: settingsInterface,
 			plug: new plugInstantiator(settingsInterface),
+			logger: new PlugLogger(plug),
 			bot: false
         }
 	}
@@ -49,7 +61,7 @@ export default async function bootstrap({
 
 		// Reset errors on bot boot
 		plugContainer.bot.addListener("start", (t, name) => {
-			Comm.sendMessage("backendError", {remove: true, plug: name});
+			logs.setLogAsRead() // TODO: Should clear only for starting plug
 			// Update settings status
 			Comm.sendMessage("statusUpdate", {status: t.getStatus(), plug: name});
 		});

@@ -1,5 +1,6 @@
 import storage from "storage";
 import db from "./db";
+import logs from "./logs"
 
 import {
 	getPeriodStats
@@ -96,7 +97,7 @@ export default class {
 			break;
 		}
 		if (this.error) { // Sure?
-			this.comm.sendMessage("backendError", { error: this.error });
+			logs.logError(this.error, data.plug || undefined)
 			this.error = false;
 		}
 	}
