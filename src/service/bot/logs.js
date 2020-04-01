@@ -4,19 +4,19 @@ class Logger {
         this.batchLength = batchLength || 10
     }
 
-    logError (data) {
+    logError (data, plug) {
         console.error(data)
-        this._pushLog("error", data)
+        this._pushLog("error", data, plug)
     }
 
-    logWarn (data) {
+    logWarn (data, plug) {
         console.warn(data)
-        this._pushLog("warn", data)
+        this._pushLog("warn", data, plug)
     }
 
-    logInfo (data) {
+    logInfo (data, plug) {
         console.info(data)
-        this._pushLog("info", data)
+        this._pushLog("info", data, plug)
     }
 
     getLogs (startPoint = 0) {
@@ -40,10 +40,11 @@ class Logger {
         this.logs = []
     }
 
-    _pushLog (type, data) {
+    _pushLog (type, data, plug) {
         this.logs.push({
             id: this.logs.length + 1,
             toRead: true,
+            plug,
             time: new Date(),
             type,
             data
@@ -51,4 +52,27 @@ class Logger {
     }
 }
 
-export default new Logger()
+const mainLogger = new Logger()
+
+class PlugLogger {
+    constructor (plugName) {
+        this.plug = plugName
+    }
+
+    logError (data) {
+        mainLogger.logError(data, this.plug)
+    }
+
+    logWarn (data) {
+        mainLogger.logWarn(data, this.plug)
+    }
+
+    logInfo (data) {
+        mainLogger.logInfo(data, this.plug)
+    }
+}
+
+export {
+    mainLogger as default,
+    PlugLogger
+}
