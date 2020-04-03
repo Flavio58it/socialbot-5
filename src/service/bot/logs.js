@@ -142,7 +142,7 @@ class Logger {
             id: this.logs.length + 1,
             toRead: true,
             plug,
-            time: new Date(),
+            time: new Date().getTime(),
             type,
             data
         })

@@ -18,19 +18,30 @@ export default async function bootstrap({
 }) {
 	var instances = {}
 	
-	logs.clearEvent()
 	// Implement realtime logging to frontend and popup
+	// These logs for a user are notifications, so in frontend are called notifications
+	logs.clearEvent()
 	logs.attachEvent("log", function () {
-		Comm.sendMessage("logs", logs.getLogs());
+		Comm.sendMessage("notifications", logs.getLogs());
 	})
 
 	logs.attachEvent("clear", function () {
-		Comm.sendMessage("logs", logs.getLogs());
+		Comm.sendMessage("notifications", logs.getLogs());
 	})
 
-	for (let plugIndex = 0; plugIndex < plugs.enabledPlugs.length; plugIndex ++) {
-        const plug = plugs.enabledPlugs[plugIndex],
-            plugInstantiator = plugInstantiators[plug] ? plugInstantiators[plug] : await require(`../plugs/${plug}/${plug}`).default;
+	logs.attachEvent("read", function () {
+		Comm.sendMessage("notifications", logs.getLogs());
+	})
+
+	if (!plugs.enabledPlugs)
+		throw Error("Missing plugs config")
+
+	for (const plug in plugs.enabledPlugs) {
+		const plugData = plugs.enabledPlugs[plug]
+		if (plugData.enabled !== true)
+			continue;
+
+		const plugInstantiator = plugInstantiators[plug] ? plugInstantiators[plug] : await require(`../plugs/${plug}/${plug}`).default;
 	
         const settingsInterface = await new settings(plug);
 	

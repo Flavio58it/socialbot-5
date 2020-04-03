@@ -62,22 +62,28 @@
 
 <script>
 	import ErrorDash from "components/ErrorDash.vue";
+	import config from "../config"
 
 	export default {
 		data () {
 			return {
-				// TODO: Get cats from backend
 				showAdvanced: false,
-				cats: {
-					instagram: {text: "Instagram"},
-					fivehpx: {text: "500px"},
-					flickr: {text: "Flickr"}
-				}
+				cats: {}
 			}
 		},
 		methods: {
 			navigate (section) {
 				this.$router.push("/settings/" + section)
+			}
+		},
+		created () {
+			for (let plug in config.plugs) {
+				let plugConf = config.plugs[plug]
+
+				if (plugConf.enabled)
+					this.cats[plug] = {
+						text: plugConf.completeName || plug
+					}
 			}
 		},
 		components: {

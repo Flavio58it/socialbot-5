@@ -17,7 +17,7 @@
 				</div>
 				<div v-else class="col-1"></div>
 				<div class="col-1 text-right">
-					<i class="fa fa-bell"></i> <!-- Notification system (unified) -->
+					<Notificator />
 				</div>
 			</div>
 		</div>
@@ -43,6 +43,8 @@
 </style>
 
 <script>
+	import Notificator from "./Notificator.vue";
+
 	export default {
 		props: {
 			showsettings:{
@@ -62,6 +64,9 @@
 		          home: chrome.extension.getURL('/pages/manager.html#/')
 		        }
 		    }
+		},
+		components: {
+			Notificator
 		}
 	}
 </script>

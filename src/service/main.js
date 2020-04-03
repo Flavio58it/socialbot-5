@@ -4,7 +4,7 @@ import bootstrap from './bot/bootstrap'
 import frontendComm from './bot/frontendComm'
 
 // Get enabled plugs list
-import plugs from "./plugs";
+import { plugs } from "../config";
 
 let error = false
 

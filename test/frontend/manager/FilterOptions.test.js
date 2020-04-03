@@ -6,19 +6,7 @@ Vue.use(BootstrapVue)
 
 import FilterOptions from '../../../src/manager/FilterOptions.vue'
 
-const modalStub = () => ({
-    data () {
-        return {
-            shown: false
-        }
-    },
-    methods: {
-        show () {
-            this.shown = true
-        }
-    },
-    template:'<div v-if="shown"><slot></slot></div>'
-})
+import modalStub from '../../utils/ModalStub'
 
 describe("#filterOptions", function () {
     var emitted = []

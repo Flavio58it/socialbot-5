@@ -4,6 +4,17 @@ import Vue from 'vue'
 
 Vue.use(BootstrapVue)
 
+import * as config from "../../../src/config.js"
+
+config.default = {
+    plugs: {
+        testplug: {
+            enabled: true,
+            fontawesomeIcon: "fa-test-icon"
+        }
+    }
+}
+
 import LogScraper from '../../../src/shared/components/LogScraper.vue'
 
 describe("#LogScraper", function () {
@@ -44,7 +55,8 @@ describe("#LogScraper", function () {
         })
     
         it ('Check if filter selection works', async function () {
-            const button = wrapper.find('a .fa-instagram')
+            const button = wrapper.find('a .fa-test-icon')
+
             button.trigger('click')
     
             await Vue.nextTick()
@@ -53,9 +65,9 @@ describe("#LogScraper", function () {
     
             chai.expect(btn).to.equal(false)
     
-            btn = wrapper.contains('.selected .fa-instagram')
+            btn = wrapper.contains('.selected .fa-test-icon')
     
-            chai.expect(btn).to.equal(true, "The new selected category should be instagram")
+            chai.expect(btn).to.equal(true, "The new selected category should be testplug")
         })
     })
 

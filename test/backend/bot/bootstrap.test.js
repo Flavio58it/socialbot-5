@@ -72,9 +72,14 @@ describe("#bootstrap()", function () {
     const testObject = {
         Comm: fakeComm,
         plugs: {
-            enabledPlugs: [
-                "testplug"
-            ]
+            enabledPlugs: {
+                testplug: {
+                    enabled: true
+                },
+                otherplug: {
+                    enabled: false
+                }
+            }
         },
         plugInstantiators: {
             testplug: function () {
