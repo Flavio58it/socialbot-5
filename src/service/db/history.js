@@ -52,3 +52,56 @@ function isSameDay(dateToCheck, actualDate) {
         dateToCheck.getFullYear() === actualDate.getFullYear()
     )
 }
+
+export class interactor {
+    /**
+     * Insert interactions into history table
+     * @param {Object} settings Settings of interactor class
+     * * plug: Plug name. Defaults to _generic_
+     */
+    constructor ({plug = "_generic_"} = {}) {
+        this.plug = plug
+    }
+
+    /**
+     * 
+     * @param {String} type Type of user interaction
+     * * LIKE
+     * * LIKEBACK
+     * * FOLLOWBACK
+     * * UNFOLLOW
+     * * NEW
+     * * COMMENT
+     * @param {Object} userData User details related to liked post
+     * * img
+     * * userId
+     * * username
+     * @param {Object} extraData Data related to post action
+     * * isVideo
+     * * tag
+     */
+
+    userInteraction (type, userData, extraData) {
+        var data = {
+            username: "Unknown",
+            ...extraData, 
+            ...userData
+        };
+
+        console.log(`[${this.plug}] Adding interaction ${type} - DATA: `, data);
+        return db.history.add({
+            plug: this.plug,
+            action: "USER_" + type.toUpperCase(),
+            details: {
+                img: data.img, // Can be also img of the user if is followback etc.
+                imgId: data.id,
+                userId: data.userId,
+                userName: data.username,
+                video: data.isVideo,
+                //comment: data.comment || undefined,
+                tag: data.tag || undefined
+            },
+            time: new Date().getTime()
+        })
+    }
+}

@@ -1,7 +1,7 @@
 import format from "string-template";
 import urlParams from "url-params";
 import waiter from "waiter";
-import logger from "../../db/logger";
+import { interactor } from "../../db/history";
 import ms from "milliseconds";
 import Users from "../../db/users";
 import objectMapper from "object-mapper";
@@ -27,7 +27,7 @@ export var cache = {
 
 export default function (settings) {
 	var csrf = false, query_id = false, user = false,
-		log = new logger({type: "instagram"}),
+		history = new interactor({plug: "instagram"}),
 		dbUser = new Users("instagram"),
 		checker = false;
 
@@ -130,7 +130,7 @@ export default function (settings) {
 							let likeCheckResult = await checker.shouldLike(d)
 							if  (!likeCheckResult) {
 								console.warn("Like rejected by police");
-								//log.userInteraction(e.id, d, {tag: tagName});
+								//history.userInteraction(e.id, d, {tag: tagName});
 								rejector++;
 								if (rejector > 5) { // Like reject protection system. See the declaration of the var for explanation.
 									numberLiked++;
@@ -150,7 +150,7 @@ export default function (settings) {
 								await Promise.reject(e)
 							}
 
-							log.userInteraction("LIKE", d, {tag: tagName});
+							history.userInteraction("LIKE", d, {tag: tagName});
 
 							numberLiked++;
 						}
@@ -221,7 +221,7 @@ export default function (settings) {
 							let likeCheckResult = await checker.shouldLike(post)
 							if  (!likeCheckResult) {
 								console.warn("[likeDashboard] Like rejected by police");
-								//log.userInteraction(e.id, d, {tag: tagName});
+								//history.userInteraction(e.id, d, {tag: tagName});
 								rejector++;
 								if (rejector > 5) { // Like reject protection system. See the declaration of the var for explanation.
 									numberLiked++;
@@ -233,7 +233,7 @@ export default function (settings) {
 							}
 							let likeResult = await actions.likePost(post.id, csrf);
 	
-							log.userInteraction("LIKE", post);
+							history.userInteraction("LIKE", post);
 	
 							numberLiked++;
 	
@@ -368,7 +368,7 @@ export default function (settings) {
 						let followResult = await actions.followUser(us.id)
 						
 						if (followResult) {
-							await log.userInteraction("FOLLOWBACK", {
+							await history.userInteraction("FOLLOWBACK", {
 								img: us.img,
 								userId: us.id,
 								username: us.username
@@ -434,7 +434,7 @@ export default function (settings) {
 								shouldCheck: likeBackSettings.useLikeFilters
 							},
 							waitTime,
-							log
+							history
 						});
 
 						let res = await dbUser.editUserData(notification.id, {

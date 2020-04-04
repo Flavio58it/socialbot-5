@@ -61,7 +61,7 @@ const lib = {
 		var notifications = await decodeObject(urls.get.notifications);
 		return objectMapper(notifications, mappers.notifications);
 	},
-	likeUserPosts: async function ({username, csrf, limit, checker, log, waitTime}) {
+	likeUserPosts: async function ({username, csrf, limit, checker, history, waitTime}) {
 		var userData = await lib.getUserData(username)
 
 		if (!userData.posts || !userData.posts.list) {
@@ -86,7 +86,7 @@ const lib = {
 				if (!post.liked) {
 					var likedPost = await lib.likePost(details.id, csrf);
 					userData.img = details.src;
-					await log.userInteraction("LIKEBACK", userData, {})
+					await history.userInteraction("LIKEBACK", userData, {})
 				}
 				await waiter(ms.seconds(waitTime.min), ms.seconds(waitTime.max));
 			}

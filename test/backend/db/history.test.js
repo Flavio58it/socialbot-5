@@ -1,6 +1,7 @@
 import {
-    getPeriodStats
-} from "../../../src/service/db/filters"
+    getPeriodStats,
+    interactor
+} from "../../../src/service/db/history"
 
 import db from "../../../src/service/bot/db"
 
@@ -89,6 +90,40 @@ describe("#db.filters", function () {
             var data = await getPeriodStats("instagram", 0, 30, {sum: true});
 
             chai.expect(data).to.have.property("likes", 4);
+        })
+    })
+
+    context ("@userInteraction", function () {
+        it ("Should log one event to history", async function () {
+            const int = new interactor({plug: "testplug"})
+
+            chai.expect(int).to.be.an("object")
+
+            int.userInteraction("LIKE", {
+                img: "testImg",
+                id: "test",
+                userId: "UID",
+                isVideo: false,
+                username: "TestUserName",
+                tag: "tag"
+            })
+
+            const result = await db.history.toArray()
+
+            chai.expect(result).to.be.lengthOf(1)
+            chai.expect(result[0]).to.have.property("plug", "testplug")
+            chai.expect(result[0]).to.have.property("action", "USER_LIKE")
+
+            console.log(result[0].details)
+            chai.expect(result[0].details).to.deep.equal({
+                img: "testImg", 
+                imgId: "test",
+                userId: "UID",
+                userName: "TestUserName",
+                video: false, 
+                tag: "tag"
+            })
+            chai.expect(result[0].time).to.be.an("number")
         })
     })
 })

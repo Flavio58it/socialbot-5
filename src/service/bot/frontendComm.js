@@ -4,7 +4,7 @@ import logs from "./logs"
 
 import {
 	getPeriodStats
-} from "../db/filters"
+} from "../db/history"
 
 import actions from "../actions/index";
 

@@ -127,7 +127,7 @@ describe("@actions", function () {
                     min:1,
                     max:1
                 },
-                log: {userInteraction: fakedLogger}
+                history: {userInteraction: fakedLogger}
             }).then(() => {
                 chai.expect(server.requests.length).to.equal(2)
                 chai.expect(fakedLogger.callCount).to.equal(1)
@@ -211,7 +211,7 @@ describe("@actions", function () {
                     min:1,
                     max:1
                 },
-                log: {userInteraction: fakedLogger}
+                history: {userInteraction: fakedLogger}
             }).then(() => {
                 chai.expect(server.requests.length).to.equal(5)
                 chai.expect(fakedLogger.callCount).to.equal(2)
@@ -301,7 +301,7 @@ describe("@actions", function () {
                     min:1,
                     max:1
                 },
-                log: {userInteraction: fakedLogger}
+                history: {userInteraction: fakedLogger}
             }).then(() => {
                 chai.expect(server.requests.length).to.equal(5)
                 chai.expect(fakedLogger.callCount).to.equal(2)
@@ -345,7 +345,7 @@ describe("@actions", function () {
                     min:1,
                     max:1
                 },
-                log: {userInteraction: fakedLogger}
+                history: {userInteraction: fakedLogger}
             }).then(() => {
                 chai.expect(server.requests.length).to.equal(1)
                 chai.expect(fakedLogger.callCount).to.equal(0)
