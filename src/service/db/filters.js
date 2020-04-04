@@ -39,7 +39,7 @@ export async function getPeriodStats (
     // Seems to be PAINFULLY slow.
     async function getData (action, offsetDay) {
         var time = new Date(new Date().getTime() - (offsetDay * 24 * 60 * 60 * 1000));
-        return await db.logs.where({plug, action})
+        return await db.history.where({plug, action})
             .filter((row) => isSameDay(new Date(row.time), time))
             .count()
     }

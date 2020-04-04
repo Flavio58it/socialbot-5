@@ -5,7 +5,7 @@ import db from "../../../src/service/bot/db";
 describe("directAction()", function () {
     beforeEach(function () {
         // Reset database
-        return db.logs.clear().then(() => db.users.clear())
+        return db.history.clear().then(() => db.users.clear())
     });
 
     it("whitelistUser - Should create user and whitelist it", function () {

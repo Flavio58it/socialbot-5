@@ -13,7 +13,7 @@ export default function (settings) {
 		userInteraction (type, userData, details) { // Types: LIKE, LIKEBACK, FOLLOWBACK, UNFOLLOW, NEW, COMMENT
 			var details = details || {};
 			console.log("Logging action: ", type," Data: ", userData, "Details", details);
-			return db.logs.add({
+			return db.history.add({
 				plug: settings.type,
 				action: "USER_" + type.toUpperCase(),
 				details: {

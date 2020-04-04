@@ -19,7 +19,7 @@ async function mockDbLogEntries(
     var date = new Date().getTime() - (dateOffsetFromNow * 1000 * 60 * 60 * 24 - dateMillisOffset);
 
     for (let i = 0; i < qty; i++) {
-        await db.logs.add({
+        await db.history.add({
             plug,
             action: eventName,
             details,
@@ -31,7 +31,7 @@ async function mockDbLogEntries(
 describe("#db.filters", function () {
 
     beforeEach(async function () {
-        await db.logs.clear()
+        await db.history.clear()
         await db.users.clear()
     })
 

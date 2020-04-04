@@ -62,6 +62,7 @@ export default class {
 			break;
 	
 			case "getUsers": 
+			// TODO: Cache this costly call
 				this.plugsInstances[data.plug].bot.getPlug().then((plug) => {
 					return plug.actions.followManager(true);
 				}).then((users) => {
@@ -74,7 +75,7 @@ export default class {
 				})
 			break;
 			case "getLogs": 
-				var prom = db.logs;
+				var prom = db.history;
 				if (data.filter != "all")
 					prom = prom.where("plug").equals(data.filter)
 				if (data.limit)
