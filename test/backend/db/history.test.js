@@ -1,6 +1,7 @@
 import {
     getPeriodStats,
-    interactor
+    interactor,
+    getHistory
 } from "../../../src/service/db/history"
 
 import db from "../../../src/service/bot/db"
@@ -124,6 +125,30 @@ describe("#db.filters", function () {
                 tag: "tag"
             })
             chai.expect(result[0].time).to.be.an("number")
+        })
+    })
+
+    context("@getHistory", function () {
+        it ("Should get all entries", async function () {
+            await mockDbLogEntries("LIKE", 1, 1, {plug: "test1"})
+            await mockDbLogEntries("LIKE", 1, 1, {plug: "test2"})
+            await mockDbLogEntries("LIKE", 1, 1, {plug: "test3"})
+
+            const history = await getHistory()
+
+            chai.expect(history).to.be.lengthOf(3)
+            chai.expect(history[0]).to.have.property("plug", "test3", "The entries must be inverted")
+        })
+
+        it ("Should get filtered entries", async function () {
+            await mockDbLogEntries("LIKE", 1, 1, {plug: "test1"})
+            await mockDbLogEntries("LIKE", 1, 2, {plug: "test2"})
+            await mockDbLogEntries("LIKE", 1, 1, {plug: "test3"})
+
+            const history = await getHistory("test2")
+
+            chai.expect(history).to.be.lengthOf(2)
+            chai.expect(history[0]).to.have.property("plug", "test2", "Correct entry must be present")
         })
     })
 })

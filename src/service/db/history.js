@@ -53,6 +53,25 @@ function isSameDay(dateToCheck, actualDate) {
     )
 }
 
+/**
+ * 
+ * @param {String} filter Filter of which plugs are available
+ * @param {Number} limit 
+ */
+
+export async function getHistory (filter = "all", limit = 10) {
+    let query = db
+        .history
+
+    if (filter !== "all")
+        query = query.where("plug").equals(filter)
+
+    return query
+        .limit(limit)
+        .reverse()
+        .toArray()
+}
+
 export class interactor {
     /**
      * Insert interactions into history table

@@ -3,7 +3,8 @@ import db from "./db";
 import logs from "./logs"
 
 import {
-	getPeriodStats
+	getPeriodStats,
+	getHistory
 } from "../db/history"
 
 import actions from "../actions/index";
@@ -75,15 +76,9 @@ export default class {
 				})
 			break;
 			case "getLogs": 
-				var prom = db.history;
-				if (data.filter != "all")
-					prom = prom.where("plug").equals(data.filter)
-				if (data.limit)
-					prom = prom.limit(data.limit)
-				prom = prom.reverse();
-				prom.toArray().then((data) => {
-					this.comm.sendMessage("logs", {list: data, forWhich: data.forWhich});
-				});
+				const history = await getHistory(data.filter, data.limit)
+
+				this.comm.sendMessage("logs", {list: history, forWhich: data.forWhich});
 			break;
 			// Direct operations to users by popup page and followManager
 			// Perform operation by bot type
