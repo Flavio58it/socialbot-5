@@ -3,7 +3,7 @@ export default {
         instagram: {
             enabled: true,
             completeName: "Instagram",
-            fontawesomeIcon: "fa-br-instagram"
+            fontawesomeIcon: "fa-instagram"
         }
     }
 }

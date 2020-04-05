@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div id="notificationsContainer">
         <i @click="toggleModal" class="fa fa-bell notifButton" />
         <div v-show="visible" id="notifications">
             <template v-if="notifications.length">
@@ -23,11 +23,18 @@
 </template>
 
 <style lang="scss" scoped>
+    #notificationsContainer {
+        position: relative;
+    }
+    
     #notifications {
         min-height: 50px;
-        background: $background-color-darker;
+        z-index: 2;
+        background: $background-color;
         border: 1px solid $font-color;
         border-radius: 2px;
+        width: 600px;
+        max-width: 100vw;
 
         -webkit-box-shadow: 0px 0px 19px -2px rgba(0,0,0,0.75);
         -moz-box-shadow: 0px 0px 19px -2px rgba(0,0,0,0.75);
@@ -35,8 +42,11 @@
 
         .noNotifs {
             text-align: center;
-            padding-top: 25px;
+            line-height: 100px;
         }
+    }
+    .notifButton {
+        cursor: pointer;
     }
 </style>
 
@@ -62,7 +72,15 @@
             const container = this.$el.querySelector("#notifications")
 
             this.popperInstance = createPopper(button, container, {
-                placement: "top-end"
+                placement: "top-end",
+                modifiers: [
+                    {
+                        name: 'offset',
+                        options: {
+                            offset: [5, 20],
+                        },
+                    },
+                ]
             })
         },
         beforeDestroy () {
@@ -72,6 +90,9 @@
         methods: {
             toggleModal () {
                 this.visible = !this.visible
+                this.$nextTick(() => {
+                    this.popperInstance.forceUpdate()
+                })
             },
             getNotifIcon (notification) {
                 if (notification.plug && config.plugs[notification.plug])
