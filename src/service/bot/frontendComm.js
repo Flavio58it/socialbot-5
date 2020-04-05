@@ -5,7 +5,9 @@ import logs from "./logs"
 import {
 	getPeriodStats,
 	getHistory
-} from "../db/history"
+} from "../db/History"
+
+import Users from "../db/Users"
 
 import actions from "../actions/index";
 
@@ -63,17 +65,22 @@ export default class {
 			break;
 	
 			case "getUsers": 
-			// TODO: Cache this costly call
-				this.plugsInstances[data.plug].bot.getPlug().then((plug) => {
-					return plug.actions.followManager(true);
-				}).then((users) => {
-					this.comm.sendMessage("usersData", {list: users, plug: data.plug});
-				}).catch((_error) => {
+				try {
+					const plugInstance = await this.plugsInstances[data.plug].bot.getPlug()
+
+					// Provide cache immediately
+					const cachedUsers = await Users.getAllUsers()
+					await this.comm.sendMessage("usersData", {list: cachedUsers, plug: data.plug, cached: true});
+
+					// Fetch users nominally updating the cache for next time and resending it
+					const users = await plugInstance.actions.followManager(true);
+					await this.comm.sendMessage("usersData", {list: users, plug: data.plug});
+				} catch (_error) {
 					this.error = {
 						plug: data.plug,
 						data: _error
 					}
-				})
+				}
 			break;
 			case "getLogs": 
 				const history = await getHistory(data.filter, data.limit)
@@ -92,6 +99,7 @@ export default class {
 					actions[data.operation](data);
 			break;
 		}
+
 		if (this.error) { // Sure?
 			logs.logError(this.error, data.plug || undefined)
 			this.error = false;

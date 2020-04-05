@@ -2,7 +2,7 @@ import {
     getPeriodStats,
     interactor,
     getHistory
-} from "../../../src/service/db/history"
+} from "../../../src/service/db/History"
 
 import db from "../../../src/service/bot/db"
 

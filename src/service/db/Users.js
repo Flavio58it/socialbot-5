@@ -17,7 +17,7 @@ export default class {
         return await db.users.add({plug: this.plug, ...userData});
     }
 
-    async getAllUsers () {
+    static async getAllUsers () {
         return await db.users.toArray();
     }
 }

@@ -1,9 +1,9 @@
 import format from "string-template";
 import urlParams from "url-params";
 import waiter from "waiter";
-import { interactor } from "../../db/history";
+import { interactor } from "../../db/History";
 import ms from "milliseconds";
-import Users from "../../db/users";
+import Users from "../../db/Users";
 import objectMapper from "object-mapper";
 import police from "../../bot/police";
 
@@ -12,9 +12,6 @@ import {getUrl, decodeObject} from "./utils";
 import actions from "./actions";
 import urls from "./urls";
 import queryIdParser from "./queryid_parser";
-
-// https://www.npmjs.com/package/node-schedule
-// https://www.npmjs.com/package/node-cron
 
 export var cache = {
 	query_id: false,
@@ -313,7 +310,7 @@ export default function (settings) {
 					});
 				});
 
-				var arr = await dbUser.getAllUsers()
+				var arr = await Users.getAllUsers()
 
 				var cache = {}, //Cache users by id in order to avoid nested foreach
 					now = new Date().getTime(), 

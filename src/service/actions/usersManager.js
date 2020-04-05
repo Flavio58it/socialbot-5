@@ -1,4 +1,4 @@
-import Users from "../db/users";
+import Users from "../db/Users";
 
 export default {
     flagUser: async function (flagType, data) {
