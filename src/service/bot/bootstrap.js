@@ -33,11 +33,11 @@ export default async function bootstrap({
 		Comm.sendMessage("notifications", logs.getLogs());
 	})
 
-	if (!plugs.enabledPlugs)
+	if (!plugs)
 		throw Error("Missing plugs config")
 
-	for (const plug in plugs.enabledPlugs) {
-		const plugData = plugs.enabledPlugs[plug]
+	for (const plug in plugs) {
+		const plugData = plugs[plug]
 		if (plugData.enabled !== true)
 			continue;
 

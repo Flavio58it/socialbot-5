@@ -4,15 +4,16 @@ import bootstrap from './bot/bootstrap'
 import frontendComm from './bot/frontendComm'
 
 // Get enabled plugs list
-import { plugs } from "../config";
+import config from "../config";
 
 let error = false
 
 async function starter() {
 	// Start bot
+	
 	const plugsInstances = await bootstrap({
 		Comm,
-		plugs
+		plugs: config.plugs
 	})
 
 	// Initialize communication hub
