@@ -9,9 +9,6 @@
 				<b-button variant="info" @click.prevent="$send('resetDB')">Reset database</b-button>
 			</b-button-group>
 		</b-modal>
-		<div class="container errorContainer">
-			<ErrorDash class="row"/>
-		</div>
 		<i class="fas fa-wrench advancedSettings" @click="showAdvanced = !showAdvanced"/>
 		<div class="container">
 			<div class="row text-center">
@@ -61,7 +58,6 @@
 </style>
 
 <script>
-	import ErrorDash from "components/ErrorDash.vue";
 	import config from "../config"
 
 	export default {
@@ -85,9 +81,6 @@
 						text: plugConf.completeName || plug
 					}
 			}
-		},
-		components: {
-			ErrorDash
 		}
 	}
 </script>

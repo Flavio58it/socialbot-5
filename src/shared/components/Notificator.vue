@@ -9,11 +9,11 @@
                     :class="['notification', notification.type]"
                 >
                     <b-col cols="2">
-                        <i :class="['fa', getNotifIcon(notification), 'fa-2x']"/>
+                        <i :class="['fa', getNotifIcon(notification), 'fa-2x', 'icon']"/>
                     </b-col>
                     <b-col>
-                        <b>{{notification.data.description || notification.data.message}}</b>
-                        <p>{{notification.data.id}}</p>
+                        <b>{{ parseMessages(notification).title }}</b>
+                        <p>{{ parseMessages(notification).message }}</p>
                     </b-col>
                 </b-row>
             </template>
@@ -43,6 +43,27 @@
         .noNotifs {
             text-align: center;
             line-height: 100px;
+        }
+
+        .notification {
+            width: 100%;
+            height: 40px;
+
+            &.error {
+                background-color: rgba(#F2DDA4, 0.6);
+            }
+
+            &.info {
+                background-color: rgba(#A3C4BC, 0.6);
+            }
+
+            &.warn {
+                background-color: rgba(#E7EFC5, 0.6);
+            }
+
+            .icon {
+                line-height: 40px;
+            }
         }
     }
     .notifButton {
@@ -99,6 +120,12 @@
                     return config.plugs[notification.plug].fontawesomeIcon
                 else
                     return "fa-robot"
+            },
+            parseMessages (notification) {
+                return {
+                    title: notification.data.id || notification.data.description || notification.data.message,
+                    message: notification.data.id || notification.data.error
+                }
             }
         }
     }

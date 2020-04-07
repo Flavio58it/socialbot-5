@@ -3,7 +3,6 @@
     <Headbar showsettings showaccounts separator/>
     <div class="container">
       <div class="status"></div>
-      <ErrorDash/>
       <LogScraper loggerid = "popup"/>
     </div>
   </div>
@@ -25,7 +24,6 @@
 <script>
   import Headbar from "components/Headbar.vue";
   import LogScraper from "components/LogScraper.vue";
-  import ErrorDash from "components/ErrorDash.vue";
 
   export default {
     data () {
@@ -38,8 +36,7 @@
     },
     components: {
         Headbar,
-        LogScraper,
-        ErrorDash
+        LogScraper
     }
   }
 </script>
