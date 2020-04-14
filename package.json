@@ -12,7 +12,7 @@
     "deploy": "webstore publish --extension-id $EXTENSION_ID"
   },
   "dependencies": {
-    "@babel/runtime": "^7.9.0",
+    "@babel/runtime": "^7.9.2",
     "@popperjs/core": "^2.1.1",
     "@tensorflow-models/coco-ssd": "^2.0.1",
     "@tensorflow/tfjs-converter": "^1.7.0",
