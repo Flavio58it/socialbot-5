@@ -124,7 +124,7 @@
             parseMessages (notification) {
                 return {
                     title: notification.data.id || notification.data.description || notification.data.message,
-                    message: notification.data.id || notification.data.error
+                    message: notification.data.error || notification.data.message ||  notification.data.id
                 }
             }
         }
