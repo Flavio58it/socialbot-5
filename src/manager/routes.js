@@ -3,9 +3,6 @@ import Followers from "./Followers.vue";
 
 import NotFound from "components/NotFound.vue";
 
-import Instagram from "./sections/Instagram/Instagram.vue";
-import Fivehpx from "./sections/Fivehpx.vue";
-
 import Home from "./Home.vue";
 
 var dev = process.env.NODE_ENV === 'development';
@@ -25,7 +22,7 @@ for (const plugName in config.plugs) {
 	settingsPaths.push({
 		path: plugName,
 		name: plugName,
-		component: require(`./sections/${plugUpperString}/${plugUpperString}.vue`)
+		component: require(`./sections/${plugUpperString}/${plugUpperString}.vue`).default
 	})
 }
 
@@ -33,22 +30,7 @@ export default [
 	{ 
 		path: '/settings', 
 		component: Settings,
-		children: [
-			{
-				path: "instagram",
-				name: "instagram",
-				component: Instagram
-			},
-			{
-				path: "fivehpx",
-				name: "fivehpx",
-				component: Fivehpx
-			},
-			{
-				path: "*",
-				redirect: "/settings/instagram" 
-			}
-		]
+		children: settingsPaths
 	},
 	{
 		path: "/followers/:plug",
