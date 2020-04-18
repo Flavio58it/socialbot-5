@@ -10,12 +10,17 @@ var dev = process.env.NODE_ENV === 'development';
 import config from "../config"
 
 const settingsPaths = []
+let chosenSettings = ''
 
 for (const plugName in config.plugs) {
 	const plug = config.plugs[plugName]
 
 	if (!plug.enabled)
 		continue
+
+	// Select first settings page as default
+	if (chosenSettings === '')
+		chosenSettings = plugName
 
 	const plugUpperString = `${plugName.charAt(0).toUpperCase()}${plugName.slice(1)}`
 	
@@ -38,7 +43,7 @@ export default [
 	},
 	{
 		path: "/",
-		redirect:"/settings/instagram",
+		redirect:`/settings/${chosenSettings}`,
 		component: Home
 	},
 
