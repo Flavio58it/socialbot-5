@@ -32,6 +32,10 @@ for (const plugName in config.plugs) {
 }
 
 export default [
+	{
+		path: "/settings",
+		redirect:`/settings/${chosenSettings}`
+	},
 	{ 
 		path: '/settings', 
 		component: Settings,
@@ -43,8 +47,7 @@ export default [
 	},
 	{
 		path: "/",
-		redirect:`/settings/${chosenSettings}`,
-		component: Home
+		redirect:`/settings/${chosenSettings}`
 	},
 
 	// Page not found fallback

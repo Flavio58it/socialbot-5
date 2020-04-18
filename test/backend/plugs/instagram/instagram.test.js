@@ -580,6 +580,7 @@ describe("@instagram", function () {
                 return db.users.toArray();
             }).then((data) => {
                 chai.expect(data).to.be.lengthOf(1, "User is inserted in database")
+                chai.expect(data[0]).to.not.have.nested.property("details.autoFollowed", "The user was NOT autoFollowed")
             })
         });
 
@@ -876,7 +877,7 @@ describe("@instagram", function () {
                                     }
                                 ],
                                 page_info: {
-                                    has_next_page: true,
+                                    has_next_page: false,
                                     end_cursor: false
                                 }
                             }
@@ -898,6 +899,57 @@ describe("@instagram", function () {
             }).then((data) => {
                 chai.expect(data).to.be.lengthOf(1, "One action performed")
                 chai.expect(data[0]).to.have.nested.property("details.autoFollowed", true, "The user was autoFollowed")
+            })
+        });
+
+        it("Should not followback as no users present so is first round", function () {
+            var instance = new instagram(simulateSetting({
+                modules: {
+                    follow: {
+                        followBack: true
+                    }
+                }
+            }));
+
+            server.attachCallback("homepage_logged", function () {
+                return rawHomePageStructure({
+                    config: {
+                        viewer: user().user
+                    }
+                })
+            })
+
+            server.respondWith(/\/tester\/\?__a=1/, function (xhr) {
+                xhr.respond(200, { "Content-Type": "application/json" }, JSON.stringify({}))
+            })
+
+            server.respondWith(/\/graphql\/query\//, function (xhr) {
+                xhr.respond(200, { "Content-Type": "application/json" }, JSON.stringify({
+                    data: {
+                        user: {
+                            edge_follow: {
+                                edges: [
+                                    {
+                                        node: user().user
+                                    }
+                                ],
+                                page_info: {
+                                    has_next_page: false,
+                                    end_cursor: false
+                                }
+                            }
+                        }
+                    }
+                }));
+            });
+
+            return instance.init().then(() => instance.actions.followManager(false)).then((data) => {
+                chai.expect(data).to.be.lengthOf(1, "User is 1")
+
+                return db.users.toArray();
+            }).then((data) => {
+                chai.expect(data).to.be.lengthOf(1, "One action performed")
+                chai.expect(data[0]).to.not.have.nested.property("details.autoFollowed", "The user was not autoFollowed as db was empty")
             })
         });
     });

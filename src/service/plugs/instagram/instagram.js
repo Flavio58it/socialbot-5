@@ -329,7 +329,7 @@ export default function (settings) {
 						action: "RESET_DB"
 					})	
 				
-				if (arr.length == 0)
+				if (!arr.length)
 					isFirstTime = true;
 
 				for (let i = 0; i < users.length; i++) {
@@ -337,16 +337,17 @@ export default function (settings) {
 
 					// us = users picked now from server / user = users picked from database
 					let user = cache[us.id];
-					if (user && user.toFollow != 2) {
+					if (user && user.toFollow !== 2) {
 						user.found = true; // The user has been found so has not unfollowed
 						us.whitelisted = user.whitelisted;
-						// TODO: Update in real time the details to the db in order to have all info updated somehow [partially done]
+
 						await dbUser.editUserData(us.id, {
 							username: user.username,
-							"details.img": user.img
+							"details.img": us.img,
+							"details.fullName": us.fullname
 						})
 					} else { // User not found and is present in the users array so is a new follower! (party) (except if isFirstTime or likeBack)
-						let toFollow = !((!settingsData.followBack) || isFirstTime);
+						let toFollow = settingsData.followBack && !isFirstTime;
 
 						if (user){ // When the user is in database but has already been added by likeBack
 							await dbUser.editUserData(us.id, {
@@ -354,9 +355,7 @@ export default function (settings) {
 							})
 							us.whitelisted = user.whitelisted; // TODO: Not sure if needed
 						} else{ // Here normal addition.
-							await dbUser.addUser(
-								await actions.newDbUser(us, now, toFollow)
-							)
+							await dbUser.addUser(actions.newDbUser(us, now, toFollow))
 						}
 
 						if ((isFirstTime || !settingsData.followBack) && !onlyFetch) // Not followbacking all the people the first time

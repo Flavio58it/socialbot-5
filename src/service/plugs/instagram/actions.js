@@ -101,6 +101,7 @@ const lib = {
 		return Promise.resolve(true);
 	},
 	newDbUser: function(us, now, toFollow) {
+		console.log(us.img)
 		return {
 			plug: "instagram",
 			userid: us.id,
@@ -108,7 +109,8 @@ const lib = {
 			whitelisted: false,
 			toFollow: toFollow,
 			details: {
-				img: us.img
+				img: us.img,
+				fullName: us.fullname
 			},
 			lastInteraction: toFollow == 2?now:false,
 			added: now

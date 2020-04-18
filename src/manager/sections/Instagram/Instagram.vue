@@ -11,6 +11,9 @@
 					<b-tab title="Status">
 						<StatsViewer :stats="data.stats"/>
 						<MasterSwitch v-model="data.settings.enabled" :running="data.running" @click="$refs.settingsSection.save()"/>
+						<div class="text-center">
+							<router-link :to="`/followers/${type}`"><i class="fas fa-users fa-2x"/></router-link>
+						</div>
 					</b-tab>
 					<b-tab title="Tags Follower">
 						<Tags v-model="settings.modules.like.tags"/>

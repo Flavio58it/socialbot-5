@@ -15,22 +15,20 @@
 				<b-form-checkbox v-model="filters.state" value="whitelisted">&nbsp;Whitelisted&nbsp;</b-form-checkbox>
 			</div>
 			<div class="col-1 text-right">
-				<a v-if="clUsers.elements > 50" href = "#" @click.prevent="toggleExpand" title="Toggle expand">
-					<i :class="['fa', expanded?'fa-compress':'fa-expand']"/>
-				</a>
+				
 			</div>
 		</div>
-		<div :class="['row', 'list', expanded?'expanded':'']" :style="expanded" @mouseenter="stopScroll(true)" @mouseleave="stopScroll(false)">
+		<div :class="['row', 'list', expanded?'expanded':'']">
 			<div v-for="(user, i) in clUsers.list" class="user col-6 row" :key="i">
 				<div class="col-3">
 					<a>
-						<img :src="user.img"/>
+						<img :src="user.img || user.details.img"/>
 					</a>
 				</div>
 				<div class="col-9">
 					<div class="userInfo">
 						<a :href="user.profile_url" target="_blank"><b>{{user.username}}</b></a>
-						<span v-if="user.fullname"> - {{user.fullname}}</span>
+						<span v-if="user.fullname || user.details.fullName"> - {{user.fullname || user.details.fullName}}</span>
 					</div>
 					<div>
 						<b-badge :variant="user.follows_me?'success':'danger'" :title="user.follows_me?'The user is following you':'The user is not following you'">Follower</b-badge>
@@ -45,7 +43,7 @@
 							<b-button v-else variant="info">Follow</b-button>
 							<b-button v-if="!user.whitelisted" @click="whitelist(user, true)">Whitelist</b-button>
 							<b-button v-else @click="whitelist(user, false)">Remove from whitelist</b-button>
-							<b-button variant="success" title="Like the photos of the user">Like</b-button>
+							<b-button v-if="!user.blacklisted" @click="blacklist(user, true)">Blacklist</b-button>
 						</b-button-group>
 					</div>
 				</div>
@@ -89,14 +87,9 @@
 
 	.list {
 		overflow: hidden;
-		max-height: 425px;
 		overflow-y: auto;
 		background-color: white;
 		border-radius: 3px;
-
-		&.expanded {
-			max-height: inherit;
-		}
 
 		.userInfo {
 			display: inline-block;
@@ -133,29 +126,14 @@
 		message (action, data) {
 			if (action == "usersData" && data.plug == this.plug)
 				this.users = data.list;
+			console.log("Message", data.list)
+			console.log("Message", data.list[0].details)
 		},
 		methods: {
 			whitelist (user, mode) {
 				this.$send("directAction", {operation: "whitelistUser", id: user.id, add: mode, plug: this.plug});
 				user.whitelisted = mode;
 				this.$forceUpdate();
-			},
-			stopScroll (enabled) {
-				if (enabled) {
-					document.body.classList.add("stop-scrolling");
-					window.scrollTo(0,document.body.scrollHeight);
-				} else
-					document.body.classList.remove("stop-scrolling")
-			},
-			toggleExpand () {
-				if (this.expanded)
-					this.expanded = false;
-				else {
-					this.expanded = {"height": (window.innerHeight - 50) + "px"};
-					this.$nextTick(() => {
-						window.scrollTo(0,document.body.scrollHeight);
-					})
-				}
 			},
 			showAllUsers () {
 				if (this.show === 0)
