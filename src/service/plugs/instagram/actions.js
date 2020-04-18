@@ -101,7 +101,6 @@ const lib = {
 		return Promise.resolve(true);
 	},
 	newDbUser: function(us, now, toFollow) {
-		console.log(us.img)
 		return {
 			plug: "instagram",
 			userid: us.id,

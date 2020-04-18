@@ -126,8 +126,6 @@
 		message (action, data) {
 			if (action == "usersData" && data.plug == this.plug)
 				this.users = data.list;
-			console.log("Message", data.list)
-			console.log("Message", data.list[0].details)
 		},
 		methods: {
 			whitelist (user, mode) {
