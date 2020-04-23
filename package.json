@@ -16,7 +16,7 @@
     "@popperjs/core": "^2.1.1",
     "@tensorflow-models/coco-ssd": "^2.0.1",
     "@tensorflow/tfjs-converter": "^1.7.0",
-    "@tensorflow/tfjs-core": "^1.7.0",
+    "@tensorflow/tfjs-core": "^1.7.1",
     "bootstrap-vue": "^2.9.0",
     "object-path": "^0.11.4",
     "synaptic": "^1.1.4",
