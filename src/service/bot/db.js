@@ -6,13 +6,18 @@ import Dexie from "dexie";
  * Is advisable to NOT use this file directly. The database should be accessed with classes present in db folder.
 */
 
-var db = new Dexie("socialbot");
+var db
 
-db.version(1).stores({
-	history: "++id, plug, action, [plug+action], details, time", // Details should have imgSrc, username, userid etc.
-	users: "++id, plug, userid, [plug+userid], username, whitelisted, blacklisted, toFollow, details, lastInteraction, added"
-});
+function init () {
+	db = new Dexie("socialbot");
 
-//db.users.limit(1).delete(); // Simulate a user to follow
+	db.version(1).stores({
+		history: "++id, plug, action, [plug+action], details, time", // Details should have imgSrc, username, userid etc.
+		users: "++id, plug, userid, [plug+userid], [plug+userid+status], username, whitelisted, blacklisted, status, toFollow, details, lastInteraction, added"
+	});
+}
+
+init()
 
 export default db;
+export const initDB = init

@@ -621,6 +621,12 @@ describe("@instagram", function () {
                 return db.users.toArray();
             }).then((data) => {
                 chai.expect(data).to.be.lengthOf(1, "User is inserted in database")
+
+                chai.expect(data[0]).to.have.property("whitelisted", false)
+                chai.expect(data[0]).to.have.property("blacklisted", false)
+                chai.expect(data[0]).to.have.property("status", "followback")
+                chai.expect(data[0]).to.have.property("toFollow", false)
+                chai.expect(data[0]).to.not.have.property("added", false)
             })
         });
 
@@ -928,7 +934,7 @@ describe("@instagram", function () {
                     data: {
                         user: {
                             edge_follow: {
-                                edges: [
+                                edges: [    
                                     {
                                         node: user().user
                                     }

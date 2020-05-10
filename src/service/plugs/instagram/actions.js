@@ -31,6 +31,8 @@ const lib = {
 
 		user = user.data.user;
 
+		// TODO: Use mapper here
+
 		var fdata = user.edge_followed_by?user.edge_followed_by:user.edge_follow;
 
 		list.push(...fdata.edges);
@@ -106,7 +108,9 @@ const lib = {
 			userid: us.id,
 			username: us.username,
 			whitelisted: false,
+			blacklisted: false,
 			toFollow: toFollow,
+			status: us.status,
 			details: {
 				img: us.img,
 				fullName: us.fullname

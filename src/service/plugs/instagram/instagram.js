@@ -295,7 +295,8 @@ export default function (settings) {
 
 				accountUsers.following.forEach((t) => {
 					var index = indexer.indexOf(t.node.id);
-					if (index > -1) { // Check if the user has been already picked
+					// Check if the user is a follower and a following user
+					if (index > -1) { 
 						users[index].status = "followback";
 						return;
 					}
@@ -329,8 +330,13 @@ export default function (settings) {
 						action: "RESET_DB"
 					})	
 				
-				if (!arr.length)
+				if (!arr.length) {
 					isFirstTime = true;
+					console.log("[FollowManager] First Time mode")
+				} else {
+					console.log("NOT first time mode")
+					console.log(arr)
+				}
 
 				for (let i = 0; i < users.length; i++) {
 					let us = users[i];
@@ -343,6 +349,7 @@ export default function (settings) {
 
 						await dbUser.editUserData(us.id, {
 							username: user.username,
+							status: user.status,
 							"details.img": us.img,
 							"details.fullName": us.fullname
 						})
