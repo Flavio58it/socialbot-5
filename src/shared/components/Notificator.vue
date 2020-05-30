@@ -9,11 +9,11 @@
                     :class="['notification', notification.type]"
                 >
                     <b-col cols="2">
-                        <i :class="['fa', getNotifIcon(notification), 'fa-2x', 'icon']"/>
+                        <i :class="['fab', getNotifIcon(notification), 'fa-2x', 'icon']"/>
                     </b-col>
-                    <b-col>
-                        <b>{{ parseMessages(notification).title }}</b>
-                        <p>{{ parseMessages(notification).message }}</p>
+                    <b-col class="text-left details">
+                        <div class="title">{{ parseMessages(notification).title }}</div>
+                        <div class="message">{{ parseMessages(notification).message }}</div>
                     </b-col>
                 </b-row>
             </template>
@@ -30,6 +30,8 @@
     #notifications {
         min-height: 50px;
         z-index: 2;
+        overflow-x: hidden;
+        overflow-y: auto;
         background: $background-color;
         border: 1px solid $font-color;
         border-radius: 2px;
@@ -46,7 +48,6 @@
         }
 
         .notification {
-            width: 100%;
             height: 40px;
 
             &.error {
@@ -63,6 +64,18 @@
 
             .icon {
                 line-height: 40px;
+            }
+
+            .details {
+                line-height: 17px;
+
+                .title {
+                    font-weight: bold;
+                }
+
+                .message {
+                    font-size: 12px;
+                }
             }
         }
     }
@@ -85,8 +98,10 @@
             }
         },
         message (action, data) {
-            if (action === "notifications")
+            if (action === "notifications") {
                 this.notifications = data
+                console.log('[Notificator] List', this.notifications)
+            }
         },
         mounted () {
             const button = this.$el.querySelector(".notifButton")
@@ -122,9 +137,10 @@
                     return "fa-robot"
             },
             parseMessages (notification) {
+                const data = notification.data.data
                 return {
-                    title: notification.data.id || notification.data.description || notification.data.message,
-                    message: notification.data.error || notification.data.message ||  notification.data.id
+                    title: data.id || data.description || data.message,
+                    message: data.error || data.message ||  data.id
                 }
             }
         }
