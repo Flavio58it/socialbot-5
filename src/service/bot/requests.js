@@ -43,7 +43,7 @@ export default (function (domain, override) {
   			chrome.webRequest.onBeforeSendHeaders.addListener((details) => _updater(details, requestHeader), {
   			    urls: [domain+ "/*"]
   			}, [
-  			    "blocking", "requestHeaders"
+  			    "blocking", "requestHeaders", "extraHeaders"
   			]);
       listening = true;
     },
