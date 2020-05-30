@@ -1,5 +1,10 @@
 import db from "../bot/db";
 
+// Util function for zero addition to main number
+function parseNum (number) {
+    return (number < 10) ? `0${number}` : number
+}
+
 /**
  * 
  * @param {String} plug - Plug name (Required)
@@ -36,21 +41,12 @@ export async function getPeriodStats (
     else
         return list;
 
-    // Seems to be PAINFULLY slow.
     async function getData (action, offsetDay) {
-        var time = new Date(new Date().getTime() - (offsetDay * 24 * 60 * 60 * 1000));
-        return await db.history.where({plug, action})
-            .filter((row) => isSameDay(new Date(row.time), time))
+        const time = new Date(new Date().getTime() - (offsetDay * 24 * 60 * 60 * 1000))
+        const day = `${time.getFullYear()}${parseNum(time.getMonth() + 1)}${parseNum(time.getDate())}}`
+        return await db.history.where({plug, action, day})
             .count()
     }
-}
-
-function isSameDay(dateToCheck, actualDate) {
-    return (
-        dateToCheck.getDate() === actualDate.getDate() && 
-        dateToCheck.getMonth() === actualDate.getMonth() && 
-        dateToCheck.getFullYear() === actualDate.getFullYear()
-    )
 }
 
 /**
@@ -108,6 +104,7 @@ export class interactor {
         };
 
         console.log(`[${this.plug}] Adding interaction ${type} - DATA: `, data);
+        const now = new Date()
         return db.history.add({
             plug: this.plug,
             action: "USER_" + type.toUpperCase(),
@@ -120,7 +117,8 @@ export class interactor {
                 //comment: data.comment || undefined,
                 tag: data.tag || undefined
             },
-            time: new Date().getTime()
+            time: now.getTime(),
+			day: `${now.getFullYear()}${parseNum(now.getMonth() + 1)}${parseNum(now.getDate())}}`
         })
     }
 }

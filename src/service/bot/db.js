@@ -12,7 +12,7 @@ function init () {
 	db = new Dexie("socialbot");
 
 	db.version(1).stores({
-		history: "++id, plug, action, [plug+action], details, time", // Details should have imgSrc, username, userid etc.
+		history: "++id, plug, action, [plug+action], [plug+action+day], details, time, day", // Details should have imgSrc, username, userid etc.
 		users: "++id, plug, userid, [plug+userid], [plug+userid+status], username, whitelisted, blacklisted, status, toFollow, details, lastInteraction, added"
 	});
 }

@@ -54,7 +54,7 @@ describe("#Notificator", function () {
         });
 
         chai.expect(wrapper.contains(".notification")).to.equal(true, "Should have a notification")
-        chai.expect(wrapper.contains(".fa.fa-test-icon")).to.equal(true, "Should have correct icon")
+        chai.expect(wrapper.contains(".fab.fa-test-icon")).to.equal(true, "Should have correct icon")
         chai.expect(wrapper.contains(".notification.error")).to.equal(true, "Should have error class")
 
         chai.expect(wrapper.html()).to.contain("ERROR_ID", "Should show error id")
@@ -82,7 +82,7 @@ describe("#Notificator", function () {
         });
 
         chai.expect(wrapper.contains(".notification")).to.equal(true, "Should have a notification")
-        chai.expect(wrapper.contains(".fa.fa-robot")).to.equal(true, "Should have correct icon")
+        chai.expect(wrapper.contains(".fab.fa-robot")).to.equal(true, "Should have correct icon")
         chai.expect(wrapper.contains(".notification.error")).to.equal(true, "Should have error class")
     })
 })

@@ -6,6 +6,9 @@ import {
 
 import db from "../../../src/service/bot/db"
 
+function parseNum (number) {
+    return (number < 10) ? `0${number}` : number
+}
 
 // Mock log entries
 async function mockDbLogEntries(
@@ -18,14 +21,17 @@ async function mockDbLogEntries(
         details = {}
     } = {}
     ) {
-    var date = new Date().getTime() - (dateOffsetFromNow * 1000 * 60 * 60 * 24 - dateMillisOffset);
+    const date = new Date().getTime() - (dateOffsetFromNow * 1000 * 60 * 60 * 24 - dateMillisOffset);
+    const dateInstance = new Date(date)
+    const day = `${dateInstance.getFullYear()}${parseNum(dateInstance.getMonth() + 1)}${parseNum(dateInstance.getDate())}}`
 
     for (let i = 0; i < qty; i++) {
         await db.history.add({
             plug,
             action: eventName,
             details,
-            time: date
+            time: date,
+            day
         })
     }
 }

@@ -137,7 +137,7 @@
                     return "fa-robot"
             },
             parseMessages (notification) {
-                const data = notification.data.data
+                const data = notification.data.data || notification.data
                 return {
                     title: data.id || data.description || data.message,
                     message: data.error || data.message ||  data.id
